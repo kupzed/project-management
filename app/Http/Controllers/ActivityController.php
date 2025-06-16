@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Activity;
 use App\Models\Project;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class ActivityController extends Controller
 {
@@ -38,7 +39,15 @@ class ActivityController extends Controller
 
     public function show(Activity $activity)
     {
-        return view('activities.show', compact('activity'));
+        try {
+            $activity->load('project');
+            Log::info('Activity Data:', ['activity' => $activity->toArray()]);
+            return view('activities.show', compact('activity'));
+        } catch (\Exception $e) {
+            Log::error('Error showing activity: ' . $e->getMessage());
+            return redirect()->route('activities.index')
+                ->with('error', 'Terjadi kesalahan saat menampilkan aktivitas.');
+        }
     }
 
     public function edit(Activity $activity)
