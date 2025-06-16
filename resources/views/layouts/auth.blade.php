@@ -8,10 +8,8 @@
 </head>
 <body class="bg-gray-100">
     <div class="min-h-screen">
-        @include('layouts.navbar')
-
         <!-- Page Content -->
-        <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        <main>
             @yield('content')
         </main>
     </div>
