@@ -41,9 +41,10 @@
                             <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
                             <div class="mt-1">
                                 <select id="status" name="status" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md">
-                                    <option value="active" {{ old('status', $project->status) == 'active' ? 'selected' : '' }}>Active</option>
-                                    <option value="completed" {{ old('status', $project->status) == 'completed' ? 'selected' : '' }}>Completed</option>
-                                    <option value="on-hold" {{ old('status', $project->status) == 'on-hold' ? 'selected' : '' }}>On Hold</option>
+                                    <option value="Ongoing" {{ old('status', $project->status) == 'Ongoing' ? 'selected' : '' }}>Ongoing</option>
+                                    <option value="Prospect" {{ old('status', $project->status) == 'Prospect' ? 'selected' : '' }}>Prospect</option>
+                                    <option value="Complete" {{ old('status', $project->status) == 'Complete' ? 'selected' : '' }}>Complete</option>
+                                    <option value="Cancel" {{ old('status', $project->status) == 'Cancel' ? 'selected' : '' }}>Cancel</option>
                                 </select>
                             </div>
                             @error('status')

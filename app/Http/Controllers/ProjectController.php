@@ -23,7 +23,7 @@ class ProjectController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'required|string',
-            'status' => 'required|in:active,completed,on-hold',
+            'status' => 'required|in:Ongoing,Prospect,Complete,Cancel',
             'start_date' => 'required|date',
         ]);
 
@@ -49,7 +49,7 @@ class ProjectController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'required|string',
-            'status' => 'required|in:active,completed,on-hold',
+            'status' => 'required|in:Ongoing,Prospect,Complete,Cancel',
             'start_date' => 'required|date',
         ]);
 

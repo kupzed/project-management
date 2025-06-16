@@ -10,15 +10,19 @@
                 </h2>
                 <div class="mt-1 flex flex-col sm:flex-row sm:flex-wrap sm:mt-0 sm:space-x-6">
                     <div class="mt-2 flex items-center text-sm text-gray-500">
-                        <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 {{ $project->status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' }}">
-                            {{ $project->status }}
+                        <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 
+                            @if($project->status === 'Complete') bg-green-100 text-green-800
+                            @elseif($project->status === 'Ongoing') bg-blue-100 text-blue-800
+                            @elseif($project->status === 'Prospect') bg-yellow-100 text-yellow-800
+                            @else bg-red-100 text-red-800
+                            @endif"> {{ $project->status }}
                         </span>
                     </div>
                     <div class="mt-2 flex items-center text-sm text-gray-500">
                         <svg class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                             <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
                         </svg>
-                        Mulai: {{ $project->start_date }}
+                        Mulai: {{ $project->start_date->format('d F Y') }}
                     </div>
                 </div>
             </div>
@@ -84,7 +88,7 @@
                                         <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
                                     </svg>
                                     <p>
-                                        Due: {{ $activity->due_date }}
+                                        Aktivitas: {{ $activity->due_date->format('d F Y') }}
                                     </p>
                                 </div>
                             </div>

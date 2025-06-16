@@ -40,12 +40,16 @@
                                     {{ Str::limit($project->description, 50) }}
                                 </td>
                                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                    <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 {{ $project->status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' }}">
-                                        {{ $project->status }}
+                                    <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 
+                                        @if($project->status === 'Complete') bg-emerald-100 text-emerald-800
+                                        @elseif($project->status === 'Ongoing') bg-sky-100 text-sky-800
+                                        @elseif($project->status === 'Prospect') bg-amber-100 text-amber-800
+                                        @else bg-rose-100 text-rose-800
+                                        @endif"> {{ $project->status }}
                                     </span>
                                 </td>
                                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                    {{ $project->start_date }}
+                                    {{ $project->start_date->format('d F Y') }}
                                 </td>
                                 <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                                     <a href="{{ route('projects.show', $project) }}" class="text-indigo-600 hover:text-indigo-900 mr-4">Detail</a>

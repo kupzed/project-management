@@ -24,7 +24,7 @@
                                 <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">Nama Aktivitas</th>
                                 <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Project</th>
                                 <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Status</th>
-                                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Tanggal Jatuh Tempo</th>
+                                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Tanggal Aktivitas</th>
                                 <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6">
                                     <span class="sr-only">Actions</span>
                                 </th>
@@ -40,12 +40,15 @@
                                     {{ $activity->project->name }}
                                 </td>
                                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                    <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 {{ $activity->status === 'completed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800' }}">
-                                        {{ $activity->status }}
+                                    <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 
+                                        @if($activity->status === 'completed') bg-emerald-100 text-emerald-800 
+                                        @elseif($activity->status === 'pending') bg-rose-100 text-rose-800 
+                                        @else bg-amber-100 text-amber-800 
+                                        @endif "> {{ $activity->status }}
                                     </span>
                                 </td>
                                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                    {{ $activity->due_date }}
+                                    {{ $activity->due_date->format('d F Y') }}
                                 </td>
                                 <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                                     <a href="{{ route('activities.show', $activity) }}" class="text-indigo-600 hover:text-indigo-900 mr-4">Detail</a>

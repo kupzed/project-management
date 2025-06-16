@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->text('description');
-            $table->enum('status', ['active', 'completed', 'on-hold'])->default('active');
+            $table->enum('status', ['Ongoing', 'Prospect', 'Complete', 'Cancel'])->default('Ongoing');
             $table->date('start_date');
             $table->timestamps();
         });

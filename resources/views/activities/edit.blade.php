@@ -69,7 +69,7 @@
                         </div>
 
                         <div class="sm:col-span-3">
-                            <label for="due_date" class="block text-sm font-medium text-gray-700">Tanggal Jatuh Tempo</label>
+                            <label for="due_date" class="block text-sm font-medium text-gray-700">Tanggal Aktivitas</label>
                             <div class="mt-1">
                                 <input type="date" name="due_date" id="due_date" value="{{ old('due_date', $activity->due_date) }}" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md">
                             </div>

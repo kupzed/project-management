@@ -21,9 +21,13 @@
                                             {{ $project->name }}
                                         </p>
                                         <div class="ml-2 flex-shrink-0 flex">
-                                            <p class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $project->status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' }}">
-                                                {{ $project->status }}
-                                            </p>
+                                            <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 
+                                                @if($project->status === 'Complete') bg-emerald-100 text-emerald-800
+                                                @elseif($project->status === 'Ongoing') bg-sky-100 text-sky-800
+                                                @elseif($project->status === 'Prospect') bg-amber-100 text-amber-800
+                                                @else bg-rose-100 text-rose-800
+                                                @endif"> {{ $project->status }}
+                                            </span>
                                         </div>
                                     </div>
                                     <div class="mt-2 sm:flex sm:justify-between">
@@ -37,7 +41,7 @@
                                                 <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
                                             </svg>
                                             <p>
-                                                Mulai: {{ $project->start_date }}
+                                                Mulai: {{ $project->start_date->format('d F Y') }}
                                             </p>
                                         </div>
                                     </div>
@@ -67,9 +71,12 @@
                                             {{ $activity->name }}
                                         </p>
                                         <div class="ml-2 flex-shrink-0 flex">
-                                            <p class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $activity->status === 'completed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800' }}">
-                                                {{ $activity->status }}
-                                            </p>
+                                            <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 
+                                                @if($activity->status === 'completed') bg-emerald-100 text-emerald-800 
+                                                @elseif($activity->status === 'pending') bg-rose-100 text-rose-800 
+                                                @else bg-amber-100 text-amber-800 
+                                                @endif "> {{ $activity->status }}
+                                            </span>
                                         </div>
                                     </div>
                                     <div class="mt-2 sm:flex sm:justify-between">
@@ -83,7 +90,7 @@
                                                 <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
                                             </svg>
                                             <p>
-                                                Jatuh Tempo: {{ $activity->due_date }}
+                                                Aktivitas: {{ $activity->due_date->format('d F Y') }}
                                             </p>
                                         </div>
                                     </div>
