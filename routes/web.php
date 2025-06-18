@@ -20,6 +20,7 @@ Route::middleware('web')->group(function () {
         
         // Dashboard
         Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
         
         // Projects
         Route::resource('projects', ProjectController::class);
