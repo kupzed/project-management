@@ -1,14 +1,20 @@
 @extends('layouts.app')
 
+@section('header')
+    <div class="flex w-full md:ml-0">
+        <h1 class="text-2xl font-semibold text-gray-900">Dashboard</h1>
+    </div>
+@endsection 
+
 @section('content')
-<div class="container mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="py-6">
-        <div class="max-w-7xl mx-auto">
+<div class="container mx-auto">
+    <div class="py-4">
+        {{-- <div class="max-w-7xl mx-auto mt-5">
             <h1 class="text-2xl font-semibold text-gray-900">Dashboard</h1>
-        </div>
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
+        </div> --}}
+        <div class="max-w-7xl mx-auto">
             <!-- Recent Projects -->
-            <div class="mt-8">
+            <div class="my-2">
                 <h2 class="text-lg leading-6 font-medium text-gray-900">Project Terbaru</h2>
                 <div class="mt-4 bg-white shadow overflow-hidden sm:rounded-md">
                     <ul class="divide-y divide-gray-200">
@@ -108,4 +114,4 @@
         </div>
     </div>
 </div>
-@endsection 
+@endsection

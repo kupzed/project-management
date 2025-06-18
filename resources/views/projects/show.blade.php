@@ -1,11 +1,17 @@
 @extends('layouts.app')
 
+@section('header')
+    <div class="flex w-full md:ml-0">
+        <h1 class="text-2xl font-semibold text-gray-900">Project</h1>
+    </div>
+@endsection 
+
 @section('content')
-<div class="container mx-auto px-4 sm:px-6 lg:px-8">
+<div class="container mx-auto">
     <div class="max-w-3xl mx-auto">
-        <div class="md:flex md:items-center md:justify-between mb-8">
+        <div class="md:flex md:items-center md:justify-between mb-4">
             <div class="flex-1 min-w-0">
-                <h2 class="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
+                <h2 class="text-2xl font-bold leading-7 text-gray-900 mt-4 sm:text-2xl sm:truncate">
                     {{ $project->name }}
                 </h2>
                 <div class="mt-1 flex flex-col sm:flex-row sm:flex-wrap sm:mt-0 sm:space-x-6">
