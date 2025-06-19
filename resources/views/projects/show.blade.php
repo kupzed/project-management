@@ -2,7 +2,7 @@
 
 @section('header')
     <div class="flex w-full md:ml-0">
-        <h1 class="text-2xl font-semibold text-gray-900">Project</h1>
+        <h1 class="text-2xl font-semibold text-gray-900">Detail Project</h1>
     </div>
 @endsection 
 

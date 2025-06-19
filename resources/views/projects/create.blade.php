@@ -2,7 +2,7 @@
 
 @section('header')
     <div class="flex items-center justify-between">
-        <h1 class="text-2xl font-semibold text-gray-900">Tambah Project Baru</h1>
+        <h1 class="text-2xl font-semibold text-gray-900">Create Project</h1>
     </div>
 @endsection
 

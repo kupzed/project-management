@@ -2,7 +2,7 @@
 
 @section('header')
     <div class="flex items-center justify-between">
-        <h1 class="text-2xl font-semibold text-gray-900">Edit Aktivitas</h1>
+        <h1 class="text-2xl font-semibold text-gray-900">Edit Activity</h1>
     </div>
 @endsection 
 
