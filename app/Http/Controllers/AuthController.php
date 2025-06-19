@@ -15,7 +15,7 @@ class AuthController extends BaseController
 
     public function __construct()
     {
-        $this->middleware('guest')->except('logout');
+        $this->middleware('guest')->except(['logout', 'settings']);
     }
 
     public function showLoginForm()
@@ -70,5 +70,10 @@ class AuthController extends BaseController
         $request->session()->invalidate();
         $request->session()->regenerateToken();
         return redirect('/');
+    }
+
+    public function settings()
+    {
+        return view('auth.settings');
     }
 } 

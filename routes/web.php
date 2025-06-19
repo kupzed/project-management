@@ -27,5 +27,8 @@ Route::middleware('web')->group(function () {
         
         // Activities
         Route::resource('activities', ActivityController::class);
+
+        // Settings
+        Route::get('/settings', [AuthController::class, 'settings'])->name('settings');
     });
 });
