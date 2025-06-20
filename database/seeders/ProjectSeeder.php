@@ -12,15 +12,14 @@ class ProjectSeeder extends Seeder
         Project::create([
             'name' => 'Lorem Sample Project One',
             'description' => 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Itaque eum reiciendis dicta veritatis rerum at sit nostrum aliquam corrupti voluptates libero voluptas accusantium iste eius inventore numquam, harum omnis dolores.',
-            'status' => 'Complete',
+            'status' => 'Prospect',
             'start_date' => '2025-05-19',
-            'finish_date' => '2025-07-19',
         ]);
 
         Project::create([
             'name' => 'Sample Lorem Project Two',
             'description' => 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Velit cum excepturi distinctio? Laboriosam assumenda, tenetur laudantium alias tempora temporibus molestias ab nemo laborum corporis voluptates porro odit, at neque. Sed.',
-            'status' => 'Prospect',
+            'status' => 'Ongoing',
             'start_date' => '2025-05-20',
         ]);
         
@@ -34,8 +33,9 @@ class ProjectSeeder extends Seeder
         Project::create([
             'name' => 'Lorem Project Sample Four',
             'description' => 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Officiis blanditiis dolor deserunt! Aliquam hic molestiae sapiente? Quibusdam minima maxime, pariatur adipisci et magni voluptas dolorum aliquam similique dolores. Laboriosam, unde!',
-            'status' => 'Ongoing',
+            'status' => 'Complete',
             'start_date' => '2024-06-03',
+            'start_date' => '2024-09-03',
         ]);
         
     }
