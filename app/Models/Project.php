@@ -15,10 +15,12 @@ class Project extends Model
         'description',
         'status',
         'start_date',
+        'finish_date',
     ];
 
     protected $casts = [
         'start_date' => 'date',
+        'finish_date' => 'date',
     ];
 
     public function activities(): HasMany

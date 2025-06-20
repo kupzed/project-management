@@ -52,6 +52,26 @@
                 @enderror
             </div>
 
+            <div>
+                <label for="start_date" class="block text-sm font-medium text-gray-900">Tanggal Mulai</label>
+                <div class="mt-2">
+                    <input type="date" name="start_date" id="start_date" value="{{ old('start_date', $project->start_date) }}" required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm" />
+                </div>
+                @error('start_date')
+                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <div>
+                <label for="finish_date" class="block text-sm font-medium text-gray-900">Tanggal Selesai</label>
+                <div class="mt-2">
+                    <input type="date" name="finish_date" id="finish_date" value="{{ old('finish_date', $project->finish_date) }}" required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm" />
+                </div>
+                @error('finish_date')
+                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                @enderror
+            </div>
+
             <div class="flex items-center justify-between">
                 <a href="{{ url()->previous() }}" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                     <svg class="-ml-1 mr-2 h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
