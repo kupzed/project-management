@@ -28,6 +28,7 @@ class ProjectSeeder extends Seeder
             'description' => 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Cupiditate animi perferendis a eos, tempora fugiat illum ad quae neque maiores deserunt ipsum repellat, exercitationem, temporibus vitae? Odit dignissimos impedit ad.',
             'status' => 'Cancel',
             'start_date' => '2025-06-02',
+            'finish_date' => '2025-06-20',
         ]);
         
         Project::create([
@@ -35,7 +36,7 @@ class ProjectSeeder extends Seeder
             'description' => 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Officiis blanditiis dolor deserunt! Aliquam hic molestiae sapiente? Quibusdam minima maxime, pariatur adipisci et magni voluptas dolorum aliquam similique dolores. Laboriosam, unde!',
             'status' => 'Complete',
             'start_date' => '2024-06-03',
-            'start_date' => '2024-09-03',
+            'finish_date' => '2024-09-03',
         ]);
         
     }
