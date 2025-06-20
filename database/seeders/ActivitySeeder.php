@@ -15,7 +15,7 @@ class ActivitySeeder extends Seeder
 
         if ($project1) {
             Activity::create([
-                'name' => 'Laporan Pengeluaran Biaya',
+                'name' => 'Expense Report',
                 'description' => 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Earum possimus, nostrum fugit libero doloribus assumenda id odio laudantium. Culpa magnam suscipit voluptatum atque non ea aliquid, quaerat maxime animi sapiente.',
                 'project_id' => $project1->id,
                 'status' => 'in-progress',
@@ -49,7 +49,7 @@ class ActivitySeeder extends Seeder
             ]);
 
             Activity::create([
-                'name' => 'Faktur Pajak',
+                'name' => 'Tax Invoice',
                 'description' => 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Asperiores, veritatis? Animi, quibusdam harum consequatur reiciendis, eius distinctio earum, quisquam unde temporibus reprehenderit impedit quis dolorem laudantium? Id deserunt quas ipsum!',
                 'project_id' => $project2->id,
                 'status' => 'completed',
