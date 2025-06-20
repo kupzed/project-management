@@ -25,7 +25,7 @@ class ProjectController extends Controller
             'description' => 'required|string',
             'status' => 'required|in:Ongoing,Prospect,Complete,Cancel',
             'start_date' => 'required|date',
-            'finish_date' => 'required|date',
+            'finish_date' => 'nullable|date', // Sekarang opsional
         ]);
 
         Project::create($validated);
@@ -52,7 +52,7 @@ class ProjectController extends Controller
             'description' => 'required|string',
             'status' => 'required|in:Ongoing,Prospect,Complete,Cancel',
             'start_date' => 'required|date',
-            'finish_date' => 'required|date',
+            'finish_date' => 'nullable|date', // Sekarang opsional
         ]);
 
         $project->update($validated);

@@ -17,7 +17,7 @@ return new class extends Migration
             $table->text('description');
             $table->enum('status', ['Ongoing', 'Prospect', 'Complete', 'Cancel'])->default('Ongoing');
             $table->date('start_date');
-            $table->date('finish_date');
+            $table->date('finish_date')->nullable();
             $table->timestamps();
         });
     }

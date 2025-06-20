@@ -38,7 +38,7 @@ class ProjectController extends Controller
             'nama_project' => 'required|string|max:255',
             'customer' => 'required|string|max:255',
             'tanggal_mulai' => 'required|date',
-            'tanggal_selesai' => 'required|date|after_or_equal:tanggal_mulai',
+            'tanggal_selesai' => 'nullable|date|after_or_equal:tanggal_mulai',
             'status' => 'required|in:ongoing,done,cancel,prospect',
             'kategori' => 'required|string|max:255'
         ]);
@@ -65,7 +65,7 @@ class ProjectController extends Controller
             'nama_project' => 'string|max:255',
             'customer' => 'string|max:255',
             'tanggal_mulai' => 'date',
-            'tanggal_selesai' => 'date|after_or_equal:tanggal_mulai',
+            'tanggal_selesai' => 'nullable|date|after_or_equal:tanggal_mulai',
             'status' => 'in:ongoing,done,cancel,prospect',
             'kategori' => 'string|max:255'
         ]);

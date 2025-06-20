@@ -19,8 +19,9 @@
                     <div class="mt-2 flex items-center text-sm text-gray-500">
                         <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 
                             @if($activity->status === 'completed') bg-emerald-100 text-emerald-800 
-                            @elseif($activity->status === 'pending') bg-rose-100 text-rose-800 
-                            @else bg-amber-100 text-amber-800 
+                            @elseif($activity->status === 'pending') bg-rose-100 text-rose-800
+                            @elseif($activity->status === 'in-progress') bg-amber-100 text-amber-800 
+                            @else bg-grey-100 text-grey-800 
                             @endif "> {{ $activity->status }}
                         </span>
                     </div>

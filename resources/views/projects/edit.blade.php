@@ -35,6 +35,7 @@
                         <option value="Complete" {{ old('status', $project->status) == 'Complete' ? 'selected' : '' }}>Complete</option>
                         <option value="Ongoing" {{ old('status', $project->status) == 'Ongoing' ? 'selected' : '' }}>Ongoing</option>
                         <option value="Prospect" {{ old('status', $project->status) == 'Prospect' ? 'selected' : '' }}>Prospect</option>
+                        <option value="Cancel" {{ old('status', $project->status) == 'Cancel' ? 'selected' : '' }}>Cancel</option>
                     </select>
                 </div>
                 @error('status')
@@ -65,7 +66,7 @@
             <div>
                 <label for="finish_date" class="block text-sm font-medium text-gray-900">Tanggal Selesai</label>
                 <div class="mt-2">
-                    <input type="date" name="finish_date" id="finish_date" value="{{ old('finish_date', $project->finish_date) }}" required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm" />
+                    <input type="date" name="finish_date" id="finish_date" value="{{ old('finish_date', $project->finish_date ? $project->finish_date->format('Y-m-d') : '') }}" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm" />
                 </div>
                 @error('finish_date')
                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>

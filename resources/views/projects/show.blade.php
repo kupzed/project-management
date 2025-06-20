@@ -20,7 +20,8 @@
                             @if($project->status === 'Complete') bg-green-100 text-green-800
                             @elseif($project->status === 'Ongoing') bg-blue-100 text-blue-800
                             @elseif($project->status === 'Prospect') bg-yellow-100 text-yellow-800
-                            @else bg-red-100 text-red-800
+                            @elseif($project->status === 'Cancel') bg-red-100 text-red-800
+                            @else bg-grey-100 text-grey-800
                             @endif"> {{ $project->status }}
                         </span>
                     </div>
@@ -72,7 +73,11 @@
                     <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                         <dt class="text-sm font-medium text-gray-500">Tanggal Selesai</dt>
                         <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                            {{ $project->finish_date->format('d F Y') }}
+                            @if ($project->finish_date)
+                                {{ $project->finish_date->format('d F Y') }}
+                            @else
+                                Tanggal belum ditambahkan
+                            @endif
                         </dd>
                     </div>
                 </dl>
