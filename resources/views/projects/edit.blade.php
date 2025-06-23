@@ -28,6 +28,21 @@
             </div>
 
             <div>
+                <label for="customer_id" class="block text-sm font-medium text-gray-900">Customer</label>
+                <div class="mt-2">
+                    <select name="customer_id" id="customer_id" required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm">
+                        <option value="">Pilih Customer</option>
+                        @foreach($customers as $customer)
+                            <option value="{{ $customer->id }}" {{ old('customer_id', $project->customer_id) == $customer->id ? 'selected' : '' }}>{{ $customer->nama }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                @error('customer_id')
+                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <div>
                 <label for="status" class="block text-sm font-medium text-gray-900">Status</label>
                 <div class="mt-2">
                     <select name="status" id="status" required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm">
@@ -56,7 +71,7 @@
             <div>
                 <label for="start_date" class="block text-sm font-medium text-gray-900">Tanggal Mulai</label>
                 <div class="mt-2">
-                    <input type="date" name="start_date" id="start_date" value="{{ old('start_date', $project->start_date) }}" required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm" />
+                    <input type="date" name="start_date" id="start_date" value="{{ old('start_date', $project->start_date ? $project->start_date->format('Y-m-d') : '') }}" required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm" />
                 </div>
                 @error('start_date')
                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>

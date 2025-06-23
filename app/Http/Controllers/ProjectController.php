@@ -15,7 +15,8 @@ class ProjectController extends Controller
 
     public function create()
     {
-        return view('projects.create');
+        $customers = \App\Models\Customer::all();
+        return view('projects.create', compact('customers'));
     }
 
     public function store(Request $request)
@@ -26,6 +27,7 @@ class ProjectController extends Controller
             'status' => 'required|in:Ongoing,Prospect,Complete,Cancel',
             'start_date' => 'required|date',
             'finish_date' => 'nullable|date', // Sekarang opsional
+            'customer_id' => 'required|exists:customers,id',
         ]);
 
         Project::create($validated);
@@ -42,7 +44,8 @@ class ProjectController extends Controller
 
     public function edit(Project $project)
     {
-        return view('projects.edit', compact('project'));
+        $customers = \App\Models\Customer::all();
+        return view('projects.edit', compact('project', 'customers'));
     }
 
     public function update(Request $request, Project $project)
@@ -53,6 +56,7 @@ class ProjectController extends Controller
             'status' => 'required|in:Ongoing,Prospect,Complete,Cancel',
             'start_date' => 'required|date',
             'finish_date' => 'nullable|date', // Sekarang opsional
+            'customer_id' => 'required|exists:customers,id',
         ]);
 
         $project->update($validated);

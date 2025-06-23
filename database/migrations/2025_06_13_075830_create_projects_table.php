@@ -18,6 +18,7 @@ return new class extends Migration
             $table->enum('status', ['Ongoing', 'Prospect', 'Complete', 'Cancel'])->default('Ongoing');
             $table->date('start_date');
             $table->date('finish_date')->nullable();
+            $table->foreignId('customer_id')->nullable()->constrained('customers')->nullOnDelete();
             $table->timestamps();
         });
     }

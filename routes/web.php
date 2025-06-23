@@ -5,6 +5,7 @@ use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\CustomerController;
 
 Route::middleware('web')->group(function () {
     // Authentication Routes
@@ -30,5 +31,8 @@ Route::middleware('web')->group(function () {
 
         // Settings
         Route::get('/settings', [AuthController::class, 'settings'])->name('settings');
+
+        // Customers
+        Route::resource('customers', CustomerController::class);
     });
 });

@@ -4,16 +4,19 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\Project;
+use App\Models\Customer;
 
 class ProjectSeeder extends Seeder
 {
     public function run(): void
     {
+        $customerIds = Customer::pluck('id')->toArray();
         Project::create([
             'name' => 'Lorem Sample Project One',
             'description' => 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Itaque eum reiciendis dicta veritatis rerum at sit nostrum aliquam corrupti voluptates libero voluptas accusantium iste eius inventore numquam, harum omnis dolores.',
             'status' => 'Prospect',
             'start_date' => '2025-05-19',
+            'customer_id' => $customerIds[0] ?? null,
         ]);
 
         Project::create([
@@ -21,6 +24,7 @@ class ProjectSeeder extends Seeder
             'description' => 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Velit cum excepturi distinctio? Laboriosam assumenda, tenetur laudantium alias tempora temporibus molestias ab nemo laborum corporis voluptates porro odit, at neque. Sed.',
             'status' => 'Ongoing',
             'start_date' => '2025-05-20',
+            'customer_id' => $customerIds[1] ?? null,
         ]);
         
         Project::create([
@@ -29,6 +33,7 @@ class ProjectSeeder extends Seeder
             'status' => 'Cancel',
             'start_date' => '2025-06-02',
             'finish_date' => '2025-06-20',
+            'customer_id' => $customerIds[2] ?? null,
         ]);
         
         Project::create([
@@ -37,6 +42,7 @@ class ProjectSeeder extends Seeder
             'status' => 'Complete',
             'start_date' => '2024-06-03',
             'finish_date' => '2024-09-03',
+            'customer_id' => $customerIds[0] ?? null,
         ]);
         
     }

@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Models\Customer;
 
 class Project extends Model
 {
@@ -16,6 +18,7 @@ class Project extends Model
         'status',
         'start_date',
         'finish_date',
+        'customer_id',
     ];
 
     protected $casts = [
@@ -26,5 +29,10 @@ class Project extends Model
     public function activities(): HasMany
     {
         return $this->hasMany(Activity::class);
+    }
+
+    public function customer(): BelongsTo
+    {
+        return $this->belongsTo(Customer::class);
     }
 } 
