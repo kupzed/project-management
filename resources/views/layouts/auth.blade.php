@@ -6,8 +6,8 @@
     <title>Project Management System</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="bg-gray-100">
-    <div class="min-h-screen">
+<body class="bg-gray-100 h-full">
+    <div>
         <!-- Page Content -->
         <main>
             @yield('content')
