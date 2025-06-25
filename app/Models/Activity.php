@@ -14,12 +14,13 @@ class Activity extends Model
         'name',
         'description',
         'project_id',
-        'status',
-        'due_date',
+        'kategori',
+        'activity_date',
+        'attachment',
     ];
 
     protected $casts = [
-        'due_date' => 'date',
+        'activity_date' => 'date',
     ];
 
     public function project(): BelongsTo

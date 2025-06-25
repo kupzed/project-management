@@ -31,8 +31,9 @@
                                         </p>
                                         <div class="ml-2 flex-shrink-0 flex">
                                             <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 
-                                                @if($customer->kategori === 'perusahaan') bg-blue-100 text-blue-800
-                                                @else bg-green-100 text-green-800
+                                                @if($customer->kategori === 'perusahaan') bg-blue-800 text-white
+                                                @elseif($customer->kategori === 'pribadi') bg-green-800 text-white
+                                                @else bg-gray-900 text-white
                                                 @endif"> {{ ucfirst($customer->kategori) }}
                                             </span>
                                         </div>

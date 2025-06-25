@@ -16,8 +16,20 @@ return new class extends Migration
             $table->string('name');
             $table->text('description');
             $table->foreignId('project_id')->constrained()->onDelete('cascade');
-            $table->enum('status', ['pending', 'in-progress', 'completed'])->default('pending');
-            $table->date('due_date');
+            $table->enum('kategori', [
+                'Expense Report',
+                'Invoice',
+                'Purchase Order',
+                'Payment',
+                'Quotation',
+                'Faktur Pajak',
+                'Kasbon',
+                'Laporan Teknis',
+                'Surat Masuk',
+                'Surat Keluar',
+            ])->default('Expense Report');
+            $table->date('activity_date');
+            $table->string('attachment', 255)->nullable();
             $table->timestamps();
         });
     }

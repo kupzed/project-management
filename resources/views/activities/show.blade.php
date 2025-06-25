@@ -10,25 +10,21 @@
 @if(isset($activity))
 <div class="container mx-auto">
     <div class="max-w-3xl mx-auto">
-        <div class="md:flex md:items-center md:justify-between mb-4">
+        <div class="flex justify-between items-center">
             <div class="flex-1 min-w-0">
-                <h2 class="text-2xl font-bold leading-7 text-gray-900 mt-4 sm:text-2xl sm:truncate">
+                <h2 class="text-2xl font-bold leading-7 text-gray-900 my-2 sm:text-2xl">
                     {{ $activity->name }}
                 </h2>
-                <div class="mt-1 flex flex-col sm:flex-row sm:flex-wrap sm:mt-0 sm:space-x-6">
-                    <div class="mt-2 flex items-center text-sm text-gray-500">
+                <div class="my-2 flex flex-col sm:flex-row sm:flex-wrap sm:mt-0 sm:space-x-6">
+                    <div class="my-2 flex items-center text-sm text-gray-500">
                         <svg class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                             <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
                         </svg>
-                        Aktivitas: {{ $activity->due_date->format('d F Y') }}
+                        Aktivitas: {{ $activity->activity_date->format('d F Y') }}
                     </div>
-                    <div class="mt-2 flex items-center text-sm text-gray-500">
-                        <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 
-                            @if($activity->status === 'completed') bg-emerald-100 text-emerald-800 
-                            @elseif($activity->status === 'pending') bg-rose-100 text-rose-800
-                            @elseif($activity->status === 'in-progress') bg-amber-100 text-amber-800 
-                            @else bg-grey-100 text-grey-800 
-                            @endif "> {{ $activity->status }}
+                    <div class="my-2 flex items-center text-sm text-gray-900">
+                        <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 bg-gray-300 text-grey-800">
+                            {{ $activity->kategori }}
                         </span>
                     </div>
                 </div>
@@ -47,6 +43,12 @@
             <div class="border-t border-gray-200">
                 <dl>
                     <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                        <dt class="text-sm font-medium text-gray-500">Nama Aktivitas</dt>
+                        <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                            {{ $activity->name }}
+                        </dd>
+                    </div>
+                    <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                         <dt class="text-sm font-medium text-gray-500">Project</dt>
                         <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
                             @if($activity->project)
@@ -58,28 +60,34 @@
                             @endif
                         </dd>
                     </div>
-                    <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                    <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                         <dt class="text-sm font-medium text-gray-500">Deskripsi</dt>
                         <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
                             {{ $activity->description }}
                         </dd>
                     </div>
-                    <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                        <dt class="text-sm font-medium text-gray-500">Status</dt>
+                    <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                        <dt class="text-sm font-medium text-gray-500">Kategori</dt>
                         <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                            <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 
-                                @if($activity->status === 'completed') bg-green-100 text-green-800 
-                                @elseif($activity->status === 'pending') bg-red-100 text-red-800 
-                                @elseif($activity->status === 'in-progress') bg-yellow-100 text-yellow-800 
-                                @else bg-grey-100 text-grey-800 
-                                @endif "> {{ $activity->status }}
+                            <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 bg-gray-300 text-grey-900">
+                                {{ $activity->kategori }}
                             </span>
                         </dd>
                     </div>
-                    <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                    <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                         <dt class="text-sm font-medium text-gray-500">Tanggal Aktivitas</dt>
                         <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                            {{ $activity->due_date->format('d F Y') }}
+                            {{ $activity->activity_date->format('d F Y') }}
+                        </dd>
+                    </div>
+                    <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                        <dt class="text-sm font-medium text-gray-500">Attachment</dt>
+                        <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                            @if($activity->attachment)
+                                <a href="{{ asset('storage/' . $activity->attachment) }}" target="_blank" class="text-indigo-600 hover:underline">{{ basename($activity->attachment) }}</a>
+                            @else
+                                <span class="text-gray-500">Tidak ada file</span>
+                            @endif
                         </dd>
                     </div>
                 </dl>

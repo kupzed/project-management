@@ -6,6 +6,7 @@ use App\Models\Activity;
 use App\Models\Project;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class ActivityController extends Controller
 {
@@ -27,9 +28,14 @@ class ActivityController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'required|string',
             'project_id' => 'required|exists:projects,id',
-            'status' => 'required|in:pending,in-progress,completed',
-            'due_date' => 'required|date',
+            'kategori' => 'required|in:Expense Report,Invoice,Purchase Order,Payment,Quotation,Faktur Pajak,Kasbon,Laporan Teknis,Surat Masuk,Surat Keluar',
+            'activity_date' => 'required|date',
+            'attachment' => 'nullable|file|max:10240', // 10MB
         ]);
+
+        if ($request->hasFile('attachment')) {
+            $validated['attachment'] = $request->file('attachment')->store('attachments', 'public');
+        }
 
         Activity::create($validated);
 
@@ -62,9 +68,18 @@ class ActivityController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'required|string',
             'project_id' => 'required|exists:projects,id',
-            'status' => 'required|in:pending,in-progress,completed',
-            'due_date' => 'required|date',
+            'kategori' => 'required|in:Expense Report,Invoice,Purchase Order,Payment,Quotation,Faktur Pajak,Kasbon,Laporan Teknis,Surat Masuk,Surat Keluar',
+            'activity_date' => 'required|date',
+            'attachment' => 'nullable|file|max:10240', // 10MB
         ]);
+
+        if ($request->hasFile('attachment')) {
+            // Hapus file lama jika ada
+            if ($activity->attachment) {
+                Storage::disk('public')->delete($activity->attachment);
+            }
+            $validated['attachment'] = $request->file('attachment')->store('attachments', 'public');
+        }
 
         $activity->update($validated);
 

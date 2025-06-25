@@ -9,16 +9,17 @@
 @section('content')
 <div class="container mx-auto">
     <div class="max-w-3xl mx-auto">
-        <div class="md:flex md:items-center md:justify-between mb-4">
+        <div class="flex justify-between items-center">
             <div class="flex-1 min-w-0">
-                <h2 class="text-2xl font-bold leading-7 text-gray-900 mt-4 sm:text-2xl sm:truncate">
+                <h2 class="text-2xl font-bold leading-7 text-gray-900 my-2 sm:text-2xl sm:truncate">
                     {{ $customer->nama }}
                 </h2>
-                <div class="mt-1 flex flex-col sm:flex-row sm:flex-wrap sm:mt-0 sm:space-x-6">
-                    <div class="mt-2 flex items-center text-sm text-gray-500">
+                <div class="my-2 flex flex-col sm:flex-row sm:flex-wrap sm:mt-0 sm:space-x-6">
+                    <div class="my-2 flex items-center text-sm text-gray-500">
                         <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 
-                            @if($customer->kategori === 'perusahaan') bg-blue-100 text-blue-800
-                            @else bg-green-100 text-green-800
+                            @if($customer->kategori === 'perusahaan') bg-blue-800 text-white
+                            @elseif($customer->kategori === 'pribadi') bg-green-800 text-white
+                            @else bg-gray-900 text-white
                             @endif"> {{ ucfirst($customer->kategori) }}
                         </span>
                     </div>
@@ -37,6 +38,23 @@
             </div>
             <div class="border-t border-gray-200">
                 <dl>
+                    <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                        <dt class="text-sm font-medium text-gray-500">Nama</dt>
+                        <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                            {{ $customer->nama }}
+                        </dd>
+                    </div>
+                    <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                        <dt class="text-sm font-medium text-gray-500">Kategori</dt>
+                        <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                            <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 
+                                @if($customer->kategori === 'perusahaan') bg-blue-800 text-white
+                                @elseif($customer->kategori === 'pribadi') bg-green-800 text-white
+                                @else bg-gray-900 text-white
+                                @endif"> {{ ucfirst($customer->kategori) }}
+                            </span>
+                        </dd>
+                    </div>
                     <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                         <dt class="text-sm font-medium text-gray-500">Alamat</dt>
                         <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">

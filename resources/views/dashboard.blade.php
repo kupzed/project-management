@@ -78,12 +78,8 @@
                                             {{ $activity->name }}
                                         </p>
                                         <div class="ml-2 flex-shrink-0 flex">
-                                            <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 
-                                                @if($activity->status === 'completed') bg-green-100 text-green-800 
-                                                @elseif($activity->status === 'pending') bg-red-100 text-red-800 
-                                                @elseif($activity->status === 'in-progress') bg-yellow-100 text-yellow-800 
-                                                @else bg-grey-100 text-grey-800 
-                                                @endif "> {{ $activity->status }}
+                                            <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 bg-gray-300 text-grey-900">
+                                                {{ $activity->kategori }}
                                             </span>
                                         </div>
                                     </div>
@@ -98,7 +94,7 @@
                                                 <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
                                             </svg>
                                             <p>
-                                                Aktivitas: {{ $activity->due_date->format('d F Y') }}
+                                                Aktivitas: {{ $activity->activity_date->format('d F Y') }}
                                             </p>
                                         </div>
                                     </div>
