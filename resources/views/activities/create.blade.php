@@ -9,7 +9,14 @@
 @section('content')
 <div class="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8">
     <div class="sm:mx-auto sm:w-full sm:max-w-sm">
-        <h2 class="text-center text-2xl font-bold tracking-tight text-gray-900">Form Aktivitas Baru</h2>
+        <h2 class="text-center text-2xl font-bold tracking-tight text-gray-900">
+            Form Aktivitas Baru
+        </h2>
+        @if(isset($project))
+            <h2 class="text-center text-2xl font-bold tracking-tight text-gray-900">
+                Untuk Project : {{ $project->name }}
+            </h2>
+        @endif
     </div>
 
     <div class="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
@@ -27,20 +34,24 @@
             </div>
 
             <div>
-                <label for="project_id" class="block text-sm font-medium text-gray-900">Project</label>
-                <div class="mt-2">
-                    <select id="project_id" name="project_id" required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm">
-                        <option value="">Pilih Project</option>
-                        @foreach($projects as $project)
-                            <option value="{{ $project->id }}" {{ old('project_id', request('project_id')) == $project->id ? 'selected' : '' }}>
-                                {{ $project->name }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-                @error('project_id')
-                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                @enderror
+                @if(isset($project))
+                    <input type="hidden" name="project_id" value="{{ $project->id }}">
+                @else
+                    <label for="project_id" class="block text-sm font-medium text-gray-900">Project</label>
+                    <div class="mt-2">
+                        <select id="project_id" name="project_id" required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm">
+                            <option value="">Pilih Project</option>
+                            @foreach($projects as $project)
+                                <option value="{{ $project->id }}" {{ old('project_id', request('project_id')) == $project->id ? 'selected' : '' }}>
+                                    {{ $project->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    @error('project_id')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                @endif
             </div>
 
             <div>

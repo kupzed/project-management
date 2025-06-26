@@ -16,10 +16,15 @@ class ActivityController extends Controller
         return view('activities.index', compact('activities'));
     }
 
-    public function create()
+    public function create(Request $request)
     {
-        $projects = Project::all();
-        return view('activities.create', compact('projects'));
+        if ($request->has('project_id')) {
+            $project = \App\Models\Project::findOrFail($request->project_id);
+            return view('activities.create', compact('project'));
+        } else {
+            $projects = Project::all();
+            return view('activities.create', compact('projects'));
+        }
     }
 
     public function store(Request $request)

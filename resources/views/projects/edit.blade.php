@@ -10,6 +10,7 @@
 <div class="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8">
     <div class="sm:mx-auto sm:w-full sm:max-w-sm">
         <h2 class="text-center text-2xl font-bold tracking-tight text-gray-900">Edit Project</h2>
+        <h2 class="text-center text-2xl font-bold tracking-tight text-gray-900">{{ $project->name }}</h2>
     </div>
 
     <div class="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">

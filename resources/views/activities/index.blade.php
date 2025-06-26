@@ -38,7 +38,7 @@
                                     <div class="mt-2 sm:flex sm:justify-between">
                                         <div class="sm:flex">
                                             <p class="flex items-center text-sm text-gray-500">
-                                                {{ $activity->project->name }}
+                                                Project: {{ $activity->project->name }}
                                             </p>
                                         </div>
                                         <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
