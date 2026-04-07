@@ -283,12 +283,12 @@ npm run test
 
 ## 📚 Dokumentasi Lanjutan
 
-| Dokumen                                                  | Deskripsi                            |
-| -------------------------------------------------------- | ------------------------------------ |
-| [API Documentation](./docs/API_DOCUMENTATION.md)         | Template & referensi endpoint API    |
-| [Frontend Architecture](./docs/FRONTEND_ARCHITECTURE.md) | Arsitektur & pola frontend SvelteKit |
-| [Database Structure](./docs/DATABASE_STRUCTURE.md)       | Skema tabel & relasi database        |
-| [Code Standards & Changelog](./docs/CODE_STANDARDS.md)   | Standar kode & catatan perubahan     |
+| Dokumen                                                   | Deskripsi                            |
+| --------------------------------------------------------- | ------------------------------------ |
+| [API Documentation](./.docs/API_DOCUMENTATION.md)         | Template & referensi endpoint API    |
+| [Frontend Architecture](./.docs/FRONTEND_ARCHITECTURE.md) | Arsitektur & pola frontend SvelteKit |
+| [Database Structure](./.docs/DATABASE_STRUCTURE.md)       | Skema tabel & relasi database        |
+| [Code Standards & Changelog](./.docs/CODE_STANDARDS.md)   | Standar kode & catatan perubahan     |
 
 ---
 
