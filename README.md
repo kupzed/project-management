@@ -1,4 +1,4 @@
-# 📋 Proxima — Project Management System
+# 📋 Project Management System
 
 > Aplikasi manajemen proyek internal untuk mengelola proyek, aktivitas, mitra/partner, sertifikasi, dan laporan keuangan.
 
@@ -6,7 +6,7 @@
 
 ## 📖 Deskripsi
 
-**Proxima** adalah aplikasi _Project Management_ berbasis web yang dirancang untuk mengelola siklus hidup proyek secara menyeluruh — mulai dari pendataan proyek, pencatatan aktivitas harian, manajemen mitra (customer & vendor), pelacakan sertifikasi barang, hingga pelaporan keuangan.
+**Project Management System** adalah aplikasi _Project Management_ berbasis web yang dirancang untuk mengelola siklus hidup proyek secara menyeluruh — mulai dari pendataan proyek, pencatatan aktivitas harian, manajemen mitra (customer & vendor), pelacakan sertifikasi barang, hingga pelaporan keuangan.
 
 Aplikasi ini dibangun dengan arsitektur **terpisah (decoupled)**:
 
@@ -30,10 +30,10 @@ Aplikasi ini dibangun dengan arsitektur **terpisah (decoupled)**:
 
 ```
 ┌─────────────────────┐     HTTP/JSON      ┌─────────────────────────┐
-│                     │ ◄───────────────── │  Frontend (SvelteKit)   │
-│  Backend (Laravel)  │ ──────────────────►│  - v1: frontend-v1│
-│  REST API + JWT     │     API Response   │  - v2: frontend-v2│
-│  Port: 8000         │                    │  Port: 5174 / 5175       │
+│  Backend (Laravel)  │ ◄───────────────── │  Frontend (SvelteKit)   │
+│  - be: backend      │ ──────────────────►│  - fe-v1: frontend-v1   │
+│  REST API + JWT     │     API Response   │  - fe-v2: frontend-v2   │
+│  Port: 8000         │                    │  Port: 5174 / 5175      │
 └─────────────────────┘                    └─────────────────────────┘
          │
          ▼
@@ -148,7 +148,7 @@ Buka file `.env` dan sesuaikan konfigurasi berikut:
 
 ```env
 # ── Aplikasi ────────────────────────────────────────
-APP_NAME="Proxima"
+APP_NAME="[Nama Proyek]"
 APP_ENV=local
 APP_DEBUG=true
 APP_URL=http://localhost:8000
