@@ -108,7 +108,7 @@ Pastikan tools berikut sudah terinstall di mesin development Anda:
 
 ```bash
 # Project Management
-git clone [https://github.com/indogreen/project-management.git]
+git clone https://github.com/indogreen/project-management.git
 cd project-management
 
 # Laravel Backend (pada terminal terpisah)
@@ -153,7 +153,7 @@ APP_ENV=local
 APP_DEBUG=true
 APP_URL=http://localhost:8000
 
-# ── Database ────────────────────────────────────────
+# ── Database ─────────────────────────────────────
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
@@ -161,13 +161,19 @@ DB_DATABASE=[nama_database]
 DB_USERNAME=root
 DB_PASSWORD=
 
-# ── JWT ─────────────────────────────────────────────
-JWT_SECRET=[akan terisi otomatis setelah php artisan jwt:secret]
+# ── Laravel dev server defaults (Opsional) ──────
+SERVER_HOST=192.168.1.66
+SERVER_PORT=8001
 
-# ── AI Document Extraction (Opsional) ──────────────
+# ── AI Document Extraction (Opsional) ───────────
 AI_BASE_URL=[url_ai_provider]
 AI_API_KEY=[api_key_anda]
 AI_MODEL=[nama_model]
+
+# ── JWT ──────────────────────────────────────────
+JWT_SECRET=[akan terisi otomatis setelah php artisan jwt:secret]
+
+JWT_ALGO=[akan terisi otomatis setelah php artisan jwt:secret]
 ```
 
 #### Jalankan Migration & Seeder
@@ -294,6 +300,6 @@ npm run test
 
 ## 👥 Tim & Kontributor
 
-| Nama   | Role                | Github                      |
-| ------ | ------------------- | --------------------------- |
-| Kupzed | Fullstack Developer | [https://github.com/kupzed] |
+| NO  | Nama                                | Role                |
+| --- | ----------------------------------- | ------------------- |
+| 1   | [Kupzed](https://github.com/kupzed) | Fullstack Developer |
