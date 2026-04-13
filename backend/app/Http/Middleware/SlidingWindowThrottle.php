@@ -11,13 +11,13 @@ use Symfony\Component\HttpFoundation\Response;
  * Sliding Window Throttle Middleware
  *
  * Berbeda dengan Fixed Window bawaan Laravel, middleware ini me-reset TTL
- * setiap kali ada request masuk. Jika limit tercapai, user HARUS menunggu
- * penuh dari waktu request TERAKHIR, bukan dari request pertama.
+ * setiap kali ada request masuk selama belum mencapai limit. 
+ * Jika limit tercapai, user HARUS menunggu sisa waktu dari limit terakhir, 
+ * dan counter waktu TIDAK AKAN mengulang (restart) dari awal walau request terus ditekan.
  *
  * Algoritma:
- * 1. Setiap request masuk → increment counter + reset TTL ke {decaySeconds}.
- * 2. Jika counter > maxAttempts → tolak dengan 429 + Retry-After = decaySeconds.
- * 3. Counter hanya expire jika user TIDAK melakukan request selama {decaySeconds} detik.
+ * 1. Setiap request masuk (< limit) → increment counter + reset TTL ke {decaySeconds}.
+ * 2. Jika counter > maxAttempts → tolak dengan 429 + Retry-After sisa waktu. TTL tidak diperpanjang.
  */
 class SlidingWindowThrottle
 {
@@ -48,16 +48,39 @@ class SlidingWindowThrottle
             // Acquire lock — block max 5 detik agar request lain menunggu giliran
             $lock->block(5);
 
-            $attempts = (int) Cache::get($key, 0);
+            $cacheData = Cache::get($key);
+            
+            if (is_array($cacheData)) {
+                $attempts = $cacheData['attempts'] ?? 0;
+                $expiresAt = $cacheData['expires_at'] ?? now()->addSeconds($decaySeconds)->timestamp;
+            } else {
+                $attempts = (int) $cacheData;
+                $expiresAt = now()->addSeconds($decaySeconds)->timestamp;
+            }
+
             $attempts++;
 
-            // Selalu simpan counter baru dengan TTL yang di-reset (sliding window)
-            // TTL selalu dihitung dari NOW + decaySeconds, bukan dari request pertama
-            Cache::put($key, $attempts, now()->addSeconds($decaySeconds));
-
             if ($attempts > $maxAttempts) {
-                return $this->buildTooManyAttemptsResponse($decaySeconds, $maxAttempts);
+                // Limit tercapai. JANGAN mereset/mengulang waktu (TTL).
+                // Kita hitung sisa waktu mundur.
+                $retryAfter = max(0, $expiresAt - time());
+
+                if ($retryAfter > 0) {
+                    Cache::put($key, [
+                        'attempts' => $attempts,
+                        'expires_at' => $expiresAt
+                    ], now()->addSeconds($retryAfter));
+                }
+
+                return $this->buildTooManyAttemptsResponse($retryAfter, $maxAttempts);
             }
+
+            // Jika belum limit, maka TTL di-reset ke NOW + decaySeconds. (Sliding)
+            $newExpiresAt = now()->addSeconds($decaySeconds)->timestamp;
+            Cache::put($key, [
+                'attempts' => $attempts,
+                'expires_at' => $newExpiresAt
+            ], now()->addSeconds($decaySeconds));
 
             $response = $next($request);
 
@@ -67,8 +90,14 @@ class SlidingWindowThrottle
                 $maxAttempts - $attempts,
             );
         } catch (\Illuminate\Contracts\Cache\LockTimeoutException $e) {
-            // Jika gagal acquire lock (server sangat sibuk), tolak juga dengan 429
-            return $this->buildTooManyAttemptsResponse($decaySeconds, $maxAttempts);
+            // Jika gagal acquire lock (server sangat sibuk), tolak dengan 429
+            // Coba ambil sisa waktu re-try jika ada
+            $cacheData = Cache::get($key);
+            $retryAfter = $decaySeconds;
+            if (is_array($cacheData) && isset($cacheData['expires_at'])) {
+                $retryAfter = max(0, $cacheData['expires_at'] - time());
+            }
+            return $this->buildTooManyAttemptsResponse($retryAfter ?: $decaySeconds, $maxAttempts);
         } finally {
             // Pastikan lock selalu dilepas
             optional($lock)->release();
