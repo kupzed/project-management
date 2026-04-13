@@ -1,5 +1,6 @@
 <?php
- 
+
+use App\Http\Middleware\SlidingWindowThrottle;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -18,11 +19,11 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        // ⬇️ daftarkan alias middleware Spatie di sini
         $middleware->alias([
             'role' => RoleMiddleware::class,
             'permission' => PermissionMiddleware::class,
             'role_or_permission' => RoleOrPermissionMiddleware::class,
+            'sliding_throttle' => SlidingWindowThrottle::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

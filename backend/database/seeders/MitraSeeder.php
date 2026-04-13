@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+USE \App\Models\Mitra;
 
 class MitraSeeder extends Seeder
 {
@@ -34,6 +35,6 @@ class MitraSeeder extends Seeder
             ],
         ]);
 
-        \App\Models\Mitra::factory(67)->create();
+        Mitra::factory(67)->create();
     }
 } 

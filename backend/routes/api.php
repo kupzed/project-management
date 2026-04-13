@@ -13,8 +13,8 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\FinanceController;
 
 Route::group(['middleware' => 'api', 'prefix' => 'auth'], function ($router) {
-    Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:auth')->name('register');
-    Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:auth')->name('login');
+    Route::post('/register', [AuthController::class, 'register'])->middleware('sliding_throttle:5,60,auth')->name('register');
+    Route::post('/login', [AuthController::class, 'login'])->middleware('sliding_throttle:5,60,auth')->name('login');
     Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:api')->name('logout');
     Route::post('/refresh', [AuthController::class, 'refresh'])->middleware('auth:api')->name('refresh');
     Route::get('/me', [AuthController::class, 'me'])->middleware('auth:api')->name('me');
@@ -37,7 +37,7 @@ Route::group(['middleware' => 'api', 'prefix' => 'auth'], function ($router) {
         ->name('role.config');
 });
 
-Route::group(['middleware' => ['auth:api', 'throttle:api']], function () {
+Route::group(['middleware' => ['auth:api', 'sliding_throttle:15,60,api']], function () {
 
     // Project
     Route::apiResource('projects', ProjectController::class);
