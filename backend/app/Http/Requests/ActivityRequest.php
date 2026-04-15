@@ -48,7 +48,7 @@ class ActivityRequest extends FormRequest
             // Multi-file (lampiran baru)
             'attachments.*'             => ['file', 'max:10240'], // 10MB/file
             'attachment_names'          => ['array'],
-            'attachment_names.*'        => ['nullable', 'string', 'max:255'],
+            'attachment_names.*'        => ['required', 'string', 'max:255'],
             'attachment_descriptions'   => ['array'],
             'attachment_descriptions.*' => ['nullable', 'string', 'max:500'],
 
@@ -58,7 +58,7 @@ class ActivityRequest extends FormRequest
             'existing_attachment_ids'               => ['array'],
             'existing_attachment_ids.*'             => ['integer', 'exists:activity_attachments,id'],
             'existing_attachment_names'             => ['array'],
-            'existing_attachment_names.*'           => ['nullable', 'string', 'max:255'],
+            'existing_attachment_names.*'           => ['required', 'string', 'max:255'],
             'existing_attachment_descriptions'      => ['array'],
             'existing_attachment_descriptions.*'    => ['nullable', 'string', 'max:500'],
         ];
