@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('certificate_attachments', function (Blueprint $table) {
             $table->id();
             $table->foreignId('certificate_id')->constrained()->onDelete('cascade');
-            $table->string('name', 60);
-            $table->string('description', 255);
+            $table->string('name', 255);
+            $table->text('description')->nullable();
             $table->string('file_path', 255);
             $table->string('mime', 191)->nullable();
             $table->unsignedBigInteger('size')->nullable();

@@ -245,7 +245,6 @@
               <input
                 type="text"
                 bind:value={fileDescriptions[index]}
-                required
                 on:click|stopPropagation
                 on:mousedown|stopPropagation
                 on:input={(e) => updateFileDesc(index, (e.target as HTMLInputElement).value)}
