@@ -559,7 +559,6 @@
 							<input
 								type="text"
 								bind:value={att.description}
-								required
 								class="w-full rounded-md border border-black/10 bg-white/80 px-2 py-1 text-sm focus:ring-2 focus:ring-violet-500 focus:outline-none dark:border-white/10 dark:bg-[#0e0c19]/80"
 							/>
 							<div class="flex items-center justify-end gap-3 text-xs">

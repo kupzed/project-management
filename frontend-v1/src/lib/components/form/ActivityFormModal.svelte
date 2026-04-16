@@ -450,7 +450,7 @@
                 </a>
               </div>
               <input type="text" bind:value={att.name} required placeholder="Nama lampiran" class="w-full px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
-              <input type="text" bind:value={att.description} required placeholder="Deskripsi lampiran" class="w-full px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
+              <input type="text" bind:value={att.description} placeholder="Deskripsi lampiran" class="w-full px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
               <div class="flex items-center justify-end gap-3">
                 {#if att.size}<span class="text-gray-500 dark:text-gray-400">{formatFileSize(att.size)}</span>{/if}
                 <button type="button" class="text-red-600 hover:text-red-700" on:click={() => {
