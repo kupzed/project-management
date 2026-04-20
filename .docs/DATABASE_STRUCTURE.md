@@ -145,7 +145,7 @@ erDiagram
 
 ### 2. `partners` — Tabel Mitra (Customer / Vendor)
 
-> Model Eloquent: `Mitra` (mapping: `protected $table = 'partners'`)
+> Model Eloquent: `Mitra` (mapping: `#[Table('partners')]` PHP Attribute)
 
 | Kolom              | Tipe Data      | Constraint      | Keterangan                       |
 | ------------------ | -------------- | --------------- | -------------------------------- |

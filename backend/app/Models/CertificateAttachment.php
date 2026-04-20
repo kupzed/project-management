@@ -3,22 +3,24 @@
 namespace App\Models;
 
 use App\Models\Traits\LogsActivity;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Appends;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+#[Fillable([
+    'certificate_id',
+    'name',
+    'description',
+    'file_path',
+    'mime',
+    'size',
+])]
+#[Appends(['url'])]
 class CertificateAttachment extends Model
 {
     use HasFactory, LogsActivity;
-
-    protected $fillable = [
-        'certificate_id',
-        'name',
-        'description',
-        'file_path',
-        'mime',
-        'size',
-    ];
 
     public function certificate(): BelongsTo
     {
@@ -29,8 +31,6 @@ class CertificateAttachment extends Model
     {
         return $this->name ?: 'Certificate Attachment #' . $this->id;
     }
-
-    protected $appends = ['url'];
 
     public function getUrlAttribute(): ?string
     {

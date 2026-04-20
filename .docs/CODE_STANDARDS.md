@@ -145,7 +145,8 @@ if (auth && isUnauthorized(response.status, payload)) {
 // Model 'Mitra' menggunakan tabel 'partners' karena tabel ini dibuat saat
 // awal development dengan nama generik. Mengubah nama tabel sekarang terlalu
 // berisiko karena sudah ada foreign key dari 4 tabel lain dan data produksi.
-protected $table = 'partners';
+#[Table('partners')]
+class Mitra extends Model
 ```
 
 > **Mengapa komentar ini bagus:** Menjelaskan "hutang teknis" yang disengaja dan alasan mengapa tidak diperbaiki — mencegah developer lain menghabiskan waktu mencoba "memperbaiki" inkonsistensi ini.
@@ -237,6 +238,36 @@ dan proyek ini mengikuti [Semantic Versioning](https://semver.org/lang/id/).
 ### Fixed
 
 - [Perbaikan bug]
+
+---
+
+## [1.3.0] - 2026-04-20
+
+### Changed
+
+- **Major Upgrade: Laravel 11 → 13** — Framework backend di-upgrade secara
+  inkremental (11 → 12 → 13) ke Laravel 13.5.0 untuk memanfaatkan fitur
+  terbaru dan dukungan keamanan jangka panjang (security fixes hingga Q1 2028).
+- PHP minimum requirement dinaikkan dari ^8.2 menjadi ^8.3.
+- Spatie Laravel Permission di-upgrade dari v6 ke v7.3.
+- JWT Auth di-upgrade dari v2.3 ke v2.9.
+- Laravel Tinker di-upgrade dari v2 ke v3.
+- Seluruh model Eloquent (8 file) di-refaktor menggunakan **PHP Attributes**
+  (`#[Fillable]`, `#[Hidden]`, `#[Appends]`, `#[Table]`) sebagai pengganti
+  deklarasi properti klasik, mengikuti standar Laravel 13.
+
+### Added
+
+- Service class `AIAgentService.php` — skeleton untuk integrasi AI lanjutan
+  menggunakan Laravel AI SDK (saat ini menggunakan raw HTTP calls, akan
+  di-refaktor ke SDK resmi setelah upgrade PHP ke 8.4+).
+
+### Removed
+
+- `app/Http/Kernel.php` — File deprecated sejak Laravel 11. Middleware
+  sudah dikelola sepenuhnya di `bootstrap/app.php`.
+- `app/Providers/RouteServiceProvider.php` — Routing sudah dikonfigurasi
+  di `bootstrap/app.php` via `withRouting()`.
 
 ---
 

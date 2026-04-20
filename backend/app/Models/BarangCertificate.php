@@ -3,20 +3,20 @@
 namespace App\Models;
 
 use App\Models\Traits\LogsActivity;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+#[Fillable([
+    'name',
+    'no_seri',
+    'mitra_id',
+])]
 class BarangCertificate extends Model
 {
     use HasFactory, LogsActivity;
-
-    protected $fillable = [
-        'name',
-        'no_seri',
-        'mitra_id',
-    ];
 
     public function mitra(): BelongsTo
     {
