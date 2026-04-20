@@ -1,6 +1,6 @@
 # 📡 Backend & API Documentation
 
-> Dokumentasi teknis untuk RESTful API yang dibangun menggunakan **Laravel 11** dengan autentikasi **JWT (JSON Web Token)**.
+> Dokumentasi teknis untuk RESTful API yang dibangun menggunakan **Laravel 13** dengan autentikasi **JWT (JSON Web Token)**.
 
 ---
 
@@ -365,10 +365,10 @@ curl -X POST http://localhost:8000/api/activities \
 
 ### Rate Limiting
 
-| Route Group               | Limit                                           |
-| ------------------------- | ----------------------------------------------- |
-| `auth/*` (login/register) | `throttle:auth` — [konfigurasi di `Kernel.php`] |
-| Semua API route lainnya   | `throttle:api` — [konfigurasi di `Kernel.php`]  |
+| Route Group               | Limit                                                |
+| ------------------------- | ---------------------------------------------------- |
+| `auth/*` (login/register) | `sliding_throttle:5,60,auth` (5 req/60s)             |
+| Semua API route lainnya   | `sliding_throttle:15,60,api` (15 req/60s)            |
 
 ### HTTP Status Code yang Digunakan
 
@@ -407,6 +407,7 @@ Request → Controller (validasi & routing)
 | ----------------------------- | ------------------------------------- |
 | `ActivityService`             | CRUD aktivitas, attachment management |
 | `AIDocumentExtractionService` | Integrasi AI untuk ekstraksi dokumen  |
+| `AIAgentService`              | Skeleton AI agent untuk fitur lanjutan|
 | `ActivityLogService`          | Audit trail & log management          |
 | `AuthService`                 | Registrasi & autentikasi              |
 | `BarangCertificateService`    | CRUD barang sertifikat                |
@@ -599,14 +600,12 @@ php artisan activity-logs:clean --user=1 --days=30
 
 ### Schedule Cleanup (Optional)
 
-Tambahkan ke `app/Console/Kernel.php`:
+Tambahkan ke `routes/console.php`:
 
 ```php
-protected function schedule(Schedule $schedule)
-{
-    // Clean logs older than 30 days every week
-    $schedule->command('activity-logs:clean --days=30')->weekly();
-}
+use Illuminate\Support\Facades\Schedule;
+
+Schedule::command('activity-logs:clean --days=30')->weekly();
 ```
 
 ## 🛡️ Middleware
@@ -614,13 +613,8 @@ protected function schedule(Schedule $schedule)
 Aktifkan middleware untuk mencatat aktivitas otomatis:
 
 ```php
-// app/Http/Kernel.php
-protected $middlewareGroups = [
-    'api' => [
-        // ... other middleware
-        \App\Http\Middleware\LogUserActivity::class,
-    ],
-];
+// bootstrap/app.php — withMiddleware()
+$middleware->append(\App\Http\Middleware\LogUserActivity::class);
 ```
 
 ## 📦 Response Format

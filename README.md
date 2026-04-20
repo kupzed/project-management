@@ -50,11 +50,11 @@ Aplikasi ini dibangun dengan arsitektur **terpisah (decoupled)**:
 
 | Teknologi         | Versi | Keterangan                                           |
 | ----------------- | ----- | ---------------------------------------------------- |
-| PHP               | ^8.2  | Runtime server                                       |
-| Laravel           | ^11.0 | Framework PHP                                        |
-| JWT Auth          | ^2.3  | `php-open-source-saver/jwt-auth` — Autentikasi Token |
+| PHP               | ^8.3  | Runtime server                                       |
+| Laravel           | ^13.0 | Framework PHP                                        |
+| JWT Auth          | ^2.9  | `php-open-source-saver/jwt-auth` — Autentikasi Token |
 | Laravel Sanctum   | ^4.0  | API Token (tersedia sebagai alternatif)              |
-| Spatie Permission | ^6.23 | Role & Permission Management                         |
+| Spatie Permission | ^7.3  | Role & Permission Management                         |
 | MySQL / SQLite    | —     | Database relasional                                  |
 | Composer          | ^2.x  | PHP dependency manager                               |
 
@@ -90,7 +90,7 @@ Pastikan tools berikut sudah terinstall di mesin development Anda:
 
 | Tool     | Versi Minimum        | Cek Versi         |
 | -------- | -------------------- | ----------------- |
-| PHP      | 8.2+                 | `php -v`          |
+| PHP      | 8.3+                 | `php -v`          |
 | Composer | 2.x                  | `composer -V`     |
 | Node.js  | 18+ (disarankan 20+) | `node -v`         |
 | NPM      | 9+                   | `npm -v`          |
