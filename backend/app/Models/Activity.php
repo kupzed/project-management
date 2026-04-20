@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Models\Traits\LogsActivity;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Appends;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,31 +12,29 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
 
+#[Fillable([
+    'name',
+    'short_desc',
+    'description',
+    'value',
+    'project_id',
+    'kategori',
+    'activity_date',
+    'attachment',
+    'jenis',
+    'mitra_id',
+    'from',
+    'to',
+])]
+#[Appends(['attachments'])]
 class Activity extends Model
 {
     use HasFactory, LogsActivity;
-
-    protected $fillable = [
-        'name',
-        'short_desc',
-        'description',
-        'value',
-        'project_id',
-        'kategori',
-        'activity_date',
-        'attachment',
-        'jenis',
-        'mitra_id',
-        'from',
-        'to',
-    ];
 
     protected $casts = [
         'activity_date' => 'date',
         'value'         => 'decimal:2',
     ];
-
-    protected $appends = ['attachments'];
 
     public function project(): BelongsTo
     {

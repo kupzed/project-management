@@ -3,28 +3,28 @@
 namespace App\Models;
 
 use App\Models\Traits\LogsActivity;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+#[Fillable([
+    'name',
+    'description',
+    'status',
+    'start_date',
+    'finish_date',
+    'mitra_id',
+    'kategori',
+    'lokasi',
+    'no_po',
+    'no_so',
+    'is_cert_projects',
+])]
 class Project extends Model
 {
     use HasFactory, LogsActivity;
-
-    protected $fillable = [
-        'name',
-        'description',
-        'status',
-        'start_date',
-        'finish_date',
-        'mitra_id',
-        'kategori',
-        'lokasi',
-        'no_po',
-        'no_so',
-        'is_cert_projects',
-    ];
 
     protected $casts = [
         'start_date' => 'date',

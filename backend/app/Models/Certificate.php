@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Models\Traits\LogsActivity;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Appends;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,27 +12,25 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
 
+#[Fillable([
+    'name',
+    'no_certificate',
+    'project_id',
+    'barang_certificate_id',
+    'status',
+    'date_of_issue',
+    'date_of_expired',
+    'attachment',
+])]
+#[Appends(['attachments'])]
 class Certificate extends Model
 {
     use HasFactory, LogsActivity;
-
-    protected $fillable = [
-        'name',
-        'no_certificate',
-        'project_id',
-        'barang_certificate_id',
-        'status',
-        'date_of_issue',
-        'date_of_expired',
-        'attachment',
-    ];
 
     protected $casts = [
         'date_of_issue'   => 'date',
         'date_of_expired' => 'date',
     ];
-
-    protected $appends = ['attachments'];
 
     public function project(): BelongsTo
     {
