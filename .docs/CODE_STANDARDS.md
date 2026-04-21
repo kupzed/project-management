@@ -233,6 +233,7 @@ dan proyek ini mengikuti [Semantic Versioning](https://semver.org/lang/id/).
 
 ### Changed
 
+- **Update AIDocumentExtractionService**: Beralih dari penggunaan `Http::post` manual menjadi SDK resmi `laravel/ai` yang mendefinisikan native provider konfigurasi (`gemini`) dan vision model parser.
 - [Perubahan pada fitur yang sudah ada]
 
 ### Fixed
@@ -241,7 +242,7 @@ dan proyek ini mengikuti [Semantic Versioning](https://semver.org/lang/id/).
 
 ---
 
-## [1.3.0] - 2026-04-20
+## [2.0.0] - 2026-04-20
 
 ### Changed
 
@@ -255,12 +256,7 @@ dan proyek ini mengikuti [Semantic Versioning](https://semver.org/lang/id/).
 - Seluruh model Eloquent (8 file) di-refaktor menggunakan **PHP Attributes**
   (`#[Fillable]`, `#[Hidden]`, `#[Appends]`, `#[Table]`) sebagai pengganti
   deklarasi properti klasik, mengikuti standar Laravel 13.
-
-### Added
-
-- Service class `AIAgentService.php` — skeleton untuk integrasi AI lanjutan
-  menggunakan Laravel AI SDK (saat ini menggunakan raw HTTP calls, akan
-  di-refaktor ke SDK resmi setelah upgrade PHP ke 8.4+).
+- PHP minimum requirement dinaikkan dari ^8.3 menjadi ^8.4.
 
 ### Removed
 

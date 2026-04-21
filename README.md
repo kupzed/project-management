@@ -50,7 +50,7 @@ Aplikasi ini dibangun dengan arsitektur **terpisah (decoupled)**:
 
 | Teknologi         | Versi | Keterangan                                           |
 | ----------------- | ----- | ---------------------------------------------------- |
-| PHP               | ^8.3  | Runtime server                                       |
+| PHP               | ^8.4  | Runtime server                                       |
 | Laravel           | ^13.0 | Framework PHP                                        |
 | JWT Auth          | ^2.9  | `php-open-source-saver/jwt-auth` — Autentikasi Token |
 | Laravel Sanctum   | ^4.0  | API Token (tersedia sebagai alternatif)              |
