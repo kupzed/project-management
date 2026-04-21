@@ -3,11 +3,11 @@
 namespace App\Services;
 
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 class AIDocumentExtractionService
 {
+    private string $driver;
     private string $baseUrl;
     private string $apiKey;
     private string $model;
@@ -16,9 +16,24 @@ class AIDocumentExtractionService
 
     public function __construct()
     {
+        $this->driver  = config('services.ai.driver', 'gemini');
         $this->baseUrl = rtrim(config('services.ai.base_url'), '/');
         $this->apiKey  = config('services.ai.api_key');
         $this->model   = config('services.ai.model');
+
+        if ($this->apiKey) {
+            $providerConfig = [
+                'driver' => $this->driver,
+                'key' => $this->apiKey,
+            ];
+            
+            // OpenAI kompatibel membutuhkan url, gemini tidak.
+            if ($this->driver === 'openai') {
+                $providerConfig['url'] = $this->baseUrl;
+            }
+
+            config(['ai.providers.custom_service' => $providerConfig]);
+        }
     }
 
     public function extract(UploadedFile $file, ?int $projectId = null): array
@@ -32,38 +47,45 @@ class AIDocumentExtractionService
         // Menentukan apakah file adalah gambar untuk menggunakan Vision API atau sekadar teks
         $isImage  = in_array($mimeType, self::IMAGE_MIMES, true);
 
-        $messages = $isImage
-            ? $this->buildVisionMessages($file, $mimeType, $context)
-            : $this->buildTextMessages($file, $context);
+        $attachments = [];
 
-        $payload = [
-            'model'       => $this->model,
-            'messages'    => $messages,
-            'temperature' => 0.1, // Suhu rendah untuk akurasi data yang lebih konsisten
-            'max_tokens'  => 2048,
-        ];
+        if ($isImage) {
+            $prompt = "Analyze this document/image and extract the data according to the JSON schema in the system prompt.\n\n"
+                    . "PROJECT CONTEXT (Hints):\n{$context}";
+            $attachments[] = \Laravel\Ai\Files\Image::fromUpload($file, $mimeType);
+        } else {
+            $rawContent = @file_get_contents($file->getRealPath());
+            $textContent = preg_replace('/[^\x20-\x7E\xA0-\xFF\n\r\t]/u', ' ', $rawContent ?? '');
+            $textContent = mb_substr(trim($textContent), 0, 8000);
+            $originalName = $file->getClientOriginalName();
 
-        $response = Http::withHeaders([
-            'Authorization' => "Bearer {$this->apiKey}",
-            'Content-Type'  => 'application/json',
-        ])->post("{$this->baseUrl}/chat/completions", $payload);
+            $prompt = "The following is the text content extracted from a file named \"{$originalName}\".\n\n"
+                    . "PROJECT CONTEXT (Hints):\n{$context}\n\n"
+                    . "---\n{$textContent}\n---\n\n"
+                    . "Extract the relevant data and return ONLY the JSON object as specified in the system prompt.";
+        }
 
-        if ($response->failed()) {
+        try {
+            $response = \Laravel\Ai\agent($this->systemPrompt())
+                ->prompt(
+                    prompt: $prompt,
+                    attachments: $attachments,
+                    provider: 'custom_service',
+                    model: $this->model
+                );
+            
+            $rawText = $response->text;
+        } catch (\Exception $e) {
             Log::error('Provider AI API error', [
-                'status' => $response->status(),
-                'body'   => $response->body(),
+                'message'   => $e->getMessage(),
             ]);
             throw new \RuntimeException(
-                'AI extraction failed (HTTP ' . $response->status() . '): ' . $response->body()
+                'AI extraction failed: ' . $e->getMessage()
             );
         }
 
-        $responseData = $response->json();
-
-        $rawText = $responseData['choices'][0]['message']['content'] ?? '';
-
         if (empty(trim($rawText))) {
-            Log::error('Provider AI returned empty content', ['response' => $responseData]);
+            Log::error('Provider AI returned empty content', ['response' => $rawText]);
             throw new \RuntimeException('AI returned an empty response. Please try again.');
         }
 
@@ -86,59 +108,7 @@ class AIDocumentExtractionService
         return $this->sanitize($parsed);
     }
 
-    private function buildVisionMessages(UploadedFile $file, string $mimeType, string $context): array
-    {
-        // Mengonversi gambar ke base64 agar bisa dikirimkan ke model vision
-        $base64 = base64_encode(file_get_contents($file->getRealPath()));
-        return [
-            [
-                'role'    => 'system',
-                'content' => $this->systemPrompt(),
-            ],
-            [
-                'role'    => 'user',
-                'content' => [
-                    [
-                        'type'      => 'image_url',
-                        'image_url' => [
-                            'url'    => "data:{$mimeType};base64,{$base64}",
-                            'detail' => 'high', // Menggunakan detail tinggi untuk pembacaan teks yang lebih akurat
-                        ],
-                    ],
-                    [
-                        'type' => 'text',
-                        'text' => "Analyze this document/image and extract the data according to the JSON schema in the system prompt.\n\n"
-                                . "PROJECT CONTEXT (Hints):\n{$context}",
-                    ],
-                ],
-            ],
-        ];
-    }
 
-    private function buildTextMessages(UploadedFile $file, string $context): array
-    {
-        $rawContent = @file_get_contents($file->getRealPath());
-        // Membersihkan karakter non-printable/aneh dari data teks mentah
-        $textContent = preg_replace('/[^\x20-\x7E\xA0-\xFF\n\r\t]/u', ' ', $rawContent ?? '');
-        // Membatasi isi teks agar tidak melebihi batasan token model (keep within token budget)
-        $textContent = mb_substr(trim($textContent), 0, 8000);
-
-        $originalName = $file->getClientOriginalName();
-
-        return [
-            [
-                'role'    => 'system',
-                'content' => $this->systemPrompt(),
-            ],
-            [
-                'role'    => 'user',
-                'content' => "The following is the text content extracted from a file named \"{$originalName}\".\n\n"
-                            . "PROJECT CONTEXT (Hints):\n{$context}\n\n"
-                            . "---\n{$textContent}\n---\n\n"
-                            . "Extract the relevant data and return ONLY the JSON object as specified in the system prompt.",
-            ],
-        ];
-    }
 
     private function buildProjectContext(?int $projectId): string
     {

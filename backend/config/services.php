@@ -36,6 +36,7 @@ return [
     ],
 
     'ai' => [
+        'driver'   => env('AI_DRIVER', 'gemini'),
         'base_url' => env('AI_BASE_URL', 'https://generativelanguage.googleapis.com/v1beta'),
         'api_key'  => env('AI_API_KEY', ''),
         'model'    => env('AI_MODEL', 'gemini-2.5-flash-lite'),

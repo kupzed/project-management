@@ -416,6 +416,9 @@ Request → Controller (validasi & routing)
 | `MitraService`                | CRUD mitra/partner                    |
 | `ProjectService`              | CRUD proyek + form dependencies       |
 
+> [!NOTE]
+> Pada versi terbaru, `AIDocumentExtractionService` telah direfaktor menggunakan **Laravel AI SDK** (`laravel/ai`) dan berinteraksi secara _native_ dengan model menggunakan method `agent()->prompt()`, menggantikan _raw_ HTTP request. Hal ini memberikan kapabilitas lampiran file (Vision) yang lebih solid dan mendukung multi-provider endpoints.
+
 ---
 
 # 📝 File-Based Activity Logging System
