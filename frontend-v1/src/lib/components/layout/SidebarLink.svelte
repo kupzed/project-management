@@ -1,41 +1,50 @@
 <script lang="ts">
-    import { page } from '$app/stores';
-    import { createEventDispatcher } from 'svelte'; // Import createEventDispatcher
-  
-    const dispatch = createEventDispatcher(); // Inisialisasi dispatcher
-  
-    export let href: string;
-    export let icon: string; // SVG path data
-    export let collapsed: boolean = false;
-    export let routePrefix: string = ''; // Untuk mencocokkan rute aktif yang lebih kompleks
-  
-    $: isActive = $page.url.pathname === href || (routePrefix && $page.url.pathname.startsWith(`/${routePrefix}`));
-  
-    $: linkClasses = `
-      group flex items-center px-2 py-2 text-base font-medium rounded-md
-      ${isActive ? 'bg-gray-200 dark:bg-neutral-800 text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-neutral-900 hover:text-gray-900 dark:hover:text-white'}
-      ${collapsed ? 'justify-center' : ''}
-      transition-colors duration-200
-    `;
-  
-    $: iconClasses = `
-      mx-2 flex-shrink-0 h-6 w-6
-      ${isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-500 group-hover:text-indigo-600 dark:group-hover:text-indigo-400'}
-      ${collapsed ? 'mx-2' : ''}
-      transition-transform duration-200
-    `;
-  
-    // Fungsi untuk mengirimkan event ketika link diklik
-    function handleClick() {
-      dispatch('click'); // Kirim event 'click'
-    }
-  </script>
-  
-  <a {href} class={linkClasses} on:click={handleClick}> <svg class={iconClasses} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={icon} />
-    </svg>
-    {#if !collapsed}
-      <span class="whitespace-nowrap dark:text-white">
-        <slot></slot> </span>
-    {/if}
-  </a>
+	import { page } from '$app/stores';
+	import { createEventDispatcher } from 'svelte';
+
+	const dispatch = createEventDispatcher<{ click: void }>();
+
+	export let href: string;
+	export let icon: string;
+	export let label = '';
+	export let collapsed = false;
+	export let routePrefix = '';
+
+	$: isActive =
+		$page.url.pathname === href ||
+		$page.url.pathname.startsWith(`${href}/`) ||
+		(Boolean(routePrefix) && $page.url.pathname.startsWith(`/${routePrefix}`));
+
+	$: linkClasses = [
+		'group flex min-h-10 min-w-0 items-center gap-3 rounded-[10px] px-3 text-sm font-medium transition-colors',
+		collapsed ? 'justify-center px-2' : '',
+		isActive
+			? 'bg-accent text-accent-foreground shadow-sm'
+			: 'text-muted-foreground hover:bg-muted hover:text-foreground'
+	]
+		.filter(Boolean)
+		.join(' ');
+
+	$: iconClasses = [
+		'h-5 w-5 shrink-0 transition-colors',
+		isActive ? 'text-foreground' : 'text-current'
+	].join(' ');
+</script>
+
+<a
+	{href}
+	class={linkClasses}
+	aria-current={isActive ? 'page' : undefined}
+	aria-label={collapsed ? label : undefined}
+	title={collapsed ? label : undefined}
+	on:click={() => dispatch('click')}
+>
+	<svg class={iconClasses} fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+		<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={icon} />
+	</svg>
+	{#if !collapsed}
+		<span class="min-w-0 truncate">
+			<slot></slot>
+		</span>
+	{/if}
+</a>
