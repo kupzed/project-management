@@ -85,7 +85,7 @@
 		/>
 
 		<div
-			class={`flex min-h-svh flex-col transition-[padding] duration-200 ease-linear ${shellOffset}`}
+			class={`flex min-h-svh min-w-0 flex-col transition-[padding] duration-200 ease-linear ${shellOffset}`}
 		>
 			<MobileSidebar
 				bind:open={sidebarOpen}
@@ -95,7 +95,7 @@
 
 			<TopNav on:toggleMobileSidebar={() => (sidebarOpen = true)}>
 				<svelte:fragment slot="topnav-title">
-					<p class="truncate text-xs font-medium text-muted-foreground">Project Management</p>
+					<!-- <p class="truncate text-xs font-medium text-muted-foreground">Project Management</p> -->
 					<h1
 						class="truncate text-xl leading-7 font-semibold tracking-normal text-foreground md:text-2xl"
 					>
@@ -105,9 +105,9 @@
 			</TopNav>
 
 			<main
-				class="flex-1 overflow-x-clip bg-background px-4 py-4 pb-[calc(1rem+env(safe-area-inset-bottom))] md:px-6 md:py-6"
+				class="min-w-0 flex-1 bg-background px-4 py-4 pb-[calc(1rem+env(safe-area-inset-bottom))] md:px-6 md:py-6"
 			>
-				<div class="max-w-1xl mx-auto flex w-full flex-col gap-4">
+				<div class="mx-auto flex w-full min-w-0 flex-col gap-4">
 					<slot></slot>
 				</div>
 			</main>
