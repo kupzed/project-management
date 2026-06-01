@@ -4,7 +4,11 @@ export type PermissionKey =
 	| 'mitra-view'
 	| 'bc-view'
 	| 'certificate-view'
-	| 'finance-view';
+	| 'finance-view'
+	| 'category-view'
+	| 'item-view'
+	| 'warehouse-view'
+	| 'stock-movement-view';
 
 export type NavItem = {
 	href: string;
@@ -70,6 +74,39 @@ export const NAV_GROUPS: NavGroup[] = [
 		]
 	},
 	{
+		label: 'Gudang',
+		items: [
+			{
+				href: '/categories',
+				label: 'Kategori',
+				routePrefix: 'categories',
+				permission: 'category-view',
+				icon: 'M7 7h.01M3 11l8.5 8.5a2.121 2.121 0 003 0L21 13V3H11L3 11z'
+			},
+			{
+				href: '/items',
+				label: 'Item',
+				routePrefix: 'items',
+				permission: 'item-view',
+				icon: 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4'
+			},
+			{
+				href: '/warehouses',
+				label: 'Gudang',
+				routePrefix: 'warehouses',
+				permission: 'warehouse-view',
+				icon: 'M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6M8 10h.01M12 10h.01M16 10h.01'
+			},
+			{
+				href: '/stock-movements',
+				label: 'Mutasi Stok',
+				routePrefix: 'stock-movements',
+				permission: 'stock-movement-view',
+				icon: 'M8 7h12m0 0l-4-4m4 4l-4 4M16 17H4m0 0l4 4m-4-4l4-4'
+			}
+		]
+	},
+	{
 		label: 'Sertifikat',
 		items: [
 			{
@@ -107,6 +144,7 @@ const DETAIL_TITLES = [
 	{ prefix: '/mitras/', title: 'Detail Mitra' },
 	{ prefix: '/barang-certificates/', title: 'Detail Barang Sertifikat' },
 	{ prefix: '/certificates/', title: 'Detail Sertifikat' },
+	{ prefix: '/stock-movements/', title: 'Mutasi Stok' },
 	{ prefix: '/settings/', title: 'Pengaturan' }
 ];
 
