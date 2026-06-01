@@ -3,11 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Services\ActivityLogService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
-use App\Services\ActivityLogService;
 
 class RoleController extends Controller
 {
@@ -20,7 +20,7 @@ class RoleController extends Controller
 
     public function users()
     {
-        /** @var \App\Models\User|null $actor */
+        /** @var User|null $actor */
         $actor = Auth::user();
 
         if (! $actor) {
@@ -45,10 +45,10 @@ class RoleController extends Controller
 
         $data = $users->map(function (User $user) {
             return [
-                'id'          => $user->id,
-                'name'        => $user->name,
-                'email'       => $user->email,
-                'roles'       => $user->getRoleNames(),
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'roles' => $user->getRoleNames(),
                 'permissions' => $user->getAllPermissions()->pluck('name'),
             ];
         })->values();
@@ -60,7 +60,7 @@ class RoleController extends Controller
 
     public function update(Request $request)
     {
-        /** @var \App\Models\User|null $actor */
+        /** @var User|null $actor */
         $actor = Auth::user();
 
         if (! $actor) {
@@ -72,13 +72,13 @@ class RoleController extends Controller
         }
 
         $data = $request->validate([
-            'user_id'       => ['required', 'integer', 'exists:users,id'],
-            'role'          => ['required', 'string'],
-            'permissions'   => ['nullable', 'array'],
+            'user_id' => ['required', 'integer', 'exists:users,id'],
+            'role' => ['required', 'string'],
+            'permissions' => ['nullable', 'array'],
             'permissions.*' => ['boolean'],
         ]);
 
-        /** @var \App\Models\User $targetUser */
+        /** @var User $targetUser */
         $targetUser = User::findOrFail($data['user_id']);
 
         // Proteksi agar user tidak bisa menurunkan atau mengubah role-nya sendiri secara tidak sengaja
@@ -105,7 +105,7 @@ class RoleController extends Controller
         $guard = config('auth.defaults.guard', 'api');
 
         $role = Role::firstOrCreate([
-            'name'       => $data['role'],
+            'name' => $data['role'],
             'guard_name' => $guard,
         ]);
 
@@ -129,7 +129,7 @@ class RoleController extends Controller
         if (! empty($permissionNames)) {
             foreach ($permissionNames as $permName) {
                 Permission::firstOrCreate([
-                    'name'       => $permName,
+                    'name' => $permName,
                     'guard_name' => $guard,
                 ]);
             }
@@ -156,11 +156,11 @@ class RoleController extends Controller
 
         return response()->json([
             'message' => 'User role & permissions updated successfully',
-            'user'    => [
-                'id'          => $targetUser->id,
-                'name'        => $targetUser->name,
-                'email'       => $targetUser->email,
-                'roles'       => $targetUser->getRoleNames(),
+            'user' => [
+                'id' => $targetUser->id,
+                'name' => $targetUser->name,
+                'email' => $targetUser->email,
+                'roles' => $targetUser->getRoleNames(),
                 'permissions' => $targetUser->getAllPermissions()->pluck('name'),
             ],
         ]);
@@ -168,22 +168,22 @@ class RoleController extends Controller
 
     public function config()
     {
-        /** @var \App\Models\User $actor */
+        /** @var User $actor */
         $actor = Auth::user();
 
         $allRoles = Role::pluck('name')->toArray();
 
         $filteredRoles = $allRoles;
         if ($actor->hasRole('admin') && ! $actor->hasRole('super_admin')) {
-            $filteredRoles = array_values(array_filter($allRoles, function($role) {
-                return !in_array($role, ['admin', 'super_admin']);
+            $filteredRoles = array_values(array_filter($allRoles, function ($role) {
+                return ! in_array($role, ['admin', 'super_admin']);
             }));
         }
 
-        $rolesData = array_map(function($role) {
+        $rolesData = array_map(function ($role) {
             return [
-                'key'   => $role,
-                'label' => ucwords(str_replace('_', ' ', $role))
+                'key' => $role,
+                'label' => ucwords(str_replace('_', ' ', $role)),
             ];
         }, $filteredRoles);
 
@@ -197,6 +197,13 @@ class RoleController extends Controller
                 ['key' => 'view',   'label' => 'View'],
                 ['key' => 'update', 'label' => 'Update'],
             ]],
+            ['key' => 'category', 'label' => 'Kategori'],
+            ['key' => 'warehouse', 'label' => 'Gudang'],
+            ['key' => 'item', 'label' => 'Item'],
+            ['key' => 'stock-movement', 'label' => 'Mutasi Stok', 'actions' => [
+                ['key' => 'view', 'label' => 'View'],
+                ['key' => 'create', 'label' => 'Create'],
+            ]],
         ];
 
         $actions = [
@@ -207,7 +214,7 @@ class RoleController extends Controller
         ];
 
         return response()->json([
-            'roles'   => $rolesData,
+            'roles' => $rolesData,
             'modules' => $modules,
             'actions' => $actions,
         ]);

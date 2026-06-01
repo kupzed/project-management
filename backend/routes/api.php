@@ -1,16 +1,20 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\ProjectController;
-use App\Http\Controllers\MitraController;
 use App\Http\Controllers\ActivityController;
-use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ActivityLogController;
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BarangCertificateController;
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CertificateController;
-use App\Http\Controllers\RoleController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FinanceController;
+use App\Http\Controllers\ItemController;
+use App\Http\Controllers\MitraController;
+use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\RoleController;
+use App\Http\Controllers\StockMovementController;
+use App\Http\Controllers\WarehouseController;
+use Illuminate\Support\Facades\Route;
 
 Route::group(['middleware' => 'api', 'prefix' => 'auth'], function ($router) {
     Route::post('/register', [AuthController::class, 'register'])->middleware('sliding_throttle:5,60,auth')->name('register');
@@ -59,6 +63,18 @@ Route::group(['middleware' => ['auth:api', 'sliding_throttle:15,60,api']], funct
 
     // Finance Report
     Route::apiResource('finance', FinanceController::class)->only(['index', 'update']);
+
+    // Category & Warehouse
+    Route::apiResource('categories', CategoryController::class);
+    Route::apiResource('warehouses', WarehouseController::class);
+    Route::apiResource('items', ItemController::class);
+
+    // Stock Movement Ledger
+    Route::post('stock-movements/inbound', [StockMovementController::class, 'inbound']);
+    Route::post('stock-movements/outbound', [StockMovementController::class, 'outbound']);
+    Route::post('stock-movements/transfer', [StockMovementController::class, 'transfer']);
+    Route::post('stock-movements/allocate-project', [StockMovementController::class, 'allocateProject']);
+    Route::apiResource('stock-movements', StockMovementController::class)->only(['index', 'show']);
 
     // Activity Logs
     Route::get('activity-logs', [ActivityLogController::class, 'index']);

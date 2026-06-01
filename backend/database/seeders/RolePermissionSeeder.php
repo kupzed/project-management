@@ -2,10 +2,10 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\User;
-use Spatie\Permission\Models\Role;
+use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 class RolePermissionSeeder extends Seeder
 {
@@ -19,12 +19,16 @@ class RolePermissionSeeder extends Seeder
 
         // Modul & aksi yang tersedia di aplikasi
         $modules = [
-            'project'     => ['view', 'create', 'update', 'delete'],
-            'activity'    => ['view', 'create', 'update', 'delete'],
-            'mitra'       => ['view', 'create', 'update', 'delete'],
-            'bc'          => ['view', 'create', 'update', 'delete'],
+            'project' => ['view', 'create', 'update', 'delete'],
+            'activity' => ['view', 'create', 'update', 'delete'],
+            'mitra' => ['view', 'create', 'update', 'delete'],
+            'bc' => ['view', 'create', 'update', 'delete'],
             'certificate' => ['view', 'create', 'update', 'delete'],
-            'finance'     => ['view', 'update'],
+            'finance' => ['view', 'update'],
+            'category' => ['view', 'create', 'update', 'delete'],
+            'warehouse' => ['view', 'create', 'update', 'delete'],
+            'item' => ['view', 'create', 'update', 'delete'],
+            'stock-movement' => ['view', 'create'],
         ];
 
         $permissions = [];
@@ -35,7 +39,7 @@ class RolePermissionSeeder extends Seeder
                 $permissions[] = $name;
 
                 Permission::firstOrCreate([
-                    'name'       => $name,
+                    'name' => $name,
                     'guard_name' => $guard,
                 ]);
             }
@@ -58,14 +62,14 @@ class RolePermissionSeeder extends Seeder
          */
         $rolePermissions = [
             'super_admin' => $permissions,
-            'admin'       => array_values($adminPermissions),
-            'staff'       => [], // fleksibel per user
-            'user'        => [], // fleksibel per user
+            'admin' => array_values($adminPermissions),
+            'staff' => [], // fleksibel per user
+            'user' => [], // fleksibel per user
         ];
 
         foreach ($rolePermissions as $roleName => $perms) {
             $role = Role::firstOrCreate([
-                'name'       => $roleName,
+                'name' => $roleName,
                 'guard_name' => $guard,
             ]);
 
