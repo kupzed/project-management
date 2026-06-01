@@ -84,7 +84,7 @@
   async function fetchActivityDetails() {
     loadingActivity = true;
     errorActivity = '';
-    activityId = $page.params.id;
+    activityId = $page.params.id ?? null;
     if (!activityId) {
       errorActivity = 'Activity ID tidak ditemukan.';
       loadingActivity = false;
@@ -302,10 +302,10 @@
 {:else if errorActivity}
   <p class="text-red-500">{errorActivity}</p>
 {:else if activity}
-  <div class="max-w-1xl mx-auto mb-8">
-    <div class="flex justify-between items-center mb-4">
+  <div class="mb-8 w-full min-w-0">
+    <div class="mb-4 flex min-w-0 flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
       <div class="flex-1 min-w-0">
-        <h2 class="text-2xl font-bold leading-7 text-gray-900 dark:text-white sm:text-2xl">
+        <h2 class="break-words text-2xl font-bold leading-7 text-gray-900 dark:text-white sm:text-2xl">
           {activity.name}
         </h2>
         <div class="my-2 flex flex-col sm:flex-row sm:flex-wrap sm:mt-0 sm:space-x-6">
@@ -336,9 +336,7 @@
           </div>
         </div>
       </div>
-      <div
-        class="flex flex-col md:flex-row mt-2 mb-4 md:mt-0 md:ml-4 md:mb-4 space-y-2 md:space-y-0 md:space-x-4"
-      >
+      <div class="flex shrink-0 flex-col gap-2 sm:flex-row">
         {#if canUpdateActivity}
           <button
             on:click={openEditModal}
