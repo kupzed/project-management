@@ -184,7 +184,7 @@
   async function fetchProjectDetails() {
     loadingProject = true;
     errorProject = '';
-    projectId = $page.params.id;
+    projectId = $page.params.id ?? null;
     if (!projectId) {
       errorProject = 'Project ID tidak ditemukan.';
       loadingProject = false;
@@ -877,10 +877,10 @@
 {:else if errorProject}
   <p class="text-red-500">{errorProject}</p>
 {:else if project}
-  <div class="max-w-1xl mx-auto mb-8">
-    <div class="flex justify-between items-center mb-4">
+  <div class="mb-8 flex w-full min-w-0 flex-col">
+    <div class="mb-4 flex min-w-0 flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
       <div class="flex-1 min-w-0">
-        <h2 class="text-2xl font-bold leading-7 text-gray-900 dark:text-white sm:text-2xl">
+        <h2 class="break-words text-2xl font-bold leading-7 text-gray-900 dark:text-white sm:text-2xl">
           {project.name}
         </h2>
         <div class="my-2 flex flex-col sm:flex-row sm:flex-wrap sm:mt-0 sm:space-x-6">
@@ -897,7 +897,7 @@
           </div>
         </div>
       </div>
-      <div class="flex flex-col md:flex-row mt-2 mb-4 md:mt-0 md:ml-4 md:mb-4 space-y-2 md:space-y-0 md:space-x-4">
+      <div class="flex shrink-0 flex-col gap-2 sm:flex-row">
         {#if canUpdateProject}
           <button
             on:click={openEditProjectModal}
@@ -918,7 +918,7 @@
     </div>
 
     <!-- Tabs -->
-    <div class="flex items-center justify-between mb-4">
+    <div class="mb-4 flex min-w-0 items-center justify-between">
       <div class="p-1 bg-gray-200 dark:bg-gray-700 rounded-lg inline-flex" role="tablist">
         <button
           on:click={() => (activeTab = 'detail')}
@@ -970,9 +970,9 @@
 
     <!-- ACTIVITY -->
     {#if activeTab === 'activity'}
-      <div class="mb-8">
-        <div class="flex flex-col sm:flex-row items-center justify-between mb-4 space-y-4 sm:space-y-0 sm:space-x-4">
-          <div class="flex w-full sm:w-auto space-x-2">
+      <div class="mb-8 min-w-0">
+        <div class="mb-4 flex min-w-0 flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div class="flex w-full min-w-0 flex-col gap-2 sm:flex-row lg:w-auto">
             <select bind:value={activityJenisFilter} on:change={handleActivityFilterOrSearch}
               class="w-full sm:w-auto px-3 py-2 rounded-md text-sm font-semibold bg-white text-gray-900 border border-gray-300
                      dark:bg-neutral-900 dark:text-gray-100 dark:border-gray-700">
@@ -1000,8 +1000,8 @@
             </select>
           </div>
 
-          <div class="w-full sm:w-auto flex-grow">
-            <div class="relative w-full sm:w-auto">
+          <div class="w-full min-w-0 flex-1">
+            <div class="relative w-full">
               <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <svg class="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clip-rule="evenodd" /></svg>
               </div>
@@ -1017,15 +1017,15 @@
           {#if canCreateActivity}
             <button
               on:click={openCreateActivityModal}
-              class="px-4 py-2 w-full sm:w-auto border border-transparent text-sm font-medium rounded-md shadow-sm text-white
+              class="w-full rounded-md border border-transparent px-4 py-2 text-sm font-medium text-white shadow-sm
                      bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500
-                     dark:focus:ring-offset-gray-800">
+                     sm:w-auto lg:shrink-0 dark:focus:ring-offset-gray-800">
               Tambah Aktivitas
             </button>
           {/if}
         </div>
 
-        <div class="flex items-center justify-between mb-4">
+        <div class="mb-4 flex min-w-0 items-center justify-between gap-3">
           <!-- Segmented icon toggle (Table / List) -->
           <div
             class="bg-white dark:bg-neutral-900 rounded-md inline-flex gap-1"
@@ -1301,17 +1301,17 @@
           {/if}
 
           {#if activityView === 'table'}
-            <div class="mt-4 bg-white dark:bg-black shadow-md rounded-lg">
-              <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-300 dark:divide-gray-700">
+            <div class="mt-4 w-full min-w-0 overflow-hidden rounded-lg bg-white shadow-md dark:bg-black">
+              <div class="w-full overflow-x-auto">
+                <table class="w-full min-w-[840px] table-fixed divide-y divide-gray-300 dark:divide-gray-700 lg:min-w-full">
                   <thead class="bg-gray-50 dark:bg-neutral-900">
                     <tr>
-                      <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">Tanggal Aktivitas</th>
-                      <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">Nama Aktivitas</th>
-                      <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">Kategori</th>
-                      <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">Jenis</th>
-                      <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">Mitra</th>
-                      <th class="relative px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">Aksi</th>
+                      <th class="w-32 px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">Tanggal Aktivitas</th>
+                      <th class="w-[34%] px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">Nama Aktivitas</th>
+                      <th class="w-36 px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">Kategori</th>
+                      <th class="w-28 px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">Jenis</th>
+                      <th class="w-[22%] px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">Mitra</th>
+                      <th class="relative w-24 px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">Aksi</th>
                     </tr>
                   </thead>
                   <tbody class="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-black">
@@ -1320,10 +1320,10 @@
                         <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-300">
                           {new Date(activity.activity_date).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}
                         </td>
-                        <td class="whitespace-nowrap px-3 py-4 text-sm font-medium text-gray-900 dark:text-gray-100">
+                        <td class="px-3 py-4 text-sm font-medium text-gray-900 dark:text-gray-100">
                           <a 
                             href={`/activities/${activity.id}`}
-                            class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300"
+                            class="block break-words text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300"
                             on:click|preventDefault={() => openActivityDetailDrawer(activity)}
                             on:keydown={(e) => {
                               if (e.key === 'Enter' || e.key === ' ') {
@@ -1335,14 +1335,14 @@
                             aria-label={`Lihat detail aktivitas ${activity.name}`}
                           >
                             {activity.name}
-                          </a><br>
-                          <span class="text-xs text-gray-500 dark:text-gray-400">From: {activity.from || '-'} | {activity.short_desc}</span>
+                          </a>
+                          <span class="mt-1 block break-words text-xs leading-5 text-gray-500 dark:text-gray-400">From: {activity.from || '-'} | {activity.short_desc}</span>
                         </td>
-                        <td class="whitespace-nowrap px-3 py-4 text-sm">
+                        <td class="px-3 py-4 text-sm">
                           <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 bg-gray-300 dark:bg-gray-700 text-gray-900 dark:text-gray-100">{activity.kategori}</span>
                         </td>
                         <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-300">{activity.jenis}</td>
-                        <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-300">
+                        <td class="px-3 py-4 text-sm text-gray-500 dark:text-gray-300">
                           {#if activity.jenis === 'Vendor' && activity.mitra}{activity.mitra.nama}
                           {:else if activity.jenis === 'Customer' && activity.mitra}{activity.mitra.nama}
                           {:else}-{/if}

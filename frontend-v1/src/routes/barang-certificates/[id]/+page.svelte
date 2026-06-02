@@ -144,17 +144,17 @@
 {:else if !item}
   <p class="text-gray-900 dark:text-white">Data tidak ditemukan.</p>
 {:else}
-  <div class="max-w-1xl mx-auto mb-8">
-    <div class="flex justify-between items-center mb-4">
+  <div class="mb-8 w-full min-w-0">
+    <div class="mb-4 flex min-w-0 flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
       <div class="flex-1 min-w-0">
-        <h2 class="text-2xl font-bold leading-7 text-gray-900 dark:text-white sm:text-2xl">
+        <h2 class="break-words text-2xl font-bold leading-7 text-gray-900 dark:text-white sm:text-2xl">
           {item.name}
         </h2>
         <div class="my-2 text-sm text-gray-500 dark:text-gray-300">
           <span>No. Seri: {item.no_seri}</span>
         </div>
       </div>
-      <div class="flex flex-col md:flex-row mt-2 mb-4 md:mt-0 md:ml-4 md:mb-4 space-y-2 md:space-y-0 md:space-x-4">
+      <div class="flex shrink-0 flex-col gap-2 sm:flex-row">
         {#if canUpdateBarangCert}
           <button
             on:click={openEditModal}

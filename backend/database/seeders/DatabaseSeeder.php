@@ -15,6 +15,7 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             MitraSeeder::class,
             ProjectSeeder::class,
+            InventorySeeder::class,
             BarangCertificateSeeder::class,
             CertificateSeeder::class,
             ActivitySeeder::class,
