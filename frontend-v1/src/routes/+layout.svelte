@@ -2,8 +2,8 @@
 	import '../app.css';
 	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
-	import { page } from '$app/stores';
-	import { onMount } from 'svelte';
+	import { page } from '$app/state';
+	import { onMount, type Snippet } from 'svelte';
 	import axiosClient from '$lib/axiosClient';
 	import MobileSidebar from '$lib/components/layout/MobileSidebar.svelte';
 	import Sidebar from '$lib/components/layout/Sidebar.svelte';
@@ -13,17 +13,19 @@
 	import { theme } from '$lib/stores/theme';
 	import { currentUser, setUser } from '$lib/stores/user';
 
-	let sidebarOpen = false;
-	let sidebarCollapsed = false;
+	let { children }: { children: Snippet } = $props();
+
+	let sidebarOpen = $state(false);
+	let sidebarCollapsed = $state(false);
 
 	onMount(() => {
 		const unsubscribe = theme.subscribe(() => {});
 		return unsubscribe;
 	});
 
-	$: isAuthRoute = $page.url.pathname.startsWith('/auth');
-	$: pageTitle = getPageTitle($page.url.pathname);
-	$: shellOffset = sidebarCollapsed ? 'lg:pl-20' : 'lg:pl-64';
+	let isAuthRoute = $derived(page.url.pathname.startsWith('/auth'));
+	let pageTitle = $derived(getPageTitle(page.url.pathname));
+	let shellOffset = $derived(sidebarCollapsed ? 'lg:pl-20' : 'lg:pl-64');
 
 	async function logout() {
 		if (!confirm('Apakah Anda yakin ingin logout?')) return;
@@ -69,46 +71,44 @@
 		}
 	}
 
-	$: if (browser && !isAuthRoute && $page.url.pathname) {
-		loadUserData();
-	}
+	$effect(() => {
+		if (browser && !isAuthRoute && page.url.pathname) {
+			void loadUserData();
+		}
+	});
 </script>
 
 {#if isAuthRoute}
-	<slot></slot>
+	{@render children()}
 {:else}
 	<div class="min-h-svh bg-background font-sans text-foreground">
 		<Sidebar
 			bind:collapsed={sidebarCollapsed}
-			on:toggleCollapsed={() => (sidebarCollapsed = !sidebarCollapsed)}
-			on:logout={logout}
+			toggleCollapsed={() => (sidebarCollapsed = !sidebarCollapsed)}
+			{logout}
 		/>
 
 		<div
 			class={`flex min-h-svh min-w-0 flex-col transition-[padding] duration-200 ease-linear ${shellOffset}`}
 		>
-			<MobileSidebar
-				bind:open={sidebarOpen}
-				on:close={() => (sidebarOpen = false)}
-				on:logout={logout}
-			/>
+			<MobileSidebar bind:open={sidebarOpen} close={() => (sidebarOpen = false)} {logout} />
 
-			<TopNav on:toggleMobileSidebar={() => (sidebarOpen = true)}>
-				<svelte:fragment slot="topnav-title">
+			<TopNav toggleMobileSidebar={() => (sidebarOpen = true)}>
+				{#snippet topnavTitle()}
 					<!-- <p class="truncate text-xs font-medium text-muted-foreground">Project Management</p> -->
 					<h1
 						class="truncate text-xl leading-7 font-semibold tracking-normal text-foreground md:text-2xl"
 					>
 						{pageTitle}
 					</h1>
-				</svelte:fragment>
+				{/snippet}
 			</TopNav>
 
 			<main
 				class="min-w-0 flex-1 bg-background px-4 py-4 pb-[calc(1rem+env(safe-area-inset-bottom))] md:px-6 md:py-6"
 			>
 				<div class="mx-auto flex w-full min-w-0 flex-col gap-4">
-					<slot></slot>
+					{@render children()}
 				</div>
 			</main>
 		</div>

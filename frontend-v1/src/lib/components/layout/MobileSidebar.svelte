@@ -1,14 +1,20 @@
 <script lang="ts">
-	import { createEventDispatcher } from 'svelte';
 	import { fade, slide } from 'svelte/transition';
 	import AppSidebar from './AppSidebar.svelte';
 
-	const dispatch = createEventDispatcher<{
-		close: void;
-		logout: void;
-	}>();
+	type Props = {
+		open?: boolean;
+		close?: () => void;
+		logout?: () => void;
+	};
 
-	export let open = false;
+	const noop = () => {};
+
+	let { open = $bindable(false), close = noop, logout = noop }: Props = $props();
+
+	function closeSidebar() {
+		close();
+	}
 </script>
 
 {#if open}
@@ -16,7 +22,7 @@
 		<div
 			class="fixed inset-0 bg-slate-950/35 backdrop-blur-[2px] dark:bg-black/55"
 			transition:fade={{ duration: 150 }}
-			on:click={() => dispatch('close')}
+			onclick={closeSidebar}
 			aria-hidden="true"
 		></div>
 
@@ -26,11 +32,7 @@
 				in:slide={{ axis: 'x', duration: 220 }}
 				out:slide={{ axis: 'x', duration: 180 }}
 			>
-				<AppSidebar
-					mobile
-					on:close={() => dispatch('close')}
-					on:logout={() => dispatch('logout')}
-				/>
+				<AppSidebar mobile close={closeSidebar} {logout} />
 			</div>
 		</div>
 	</div>

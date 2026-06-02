@@ -1,10 +1,15 @@
 <script lang="ts">
-	import { createEventDispatcher } from 'svelte';
+	import type { Snippet } from 'svelte';
 	import { theme, toggleTheme } from '$lib/stores/theme';
 
-	const dispatch = createEventDispatcher<{
-		toggleMobileSidebar: void;
-	}>();
+	type Props = {
+		toggleMobileSidebar?: () => void;
+		topnavTitle?: Snippet;
+	};
+
+	const noop = () => {};
+
+	let { toggleMobileSidebar = noop, topnavTitle }: Props = $props();
 </script>
 
 <header
@@ -15,7 +20,7 @@
 			type="button"
 			class="grid h-10 w-10 shrink-0 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground lg:hidden"
 			aria-label="Buka menu"
-			on:click={() => dispatch('toggleMobileSidebar')}
+			onclick={toggleMobileSidebar}
 		>
 			<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 				<rect x="3" y="3" width="18" height="18" rx="2" ry="2" stroke-width="2" />
@@ -24,7 +29,7 @@
 		</button>
 
 		<div class="min-w-0">
-			<slot name="topnav-title"></slot>
+			{@render topnavTitle?.()}
 		</div>
 	</div>
 
@@ -34,7 +39,7 @@
 			aria-label={$theme === 'dark' ? 'Gunakan mode terang' : 'Gunakan mode gelap'}
 			title={$theme === 'dark' ? 'Gunakan mode terang' : 'Gunakan mode gelap'}
 			class="grid h-10 w-10 place-items-center rounded-[10px] text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-			on:click={toggleTheme}
+			onclick={toggleTheme}
 		>
 			{#if $theme === 'dark'}
 				<svg

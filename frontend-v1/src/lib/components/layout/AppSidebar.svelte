@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { createEventDispatcher, onMount } from 'svelte';
+	import { onMount } from 'svelte';
 	import { currentUser } from '$lib/stores/user';
 	import { userPermissions } from '$lib/stores/permissions';
 	import SidebarLink from './SidebarLink.svelte';
@@ -11,23 +11,32 @@
 	const LOGOUT_ICON =
 		'M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1';
 
-	const dispatch = createEventDispatcher<{
-		close: void;
-		logout: void;
-		toggleCollapsed: void;
-	}>();
+	type Props = {
+		collapsed?: boolean;
+		mobile?: boolean;
+		close?: () => void;
+		logout?: () => void;
+		toggleCollapsed?: () => void;
+	};
 
-	export let collapsed = false;
-	export let mobile = false;
+	const noop = () => {};
 
-	let accountMenuOpen = false;
+	let {
+		collapsed = false,
+		mobile = false,
+		close = noop,
+		logout: onLogout = noop,
+		toggleCollapsed: onToggleCollapsed = noop
+	}: Props = $props();
+
+	let accountMenuOpen = $state(false);
 	let accountMenuRoot: HTMLDivElement | undefined;
 
-	$: compact = collapsed && !mobile;
-	$: visibleGroups = getVisibleNavGroups($userPermissions ?? []);
-	$: displayName = $currentUser?.name || 'Pengguna';
-	$: displayEmail = $currentUser?.email || 'Belum ada email';
-	$: initials =
+	let compact = $derived(collapsed && !mobile);
+	let visibleGroups = $derived(getVisibleNavGroups($userPermissions ?? []));
+	let displayName = $derived($currentUser?.name || 'Pengguna');
+	let displayEmail = $derived($currentUser?.email || 'Belum ada email');
+	let initials = $derived(
 		displayName
 			.split(' ')
 			.filter(Boolean)
@@ -35,8 +44,9 @@
 			.join('')
 			.toUpperCase()
 			.slice(0, 2) ||
-		displayEmail[0]?.toUpperCase() ||
-		'U';
+			displayEmail[0]?.toUpperCase() ||
+			'U'
+	);
 
 	onMount(() => {
 		const handleDocumentClick = (event: MouseEvent) => {
@@ -55,16 +65,16 @@
 	});
 
 	function closeIfMobile() {
-		if (mobile) dispatch('close');
+		if (mobile) close();
 	}
 
 	function toggleCollapsed() {
 		if (mobile) {
-			dispatch('close');
+			close();
 			return;
 		}
 
-		dispatch('toggleCollapsed');
+		onToggleCollapsed();
 	}
 
 	function openSettings() {
@@ -76,7 +86,7 @@
 	function logout() {
 		accountMenuOpen = false;
 		closeIfMobile();
-		dispatch('logout');
+		onLogout();
 	}
 </script>
 
@@ -87,7 +97,7 @@
 				href="/dashboard"
 				class="flex min-w-0 flex-1 items-center gap-3 rounded-[10px] px-2 py-2 transition-colors"
 				aria-label="Buka dashboard"
-				on:click={closeIfMobile}
+				onclick={closeIfMobile}
 			>
 				<img
 					src="/indogreen.png"
@@ -106,7 +116,7 @@
 			class={`grid h-9 shrink-0 place-items-center rounded-[9px] text-muted-foreground transition-colors hover:bg-muted hover:text-foreground ${compact ? 'w-full' : 'w-9'}`}
 			aria-label={mobile ? 'Tutup menu' : collapsed ? 'Buka sidebar' : 'Ciutkan sidebar'}
 			title={mobile ? 'Tutup menu' : collapsed ? 'Buka sidebar' : 'Ciutkan sidebar'}
-			on:click={toggleCollapsed}
+			onclick={toggleCollapsed}
 		>
 			{#if mobile}
 				<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -147,7 +157,7 @@
 							label={item.label}
 							routePrefix={item.routePrefix ?? ''}
 							{collapsed}
-							on:click={closeIfMobile}
+							onclick={closeIfMobile}
 						>
 							{item.label}
 						</SidebarLink>
@@ -173,7 +183,7 @@
 					<button
 						type="button"
 						class="flex w-full items-center gap-2 px-4 py-3 text-left text-sm text-foreground transition-colors hover:bg-muted"
-						on:click={openSettings}
+						onclick={openSettings}
 					>
 						<svg
 							class="h-4 w-4 shrink-0"
@@ -195,7 +205,7 @@
 					<button
 						type="button"
 						class="flex w-full items-center gap-2 px-4 py-3 text-left text-sm text-destructive transition-colors hover:bg-destructive/10"
-						on:click={logout}
+						onclick={logout}
 					>
 						<svg
 							class="h-4 w-4 shrink-0"
@@ -223,7 +233,7 @@
 				aria-haspopup="menu"
 				aria-label="Menu akun"
 				title={compact ? displayName : undefined}
-				on:click={() => (accountMenuOpen = !accountMenuOpen)}
+				onclick={() => (accountMenuOpen = !accountMenuOpen)}
 			>
 				<div
 					class="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-primary text-xs font-semibold text-primary-foreground"
