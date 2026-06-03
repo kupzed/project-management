@@ -1,76 +1,89 @@
 <script lang="ts">
-  import { storageUrl } from "$lib/utils/url";
+  import { formatCurrency, formatDate, formatFileSize } from '$lib/utils/formatters';
+  import { storageUrl } from '$lib/utils/url';
+  import type { Activity, Attachment } from '$lib/types';
 
-  export let activity: any = null;
-
-  function formatRupiah(val: number) {
-    return new Intl.NumberFormat('id-ID', {
-      style: 'currency',
-      currency: 'IDR',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 2
-    }).format(val);
-  }
-
-  let attachments: NormalizedAttachment[] = [];
-
-  // ====== Helpers Lampiran (nama/label + deskripsi) ======
-  type NormalizedAttachment = {
-    url: string;
-    filename: string;     // nama file asli (dari path)
-    displayName: string;  // label/nama tampil (label/nama/title/name) -> fallback filename
-    desc?: string;        // deskripsi/keterangan/caption
-    sizeLabel?: string;   // "123KB", "1.2MB", dst
+  type LegacyAttachment = Attachment & {
+    file?: string | null;
+    file_path?: string | null;
+    label?: string | null;
+    nama?: string | null;
+    title?: string | null;
+    deskripsi?: string | null;
+    keterangan?: string | null;
+    caption?: string | null;
   };
 
-  function filenameFromPath(path: string) {
+  type AttachmentInput = LegacyAttachment | string | null | undefined;
+  type ActivityDetailPayload = Activity & {
+    attachment?: AttachmentInput | AttachmentInput[];
+  };
+
+  type NormalizedAttachment = {
+    url: string;
+    filename: string;
+    displayName: string;
+    desc?: string;
+    sizeLabel?: string;
+  };
+
+  /**
+   * Readonly activity detail payload with legacy attachment fallbacks.
+   */
+  let { activity = null }: { activity?: ActivityDetailPayload | null } = $props();
+
+  function formatRupiah(val: number | string): string {
+    return formatCurrency(Number(val));
+  }
+
+  function filenameFromPath(path: string): string {
     try {
       const clean = decodeURIComponent(path);
-      return (clean.split("/").pop() ?? clean) || clean;
+      return (clean.split('/').pop() ?? clean) || clean;
     } catch {
-      return (path.split("/").pop() ?? path) || path;
+      return (path.split('/').pop() ?? path) || path;
     }
   }
 
-  function formatBytes(bytes?: number) {
-    if (bytes === undefined || !Number.isFinite(bytes)) return undefined;
-    let n = Number(bytes);
-    const units = ["bytes", "KB", "MB", "GB", "TB"];
-    let i = 0;
-    while (n >= 1024 && i < units.length - 1) { n /= 1024; i++; }
-    const rounded = i === 0 ? Math.round(n) : n < 10 ? n.toFixed(1) : Math.round(n).toString();
-    return `${rounded}${units[i]}`;
+  function normalizeOneAttachment(attachment: AttachmentInput): NormalizedAttachment | null {
+    if (!attachment) return null;
+
+    if (typeof attachment === 'string') {
+      const filename = filenameFromPath(attachment);
+      return { url: storageUrl(attachment), filename, displayName: filename };
+    }
+
+    const rawPath = attachment.path ?? attachment.file ?? attachment.file_path ?? '';
+    const url = attachment.url ?? (rawPath ? storageUrl(rawPath) : '');
+    if (!url) return null;
+
+    const filename = filenameFromPath(rawPath || attachment.url || '');
+    const displayName =
+      attachment.label ?? attachment.nama ?? attachment.title ?? attachment.name ?? filename;
+    const desc =
+      attachment.description ??
+      attachment.deskripsi ??
+      attachment.keterangan ??
+      attachment.caption ??
+      undefined;
+    const sizeLabel =
+      attachment.sizeLabel ?? (typeof attachment.size === 'number' ? formatFileSize(attachment.size) : undefined);
+
+    return { url, filename, displayName, desc, sizeLabel };
   }
 
-  function normalizeAttachments(att: any): NormalizedAttachment[] {
-    if (!att) return [];
-    const normalizeOne = (a: any): NormalizedAttachment | null => {
-      if (!a) return null;
+  function normalizeAttachments(
+    attachmentInput: AttachmentInput | AttachmentInput[]
+  ): NormalizedAttachment[] {
+    if (!attachmentInput) return [];
 
-      // String path
-      if (typeof a === "string") {
-        const filename = filenameFromPath(a);
-        return { url: storageUrl(a), filename, displayName: filename };
-      }
-
-      // Object
-      const rawPath = a?.path ?? a?.file ?? a?.file_path ?? "";
-      const url = a?.url ?? (rawPath ? storageUrl(rawPath) : "");
-      if (!url) return null;
-
-      const filename = filenameFromPath(rawPath || a?.url || "");
-      const displayName = a?.label ?? a?.nama ?? a?.title ?? a?.name ?? filename;
-      const desc = a?.description ?? a?.deskripsi ?? a?.keterangan ?? a?.caption ?? undefined;
-      const sizeLabel = a?.sizeLabel ?? formatBytes(a?.size);
-      return { url, filename, displayName, desc, sizeLabel };
-    };
-
-    return (Array.isArray(att) ? att.map(normalizeOne) : [normalizeOne(att)])
-      .filter(Boolean) as NormalizedAttachment[];
+    return (Array.isArray(attachmentInput) ? attachmentInput : [attachmentInput]).flatMap((item) => {
+      const normalized = normalizeOneAttachment(item);
+      return normalized ? [normalized] : [];
+    });
   }
 
-  // Mendukung activity.attachment (single) atau activity.attachments (array)
-  $: attachments = normalizeAttachments(activity?.attachments ?? activity?.attachment);
+  let attachments = $derived(normalizeAttachments(activity?.attachments ?? activity?.attachment));
 </script>
 
 {#if activity}
@@ -162,7 +175,7 @@
       <div class="bg-white dark:bg-black px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
         <dt class="text-sm font-medium text-gray-500 dark:text-gray-300">Tanggal Aktivitas</dt>
         <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100 sm:mt-0 sm:col-span-2">
-          {new Date(activity.activity_date).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}
+          {activity.activity_date ? formatDate(activity.activity_date, 'long') : '-'}
         </dd>
       </div>
 

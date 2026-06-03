@@ -1,18 +1,38 @@
 <script lang="ts">
-  import { storageUrl } from "$lib/utils/url";
-  export let certificates: any = null;
+  import { getCertificateStatusBadgeClasses } from '$lib/utils/badges';
+  import { formatFileSize } from '$lib/utils/formatters';
+  import { storageUrl } from '$lib/utils/url';
+  import type { Attachment } from '$lib/types';
 
-  // === Badge status (konsisten dark) ===
-  function getStatusBadgeClasses(status: string) {
-    switch (status) {
-      case "Aktif": return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
-      case "Tidak Aktif": return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200";
-      case "Belum": return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200";
-      default: return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200";
-    }
-  }
+  type LegacyAttachment = Omit<Attachment, 'path' | 'url'> & {
+    path?: string;
+    url?: string | null;
+    file?: string | null;
+    file_path?: string | null;
+    label?: string | null;
+    nama?: string | null;
+    title?: string | null;
+    deskripsi?: string | null;
+    keterangan?: string | null;
+    caption?: string | null;
+  };
 
-  // ====== Helpers Lampiran (nama/label + deskripsi) ======
+  type AttachmentInput = LegacyAttachment | string | null | undefined;
+  type CertificateDetailPayload = {
+    id?: number;
+    name?: string;
+    no_certificate?: string;
+    project_id?: number | string | null;
+    barang_certificate_id?: number | string | null;
+    status?: string;
+    date_of_issue?: string | null;
+    date_of_expired?: string | null;
+    project?: { id: number; name?: string } | null;
+    barang_certificate?: { id: number; name?: string } | null;
+    attachments?: AttachmentInput[];
+    attachment?: AttachmentInput | AttachmentInput[];
+  };
+
   type NormalizedAttachment = {
     url: string;
     filename: string;
@@ -21,43 +41,65 @@
     sizeLabel?: string;
   };
 
-  function filenameFromPath(path: string) {
-    try { const clean = decodeURIComponent(path); return (clean.split("/").pop() ?? clean) || clean; }
-    catch { return (path.split("/").pop() ?? path) || path; }
+  /**
+   * Readonly certificate detail payload with legacy attachment fallbacks.
+   */
+  let { certificates = null }: { certificates?: CertificateDetailPayload | null } = $props();
+
+  function getStatusBadgeClasses(status: string): string {
+    return getCertificateStatusBadgeClasses(status);
   }
 
-  function formatBytes(bytes?: number) {
-    if (bytes === undefined || !Number.isFinite(bytes)) return undefined;
-    let n = Number(bytes);
-    const units = ["bytes", "KB", "MB", "GB", "TB"];
-    let i = 0;
-    while (n >= 1024 && i < units.length - 1) { n /= 1024; i++; }
-    const rounded = i === 0 ? Math.round(n) : n < 10 ? n.toFixed(1) : Math.round(n).toString();
-    return `${rounded}${units[i]}`;
+  function filenameFromPath(path: string): string {
+    try {
+      const clean = decodeURIComponent(path);
+      return (clean.split('/').pop() ?? clean) || clean;
+    } catch {
+      return (path.split('/').pop() ?? path) || path;
+    }
   }
 
-  function normalizeAttachments(att: any): NormalizedAttachment[] {
-    if (!att) return [];
-    const conv = (a: any): NormalizedAttachment | null => {
-      if (!a) return null;
-      if (typeof a === "string") {
-        const filename = filenameFromPath(a);
-        return { url: storageUrl(a), filename, displayName: filename };
-      }
-      const url = a?.url ?? (a?.path ? storageUrl(a.path) : a?.file ? storageUrl(a.file) : "");
-      if (!url) return null;
+  function normalizeOneAttachment(attachment: AttachmentInput): NormalizedAttachment | null {
+    if (!attachment) return null;
 
-      const filename = filenameFromPath(a?.path ?? a?.file ?? a?.url ?? "");
-      const displayName = a?.label ?? a?.nama ?? a?.title ?? a?.name ?? filename;
-      const desc = a?.description ?? a?.deskripsi ?? a?.keterangan ?? a?.caption ?? undefined;
-      const sizeLabel = a?.sizeLabel ?? formatBytes(a?.size);
-      return { url, filename, displayName, desc, sizeLabel };
-    };
-    return (Array.isArray(att) ? att.map(conv) : [conv(att)]).filter(Boolean) as NormalizedAttachment[];
+    if (typeof attachment === 'string') {
+      const filename = filenameFromPath(attachment);
+      return { url: storageUrl(attachment), filename, displayName: filename };
+    }
+
+    const rawPath = attachment.path ?? attachment.file ?? attachment.file_path ?? '';
+    const url = attachment.url ?? (rawPath ? storageUrl(rawPath) : '');
+    if (!url) return null;
+
+    const filename = filenameFromPath(rawPath || attachment.url || '');
+    const displayName =
+      attachment.label ?? attachment.nama ?? attachment.title ?? attachment.name ?? filename;
+    const desc =
+      attachment.description ??
+      attachment.deskripsi ??
+      attachment.keterangan ??
+      attachment.caption ??
+      undefined;
+    const sizeLabel =
+      attachment.sizeLabel ?? (typeof attachment.size === 'number' ? formatFileSize(attachment.size) : undefined);
+
+    return { url, filename, displayName, desc, sizeLabel };
   }
 
-  // Mendukung single/array
-  $: attachments = normalizeAttachments(certificates?.attachments ?? certificates?.attachment);
+  function normalizeAttachments(
+    attachmentInput: AttachmentInput | AttachmentInput[]
+  ): NormalizedAttachment[] {
+    if (!attachmentInput) return [];
+
+    return (Array.isArray(attachmentInput) ? attachmentInput : [attachmentInput]).flatMap((item) => {
+      const normalized = normalizeOneAttachment(item);
+      return normalized ? [normalized] : [];
+    });
+  }
+
+  let attachments = $derived(
+    normalizeAttachments(certificates?.attachments ?? certificates?.attachment)
+  );
 </script>
 
 {#if certificates}
@@ -102,7 +144,7 @@
       <div class="bg-white dark:bg-black px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
         <dt class="text-sm font-medium text-gray-500 dark:text-gray-300">Status</dt>
         <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100 sm:mt-0 sm:col-span-2">
-          <span class={`inline-flex rounded-full px-2 text-xs font-semibold leading-5 ${getStatusBadgeClasses(certificates.status)}`}>
+          <span class={`inline-flex rounded-full px-2 text-xs font-semibold leading-5 ${getStatusBadgeClasses(certificates.status ?? '')}`}>
             {certificates.status}
           </span>
         </dd>

@@ -1,42 +1,82 @@
 <script lang="ts">
   import Modal from '$lib/components/Modal.svelte';
+  import type { MitraSummary } from '$lib/types';
 
-  export let show: boolean;
-  export let title: string;
-  export let submitLabel: string;
-  export let idPrefix: string = 'project';
-
-  export let form: {
+  type ProjectModalForm = {
     name: string;
     description: string;
     status: string;
     start_date: string;
-    finish_date: string | null | '';
+    finish_date?: string | null | '';
     mitra_id: string | number | '';
     kategori: string;
-    lokasi: string;
-    no_po: string;
-    no_so: string;
+    lokasi?: string | null;
+    no_po?: string | null;
+    no_so?: string | null;
     is_cert_projects: boolean;
   };
 
-  export let customers: Array<{ id: number; nama: string }> = [];
-  export let projectStatuses: string[] = [];
-  export let projectKategoris: string[] = [];
+  function makeDefaultForm(): ProjectModalForm {
+    return {
+      name: '',
+      description: '',
+      status: '',
+      start_date: '',
+      finish_date: '',
+      mitra_id: '',
+      kategori: '',
+      lokasi: '',
+      no_po: '',
+      no_so: '',
+      is_cert_projects: false
+    };
+  }
 
-  export let onSubmit: () => void | Promise<void>;
+  /**
+   * Project form modal props. `show` and `form` are bindable for parent-owned modal state.
+   */
+  let {
+    show = $bindable(false),
+    title = 'Form Project',
+    submitLabel = 'Simpan',
+    idPrefix = 'project',
+    form = $bindable(makeDefaultForm()),
+    customers = [],
+    projectStatuses = [],
+    projectKategoris = [],
+    onSubmit
+  }: {
+    show?: boolean;
+    title?: string;
+    submitLabel?: string;
+    idPrefix?: string;
+    form?: ProjectModalForm;
+    customers?: MitraSummary[];
+    projectStatuses?: string[];
+    projectKategoris?: string[];
+    onSubmit?: () => void | Promise<void>;
+  } = $props();
 
-  let isSubmitting = false;
-  async function handleSubmit() {
+  let isSubmitting = $state(false);
+
+  async function handleSubmit(): Promise<void> {
     if (isSubmitting) return;
     isSubmitting = true;
-    try { await onSubmit?.(); }
-    finally { isSubmitting = false; }
+    try {
+      await onSubmit?.();
+    } finally {
+      isSubmitting = false;
+    }
+  }
+
+  function handleFormSubmit(event: SubmitEvent): void {
+    event.preventDefault();
+    void handleSubmit();
   }
 </script>
 
 <Modal bind:show={show} {title} maxWidth="max-w-xl">
-  <form on:submit|preventDefault={handleSubmit} autocomplete="off">
+  <form onsubmit={handleFormSubmit} autocomplete="off">
     <fieldset disabled={isSubmitting} class="space-y-4">
       <div>
         <label for={`${idPrefix}_name`} class="block text-sm/6 font-medium text-gray-900 dark:text-white">Nama Project</label>
