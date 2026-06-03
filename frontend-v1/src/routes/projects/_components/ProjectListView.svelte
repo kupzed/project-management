@@ -2,6 +2,7 @@
   import RowActionButtons from '$lib/components/ui/RowActionButtons.svelte';
   import StatusBadge from '$lib/components/ui/StatusBadge.svelte';
   import { formatDate } from '$lib/utils/formatters';
+  import type { Snippet } from 'svelte';
   import type { Activity, Project } from '$lib/types';
   import ProjectActivityTimeline from './ProjectActivityTimeline.svelte';
 
@@ -18,7 +19,8 @@
     onOpenDetail,
     onOpenActivityDetail,
     onEdit,
-    onDelete
+    onDelete,
+    footer
   }: {
     projects: Project[];
     openActivities: Record<number, boolean>;
@@ -30,6 +32,7 @@
     onOpenActivityDetail: (activity: Activity, project: Project) => void;
     onEdit: (project: Project) => void;
     onDelete: (projectId: number) => void;
+    footer?: Snippet;
   } = $props();
 
   function truncate(value: string | null | undefined, length: number): string {
@@ -141,4 +144,7 @@
       </li>
     {/each}
   </ul>
+  {#if footer}
+    {@render footer()}
+  {/if}
 </div>

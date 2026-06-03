@@ -369,35 +369,7 @@
   />
 </div>
 
-{#if loading}
-  <LoadingState label="Memuat aktivitas..." />
-{:else if error}
-  <p class="text-red-500">{error}</p>
-{:else if activities.length === 0}
-  <div class="overflow-hidden bg-white shadow sm:rounded-md dark:bg-black">
-    <EmptyState title="Belum ada aktivitas." />
-  </div>
-{:else}
-  {#if activeView === 'list'}
-    <ActivityListView
-      {activities}
-      canUpdate={canUpdateActivity}
-      canDelete={canDeleteActivity}
-      onOpenDetail={openDetailDrawer}
-      onEdit={openEditModal}
-      onDelete={handleDelete}
-    />
-  {:else}
-    <ActivityTableView
-      {activities}
-      canUpdate={canUpdateActivity}
-      canDelete={canDeleteActivity}
-      onOpenDetail={openDetailDrawer}
-      onEdit={openEditModal}
-      onDelete={handleDelete}
-    />
-  {/if}
-
+{#snippet activityPagination()}
   <Pagination
     {currentPage}
     {lastPage}
@@ -406,6 +378,36 @@
     perPageOptions={[...PER_PAGE_OPTIONS]}
     onPageChange={goToPage}
     onPerPageChange={changePerPage}
+  />
+{/snippet}
+
+{#if loading}
+  <LoadingState label="Memuat aktivitas..." />
+{:else if error}
+  <p class="text-red-500">{error}</p>
+{:else if activities.length === 0}
+  <div class="overflow-hidden bg-white shadow sm:rounded-md dark:bg-black">
+    <EmptyState title="Belum ada aktivitas." />
+  </div>
+{:else if activeView === 'list'}
+  <ActivityListView
+    {activities}
+    canUpdate={canUpdateActivity}
+    canDelete={canDeleteActivity}
+    onOpenDetail={openDetailDrawer}
+    onEdit={openEditModal}
+    onDelete={handleDelete}
+    footer={activityPagination}
+  />
+{:else}
+  <ActivityTableView
+    {activities}
+    canUpdate={canUpdateActivity}
+    canDelete={canDeleteActivity}
+    onOpenDetail={openDetailDrawer}
+    onEdit={openEditModal}
+    onDelete={handleDelete}
+    footer={activityPagination}
   />
 {/if}
 

@@ -309,43 +309,7 @@
   />
 </div>
 
-{#if loading}
-  <LoadingState label="Memuat project..." />
-{:else if error}
-  <p class="text-red-500">{error}</p>
-{:else if projects.length === 0}
-  <div class="overflow-hidden bg-white shadow sm:rounded-md dark:bg-black">
-    <EmptyState title="Belum ada project." />
-  </div>
-{:else}
-  {#if activeView === 'list'}
-    <ProjectListView
-      {projects}
-      {openActivities}
-      {canViewActivity}
-      {canUpdate}
-      {canDelete}
-      onToggleActivities={toggleActivities}
-      onOpenDetail={openDetailDrawer}
-      onOpenActivityDetail={openActivityDetail}
-      onEdit={openEditModal}
-      onDelete={handleDelete}
-    />
-  {:else}
-    <ProjectTableView
-      {projects}
-      {openActivities}
-      {canViewActivity}
-      {canUpdate}
-      {canDelete}
-      onToggleActivities={toggleActivities}
-      onOpenDetail={openDetailDrawer}
-      onOpenActivityDetail={openActivityDetail}
-      onEdit={openEditModal}
-      onDelete={handleDelete}
-    />
-  {/if}
-
+{#snippet projectPagination()}
   <Pagination
     {currentPage}
     {lastPage}
@@ -354,6 +318,44 @@
     perPageOptions={[...PER_PAGE_OPTIONS]}
     onPageChange={goToPage}
     onPerPageChange={changePerPage}
+  />
+{/snippet}
+
+{#if loading}
+  <LoadingState label="Memuat project..." />
+{:else if error}
+  <p class="text-red-500">{error}</p>
+{:else if projects.length === 0}
+  <div class="overflow-hidden bg-white shadow sm:rounded-md dark:bg-black">
+    <EmptyState title="Belum ada project." />
+  </div>
+{:else if activeView === 'list'}
+  <ProjectListView
+    {projects}
+    {openActivities}
+    {canViewActivity}
+    {canUpdate}
+    {canDelete}
+    onToggleActivities={toggleActivities}
+    onOpenDetail={openDetailDrawer}
+    onOpenActivityDetail={openActivityDetail}
+    onEdit={openEditModal}
+    onDelete={handleDelete}
+    footer={projectPagination}
+  />
+{:else}
+  <ProjectTableView
+    {projects}
+    {openActivities}
+    {canViewActivity}
+    {canUpdate}
+    {canDelete}
+    onToggleActivities={toggleActivities}
+    onOpenDetail={openDetailDrawer}
+    onOpenActivityDetail={openActivityDetail}
+    onEdit={openEditModal}
+    onDelete={handleDelete}
+    footer={projectPagination}
   />
 {/if}
 

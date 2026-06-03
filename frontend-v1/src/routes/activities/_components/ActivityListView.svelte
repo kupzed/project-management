@@ -1,6 +1,7 @@
 <script lang="ts">
   import RowActionButtons from '$lib/components/ui/RowActionButtons.svelte';
   import { formatDate } from '$lib/utils/formatters';
+  import type { Snippet } from 'svelte';
   import type { Activity } from '$lib/types';
 
   /**
@@ -12,7 +13,8 @@
     canDelete = false,
     onOpenDetail,
     onEdit,
-    onDelete
+    onDelete,
+    footer
   }: {
     activities: Activity[];
     canUpdate?: boolean;
@@ -20,6 +22,7 @@
     onOpenDetail: (activity: Activity) => void;
     onEdit: (activity: Activity) => void;
     onDelete: (activityId: number) => void;
+    footer?: Snippet;
   } = $props();
 </script>
 
@@ -88,4 +91,7 @@
       </li>
     {/each}
   </ul>
+  {#if footer}
+    {@render footer()}
+  {/if}
 </div>

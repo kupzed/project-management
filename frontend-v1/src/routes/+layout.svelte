@@ -107,7 +107,7 @@
       <main
         class="min-w-0 flex-1 bg-background px-4 py-4 pb-[calc(1rem+env(safe-area-inset-bottom))] md:px-6 md:py-6"
       >
-        <div class="mx-auto flex w-full min-w-0 flex-col gap-4">
+        <div class="mx-auto flex w-full min-w-0 flex-col">
           {@render children()}
         </div>
       </main>
