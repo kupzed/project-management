@@ -4,8 +4,8 @@
   import type { Project } from '$lib/types';
 
   /**
-   * Header props for project identity and permission-gated project actions.
-   */
+  * Header props for project identity and permission-gated project actions.
+  */
   let {
     project,
     canUpdate,
@@ -23,12 +23,17 @@
 
 <div class="mb-4 flex min-w-0 flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
   <div class="min-w-0 flex-1">
-    <h2 class="break-words text-2xl leading-7 font-bold text-gray-900 sm:text-2xl dark:text-white">
+    <h2 class="text-2xl leading-7 font-bold break-words text-gray-900 sm:text-2xl dark:text-white">
       {project.name}
     </h2>
     <div class="my-2 flex flex-col sm:mt-0 sm:flex-row sm:flex-wrap sm:space-x-6">
       <div class="my-2 flex items-center text-sm text-gray-500 dark:text-gray-300">
-        <svg class="mr-1.5 h-5 w-5 flex-shrink-0 text-gray-400" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+        <svg
+          class="mr-1.5 h-5 w-5 flex-shrink-0 text-gray-400"
+          fill="currentColor"
+          viewBox="0 0 20 20"
+          aria-hidden="true"
+        >
           <path
             fill-rule="evenodd"
             d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"

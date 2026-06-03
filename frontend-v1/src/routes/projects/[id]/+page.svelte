@@ -7,13 +7,7 @@
   import ProjectFormModal from '$lib/components/form/ProjectFormModal.svelte';
   import { deleteProject, fetchProject, updateProject } from '$lib/services/projectService';
   import { userPermissions } from '$lib/stores/permissions';
-  import type {
-    MitraSummary,
-    Project,
-    ProjectForm,
-    ProjectKategori,
-    ProjectStatus
-  } from '$lib/types';
+  import type { MitraSummary, Project, ProjectForm, ProjectKategori, ProjectStatus } from '$lib/types';
   import { PROJECT_KATEGORI_OPTIONS, PROJECT_STATUS_OPTIONS } from '$lib/constants';
   import { extractApiErrors } from '$lib/utils/errors';
   import { lockBodyScroll } from '$lib/utils/scroll-lock';
@@ -27,6 +21,8 @@
   let loading = $state(true);
   let error = $state('');
   let activeTab = $state<ProjectDetailTab>('activity');
+  let hasVisitedActivity = $state(true);
+  let hasVisitedCertificates = $state(false);
   let showEditModal = $state(false);
   let editProjectForm = $state<ProjectForm>(makeProjectForm());
   let customers = $state<MitraSummary[]>([]);
@@ -70,6 +66,8 @@
       project = response.project;
       editProjectForm = makeProjectForm(response.project);
       applyFormDependencies(response.formDeps);
+      hasVisitedActivity = activeTab === 'activity';
+      hasVisitedCertificates = activeTab === 'certificates' && response.project.is_cert_projects;
     } catch (err: unknown) {
       error = extractApiErrors(err);
     } finally {
@@ -136,9 +134,12 @@
   });
 
   $effect(() => {
-    if (project && !project.is_cert_projects && activeTab === 'certificates') {
-      activeTab = 'detail';
-    }
+    if (project && !project.is_cert_projects && activeTab === 'certificates') activeTab = 'detail';
+  });
+
+  $effect(() => {
+    if (activeTab === 'activity') hasVisitedActivity = true;
+    if (activeTab === 'certificates') hasVisitedCertificates = true;
   });
 
   $effect(() => {
@@ -157,13 +158,7 @@
   <p class="text-red-500">{error}</p>
 {:else if project}
   <div class="mb-8 flex w-full min-w-0 flex-col">
-    <ProjectHeader
-      {project}
-      canUpdate={canUpdateProject}
-      canDelete={canDeleteProject}
-      onEdit={openEditProjectModal}
-      onDelete={handleDeleteProject}
-    />
+    <ProjectHeader {project} canUpdate={canUpdateProject} canDelete={canDeleteProject} onEdit={openEditProjectModal} onDelete={handleDeleteProject} />
 
     <ProjectTabs bind:activeTab showCertificateTab={project.is_cert_projects} />
 
@@ -176,24 +171,22 @@
           <ProjectDetail {project} />
         </div>
       </div>
-    {:else if activeTab === 'activity'}
-      <ActivityTab {project} />
-    {:else if activeTab === 'certificates'}
-      <CertificateTab {project} />
+    {/if}
+
+    {#if hasVisitedActivity || activeTab === 'activity'}
+      <div class:hidden={activeTab !== 'activity'}>
+        <ActivityTab {project} />
+      </div>
+    {/if}
+
+    {#if project.is_cert_projects && (hasVisitedCertificates || activeTab === 'certificates')}
+      <div class:hidden={activeTab !== 'certificates'}>
+        <CertificateTab {project} />
+      </div>
     {/if}
   </div>
 
   {#if showEditModal}
-    <ProjectFormModal
-      bind:show={showEditModal}
-      bind:form={editProjectForm}
-      title="Edit Project"
-      submitLabel="Update Project"
-      idPrefix="edit_project"
-      {customers}
-      {projectStatuses}
-      {projectKategoris}
-      onSubmit={handleSubmitUpdateProject}
-    />
+    <ProjectFormModal bind:show={showEditModal} bind:form={editProjectForm} title="Edit Project" submitLabel="Update Project" idPrefix="edit_project" {customers} {projectStatuses} {projectKategoris} onSubmit={handleSubmitUpdateProject} />
   {/if}
 {/if}

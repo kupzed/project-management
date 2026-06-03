@@ -2,8 +2,8 @@
   export type ProjectDetailTab = 'detail' | 'activity' | 'certificates';
 
   /**
-   * Bindable tab state for the project detail page navigation.
-   */
+  * Bindable tab state for the project detail page navigation.
+  */
   let {
     activeTab = $bindable('activity' as ProjectDetailTab),
     showCertificateTab

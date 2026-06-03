@@ -31,9 +31,12 @@
     Project,
     SortOrder
   } from '$lib/types';
+  import RowActions from './RowActions.svelte';
 
   type NamedOption = { id: number; nama: string };
-  type ProjectWithMitraFlag = Project & { mitra?: (Project['mitra'] & { is_customer?: boolean }) | null };
+  type ProjectWithMitraFlag = Project & {
+    mitra?: (Project['mitra'] & { is_customer?: boolean }) | null;
+  };
   type ActivityModalForm = Omit<
     ActivityForm,
     'attachment_descriptions' | 'short_desc' | 'from' | 'to' | 'value'
@@ -51,8 +54,8 @@
   };
 
   /**
-   * Activity tab props. The tab owns activity filters, pagination, drawers, and CRUD state.
-   */
+  * Activity tab props. The tab owns activity filters, pagination, drawers, and CRUD state.
+  */
   let { project }: { project: Project } = $props();
 
   let activities = $state<Activity[]>([]);
@@ -138,7 +141,9 @@
     };
   }
 
-  function normalizeExistingAttachments(attachments: Activity['attachments']): ExistingAttachment[] {
+  function normalizeExistingAttachments(
+    attachments: Activity['attachments']
+  ): ExistingAttachment[] {
     return (attachments ?? []).flatMap((attachment) => {
       if (typeof attachment.id !== 'number') {
         return [];
@@ -290,26 +295,49 @@
 <div class="mb-8 min-w-0">
   <div class="mb-4 flex min-w-0 flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
     <div class="flex w-full min-w-0 flex-col gap-2 sm:flex-row lg:w-auto">
-      <select bind:value={jenisFilter} onchange={resetToFirstPage} class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-semibold text-gray-900 sm:w-auto dark:border-gray-700 dark:bg-neutral-900 dark:text-gray-100">
+      <select
+        bind:value={jenisFilter}
+        onchange={resetToFirstPage}
+        class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-semibold text-gray-900 sm:w-auto dark:border-gray-700 dark:bg-neutral-900 dark:text-gray-100"
+      >
         <option value="">Jenis: Semua</option>
         {#each jenisList as jenis}<option value={jenis}>{jenis}</option>{/each}
       </select>
       {#if jenisFilter === 'Vendor'}
-        <select bind:value={vendorFilter} onchange={resetToFirstPage} class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-semibold text-gray-900 sm:w-auto dark:border-gray-700 dark:bg-neutral-900 dark:text-gray-100">
+        <select
+          bind:value={vendorFilter}
+          onchange={resetToFirstPage}
+          class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-semibold text-gray-900 sm:w-auto dark:border-gray-700 dark:bg-neutral-900 dark:text-gray-100"
+        >
           <option value="">Vendor: Semua</option>
           {#each vendorOptions as vendor}<option value={vendor.id}>{vendor.nama}</option>{/each}
         </select>
       {/if}
-      <select bind:value={kategoriFilter} onchange={resetToFirstPage} class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-semibold text-gray-900 sm:w-auto dark:border-gray-700 dark:bg-neutral-900 dark:text-gray-100">
+      <select
+        bind:value={kategoriFilter}
+        onchange={resetToFirstPage}
+        class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-semibold text-gray-900 sm:w-auto dark:border-gray-700 dark:bg-neutral-900 dark:text-gray-100"
+      >
         <option value="">Kategori: Semua</option>
         {#each kategoriList as kategori}<option value={kategori}>{kategori}</option>{/each}
       </select>
     </div>
     <div class="w-full min-w-0 flex-1">
-      <SearchInput bind:value={searchInput} placeholder="Cari aktivitas..." onSearch={(value) => { search = value; currentPage = 1; }} />
+      <SearchInput
+        bind:value={searchInput}
+        placeholder="Cari aktivitas..."
+        onSearch={(value) => {
+          search = value;
+          currentPage = 1;
+        }}
+      />
     </div>
     {#if canCreate}
-      <button type="button" onclick={openCreateActivityModal} class="w-full rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:outline-none sm:w-auto lg:shrink-0 dark:focus:ring-offset-gray-800">
+      <button
+        type="button"
+        onclick={openCreateActivityModal}
+        class="w-full rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:outline-none sm:w-auto lg:shrink-0 dark:focus:ring-offset-gray-800"
+      >
         Tambah Aktivitas
       </button>
     {/if}
@@ -317,7 +345,19 @@
 
   <div class="mb-4 flex min-w-0 items-center justify-between gap-3">
     <ViewToggle bind:activeView={view} />
-    <DateFilterDropdown title="Filter Tanggal" bind:dateFrom bind:dateTo bind:sortBy bind:sortDir sortByField="activity_date" sortByCreatedLabel="Urutkan Berdasarkan Create" sortByDateLabel="Urutkan Tanggal Aktivitas" idPrefix="activity-date-filter" onFilter={resetToFirstPage} onClear={clearFilters} />
+    <DateFilterDropdown
+      title="Filter Tanggal"
+      bind:dateFrom
+      bind:dateTo
+      bind:sortBy
+      bind:sortDir
+      sortByField="activity_date"
+      sortByCreatedLabel="Urutkan Berdasarkan Create"
+      sortByDateLabel="Urutkan Tanggal Aktivitas"
+      idPrefix="activity-date-filter"
+      onFilter={resetToFirstPage}
+      onClear={clearFilters}
+    />
   </div>
 
   {#if loading}
@@ -325,46 +365,176 @@
   {:else if error}
     <p class="text-red-500">{error}</p>
   {:else if activities.length === 0}
-    <div class="mt-4 overflow-hidden bg-white shadow sm:rounded-md dark:bg-black"><EmptyState title="Belum ada aktivitas untuk project ini." /></div>
+    <div class="mt-4 overflow-hidden bg-white shadow sm:rounded-md dark:bg-black">
+      <EmptyState title="Belum ada aktivitas untuk project ini." />
+    </div>
   {:else if view === 'list'}
     <div class="mt-4 overflow-hidden bg-white shadow sm:rounded-md dark:bg-black">
       <ul class="divide-y divide-gray-200 dark:divide-gray-700">
         {#each activities as activity (activity.id)}
           <li>
             <!-- svelte-ignore a11y_no_static_element_interactions -->
-            <button type="button" class="block w-full cursor-pointer px-4 py-4 text-left hover:bg-gray-50 sm:px-6 dark:hover:bg-neutral-950" onclick={() => openActivityDetailDrawer(activity)}>
-              <div class="flex items-center justify-between"><p class="truncate text-sm font-medium text-indigo-600 dark:text-indigo-400">{activity.name}</p><span class="ml-2 inline-flex flex-shrink-0 rounded-full bg-gray-300 px-2 text-xs leading-5 font-semibold text-gray-900 dark:bg-gray-700 dark:text-gray-100">{activity.kategori}</span></div>
-              <div class="mt-2 sm:flex sm:justify-between"><p class="text-sm text-gray-500 dark:text-gray-300">Jenis: {activity.jenis}{#if activity.mitra} | Mitra: {activity.mitra.nama}{/if} | From: {activity.from || '-'} | Deskripsi: {activity.short_desc}</p><p class="mt-2 text-sm text-gray-500 sm:mt-0 dark:text-gray-300">Aktivitas: {activity.activity_date ? formatDate(activity.activity_date, 'long') : '-'}</p></div>
+            <button
+              type="button"
+              class="block w-full cursor-pointer px-4 py-4 text-left hover:bg-gray-50 sm:px-6 dark:hover:bg-neutral-950"
+              onclick={() => openActivityDetailDrawer(activity)}
+            >
+              <div class="flex items-center justify-between">
+                <p class="truncate text-sm font-medium text-indigo-600 dark:text-indigo-400">
+                  {activity.name}
+                </p>
+                <span
+                  class="ml-2 inline-flex flex-shrink-0 rounded-full bg-gray-300 px-2 text-xs leading-5 font-semibold text-gray-900 dark:bg-gray-700 dark:text-gray-100"
+                  >{activity.kategori}</span
+                >
+              </div>
+              <div class="mt-2 sm:flex sm:justify-between">
+                <p class="text-sm text-gray-500 dark:text-gray-300">
+                  Jenis: {activity.jenis}{#if activity.mitra}
+                    | Mitra: {activity.mitra.nama}{/if} | From: {activity.from || '-'} | Deskripsi: {activity.short_desc}
+                </p>
+                <p class="mt-2 text-sm text-gray-500 sm:mt-0 dark:text-gray-300">
+                  Aktivitas: {activity.activity_date
+                    ? formatDate(activity.activity_date, 'long')
+                    : '-'}
+                </p>
+              </div>
             </button>
-            <div class="flex justify-end space-x-2 px-4 py-2 sm:px-6">
-              <button type="button" onclick={() => openActivityDetailDrawer(activity)} class="inline-flex items-center rounded-md border border-transparent bg-yellow-600 px-3 py-1.5 text-xs font-medium text-white shadow-sm hover:bg-yellow-700">Detail</button>
-              {#if canUpdate}<button type="button" onclick={() => openEditActivityModal(activity)} class="inline-flex items-center rounded-md border border-transparent bg-blue-600 px-3 py-1.5 text-xs font-medium text-white shadow-sm hover:bg-blue-700">Edit</button>{/if}
-              {#if canDelete}<button type="button" onclick={() => handleDeleteActivity(activity.id)} class="inline-flex items-center rounded-md border border-transparent bg-red-600 px-3 py-1.5 text-xs font-medium text-white shadow-sm hover:bg-red-700">Hapus</button>{/if}
+            <div class="px-4 py-2 sm:px-6">
+              <RowActions
+                itemName={activity.name}
+                {canUpdate}
+                {canDelete}
+                onDetail={() => openActivityDetailDrawer(activity)}
+                onEdit={() => openEditActivityModal(activity)}
+                onDelete={() => handleDeleteActivity(activity.id)}
+              />
             </div>
           </li>
         {/each}
       </ul>
-      <Pagination {currentPage} {lastPage} totalItems={totalItems} itemsPerPage={perPage} perPageOptions={pageOptions} onPageChange={(page) => (currentPage = page)} onPerPageChange={handlePerPageChange} />
+      <Pagination
+        {currentPage}
+        {lastPage}
+        {totalItems}
+        itemsPerPage={perPage}
+        perPageOptions={pageOptions}
+        onPageChange={(page) => (currentPage = page)}
+        onPerPageChange={handlePerPageChange}
+      />
     </div>
   {:else}
     <div class="mt-4 w-full min-w-0 overflow-hidden rounded-lg bg-white shadow-md dark:bg-black">
       <div class="w-full overflow-x-auto">
-        <table class="w-full min-w-[840px] table-fixed divide-y divide-gray-300 lg:min-w-full dark:divide-gray-700">
-          <thead class="bg-gray-50 dark:bg-neutral-900"><tr><th class="w-32 px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">Tanggal Aktivitas</th><th class="w-[34%] px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">Nama Aktivitas</th><th class="w-36 px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">Kategori</th><th class="w-28 px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">Jenis</th><th class="w-[22%] px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">Mitra</th><th class="w-24 px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">Aksi</th></tr></thead>
+        <table
+          class="w-full min-w-[920px] table-fixed divide-y divide-gray-300 lg:min-w-full dark:divide-gray-700"
+        >
+          <thead class="bg-gray-50 dark:bg-neutral-900"
+            ><tr
+              ><th
+                class="w-32 px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100"
+                >Tanggal Aktivitas</th
+              ><th
+                class="w-[34%] px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100"
+                >Nama Aktivitas</th
+              ><th
+                class="w-36 px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100"
+                >Kategori</th
+              ><th
+                class="w-28 px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100"
+                >Jenis</th
+              ><th
+                class="w-[22%] px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100"
+                >Mitra</th
+              ><th
+                class="w-28 px-3 py-3.5 text-right text-sm font-semibold text-gray-900 dark:text-gray-100"
+                >Aksi</th
+              ></tr
+            ></thead
+          >
           <tbody class="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-black">
             {#each activities as activity (activity.id)}
-              <tr><td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-300">{activity.activity_date ? formatDate(activity.activity_date) : '-'}</td><td class="px-3 py-4 text-sm font-medium text-gray-900 dark:text-gray-100"><button type="button" class="block break-words text-left text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300" onclick={() => openActivityDetailDrawer(activity)}>{activity.name}</button><span class="mt-1 block break-words text-xs leading-5 text-gray-500 dark:text-gray-400">From: {activity.from || '-'} | {activity.short_desc}</span></td><td class="px-3 py-4 text-sm"><span class="inline-flex rounded-full bg-gray-300 px-2 text-xs leading-5 font-semibold text-gray-900 dark:bg-gray-700 dark:text-gray-100">{activity.kategori}</span></td><td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-300">{activity.jenis}</td><td class="px-3 py-4 text-sm text-gray-500 dark:text-gray-300">{activity.mitra?.nama ?? '-'}</td><td class="whitespace-nowrap px-3 py-4 text-sm font-medium"><div class="flex items-center space-x-2"><button type="button" onclick={() => openActivityDetailDrawer(activity)} class="text-yellow-600 hover:text-yellow-900 dark:text-yellow-400 dark:hover:text-yellow-300" title="Detail">Detail</button>{#if canUpdate}<button type="button" onclick={() => openEditActivityModal(activity)} class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300" title="Edit">Edit</button>{/if}{#if canDelete}<button type="button" onclick={() => handleDeleteActivity(activity.id)} class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300" title="Hapus">Hapus</button>{/if}</div></td></tr>
+              <tr
+                ><td class="px-3 py-4 text-sm whitespace-nowrap text-gray-500 dark:text-gray-300"
+                  >{activity.activity_date ? formatDate(activity.activity_date) : '-'}</td
+                ><td class="px-3 py-4 text-sm font-medium text-gray-900 dark:text-gray-100"
+                  ><button
+                    type="button"
+                    class="block text-left break-words text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300"
+                    onclick={() => openActivityDetailDrawer(activity)}>{activity.name}</button
+                  ><span
+                    class="mt-1 block text-xs leading-5 break-words text-gray-500 dark:text-gray-400"
+                    >From: {activity.from || '-'} | {activity.short_desc}</span
+                  ></td
+                ><td class="px-3 py-4 text-sm"
+                  ><span
+                    class="inline-flex rounded-full bg-gray-300 px-2 text-xs leading-5 font-semibold text-gray-900 dark:bg-gray-700 dark:text-gray-100"
+                    >{activity.kategori}</span
+                  ></td
+                ><td class="px-3 py-4 text-sm whitespace-nowrap text-gray-500 dark:text-gray-300"
+                  >{activity.jenis}</td
+                ><td class="px-3 py-4 text-sm text-gray-500 dark:text-gray-300"
+                  >{activity.mitra?.nama ?? '-'}</td
+                ><td class="px-3 py-4 text-sm font-medium whitespace-nowrap"
+                  ><RowActions
+                    itemName={activity.name}
+                    {canUpdate}
+                    {canDelete}
+                    onDetail={() => openActivityDetailDrawer(activity)}
+                    onEdit={() => openEditActivityModal(activity)}
+                    onDelete={() => handleDeleteActivity(activity.id)}
+                  /></td
+                ></tr
+              >
             {/each}
           </tbody>
         </table>
       </div>
-      <Pagination {currentPage} {lastPage} totalItems={totalItems} itemsPerPage={perPage} perPageOptions={pageOptions} onPageChange={(page) => (currentPage = page)} onPerPageChange={handlePerPageChange} />
+      <Pagination
+        {currentPage}
+        {lastPage}
+        {totalItems}
+        itemsPerPage={perPage}
+        perPageOptions={pageOptions}
+        onPageChange={(page) => (currentPage = page)}
+        onPerPageChange={handlePerPageChange}
+      />
     </div>
   {/if}
 </div>
 
-<ActivityFormModal bind:show={showCreateModal} bind:form={createForm} title="Form Tambah Aktivitas" submitLabel="Tambah Aktivitas" idPrefix="create_activity" projects={[project]} showProjectSelect={false} {vendors} activityKategoriList={kategoriList} activityJenisList={jenisList} allowRemoveAttachment={false} onSubmit={handleCreateActivity} />
-{#if editingActivity}<ActivityFormModal bind:show={showEditModal} bind:form={editForm} title="Edit Aktivitas" submitLabel="Update Aktivitas" idPrefix="edit_activity" projects={[project]} showProjectSelect={false} {vendors} activityKategoriList={kategoriList} activityJenisList={jenisList} allowRemoveAttachment={true} onSubmit={handleUpdateActivity} />{/if}
-<Drawer bind:show={showDetailDrawer} title="Detail Activity" onClose={() => (showDetailDrawer = false)}>
+<ActivityFormModal
+  bind:show={showCreateModal}
+  bind:form={createForm}
+  title="Form Tambah Aktivitas"
+  submitLabel="Tambah Aktivitas"
+  idPrefix="create_activity"
+  projects={[project]}
+  showProjectSelect={false}
+  {vendors}
+  activityKategoriList={kategoriList}
+  activityJenisList={jenisList}
+  allowRemoveAttachment={false}
+  onSubmit={handleCreateActivity}
+/>
+{#if editingActivity}<ActivityFormModal
+    bind:show={showEditModal}
+    bind:form={editForm}
+    title="Edit Aktivitas"
+    submitLabel="Update Aktivitas"
+    idPrefix="edit_activity"
+    projects={[project]}
+    showProjectSelect={false}
+    {vendors}
+    activityKategoriList={kategoriList}
+    activityJenisList={jenisList}
+    allowRemoveAttachment={true}
+    onSubmit={handleUpdateActivity}
+  />{/if}
+<Drawer
+  bind:show={showDetailDrawer}
+  title="Detail Activity"
+  onClose={() => (showDetailDrawer = false)}
+>
   <ActivityDetail activity={selectedActivity} />
 </Drawer>
