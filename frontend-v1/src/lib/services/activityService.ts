@@ -1,136 +1,136 @@
 import axiosClient from '$lib/axiosClient';
 import { appendAttachments, appendScalar } from '$lib/utils/form-data';
 import type {
-	Activity,
-	ActivityEditForm,
-	ActivityFilterParams,
-	ActivityForm,
-	ActivityJenis,
-	ActivityKategori,
-	ActivityPaginatedResponse,
-	Option,
-	PaginationMeta
+  Activity,
+  ActivityEditForm,
+  ActivityFilterParams,
+  ActivityForm,
+  ActivityJenis,
+  ActivityKategori,
+  ActivityPaginatedResponse,
+  Option,
+  PaginationMeta
 } from '$lib/types';
 
 export type ActivityListFormDeps = {
-	vendors: Option[];
-	customers: Option[];
-	kategoriList: ActivityKategori[];
-	jenisList: ActivityJenis[];
+  vendors: Option[];
+  customers: Option[];
+  kategoriList: ActivityKategori[];
+  jenisList: ActivityJenis[];
 };
 
 export type ActivityListResult = {
-	data: Activity[];
-	meta: PaginationMeta;
-	vendorOptions: Option[];
-	formDeps: ActivityListFormDeps;
+  data: Activity[];
+  meta: PaginationMeta;
+  vendorOptions: Option[];
+  formDeps: ActivityListFormDeps;
 };
 
 type ResourceResponse<T> = {
-	data: T;
-	message?: string;
+  data: T;
+  message?: string;
 };
 
 const MULTIPART_HEADERS = {
-	'Content-Type': 'multipart/form-data'
+  'Content-Type': 'multipart/form-data'
 } as const;
 
 /** Returns empty dependencies when the backend omits optional metadata. */
 function getDefaultFormDeps(): ActivityListFormDeps {
-	return {
-		vendors: [],
-		customers: [],
-		kategoriList: [],
-		jenisList: []
-	};
+  return {
+    vendors: [],
+    customers: [],
+    kategoriList: [],
+    jenisList: []
+  };
 }
 
 /** Fetches the paginated activity list and normalizes dependency payloads. */
 export async function fetchActivities(params: ActivityFilterParams): Promise<ActivityListResult> {
-	const response = await axiosClient.get<ActivityPaginatedResponse>('/activities', { params });
-	const deps = response.data.form_dependencies;
+  const response = await axiosClient.get<ActivityPaginatedResponse>('/activities', { params });
+  const deps = response.data.form_dependencies;
 
-	return {
-		data: response.data.data,
-		meta: response.data.meta,
-		vendorOptions: response.data.vendor_options ?? [],
-		formDeps: deps
-			? {
-					vendors: deps.vendors,
-					customers: deps.customers,
-					kategoriList: deps.kategori_list,
-					jenisList: deps.jenis_list
-				}
-			: getDefaultFormDeps()
-	};
+  return {
+    data: response.data.data,
+    meta: response.data.meta,
+    vendorOptions: response.data.vendor_options ?? [],
+    formDeps: deps
+      ? {
+          vendors: deps.vendors,
+          customers: deps.customers,
+          kategoriList: deps.kategori_list,
+          jenisList: deps.jenis_list
+        }
+      : getDefaultFormDeps()
+  };
 }
 
 /** Builds multipart activity payloads including mitra rules and attachments. */
 export function buildActivityFormData(
-	data: ActivityForm | ActivityEditForm,
-	projectMitraId?: number
+  data: ActivityForm | ActivityEditForm,
+  projectMitraId?: number
 ): FormData {
-	const fd = new FormData();
+  const fd = new FormData();
 
-	appendScalar(fd, 'action', data.action);
-	appendScalar(fd, 'name', data.name);
-	appendScalar(fd, 'short_desc', data.short_desc);
-	appendScalar(fd, 'description', data.description);
-	appendScalar(fd, 'project_id', data.project_id);
-	appendScalar(fd, 'kategori', data.kategori);
-	appendScalar(fd, 'value', data.value);
-	appendScalar(fd, 'activity_date', data.activity_date);
-	appendScalar(fd, 'jenis', data.jenis);
-	appendScalar(fd, 'from', data.from);
-	appendScalar(fd, 'to', data.to);
+  appendScalar(fd, 'action', data.action);
+  appendScalar(fd, 'name', data.name);
+  appendScalar(fd, 'short_desc', data.short_desc);
+  appendScalar(fd, 'description', data.description);
+  appendScalar(fd, 'project_id', data.project_id);
+  appendScalar(fd, 'kategori', data.kategori);
+  appendScalar(fd, 'value', data.value);
+  appendScalar(fd, 'activity_date', data.activity_date);
+  appendScalar(fd, 'jenis', data.jenis);
+  appendScalar(fd, 'from', data.from);
+  appendScalar(fd, 'to', data.to);
 
-	if (data.jenis === 'Internal') {
-		fd.set('mitra_id', '1');
-	} else if (data.jenis === 'Customer' && projectMitraId) {
-		fd.set('mitra_id', String(projectMitraId));
-	} else if (data.mitra_id) {
-		fd.set('mitra_id', String(data.mitra_id));
-	}
+  if (data.jenis === 'Internal') {
+    fd.set('mitra_id', '1');
+  } else if (data.jenis === 'Customer' && projectMitraId) {
+    fd.set('mitra_id', String(projectMitraId));
+  } else if (data.mitra_id) {
+    fd.set('mitra_id', String(data.mitra_id));
+  }
 
-	appendAttachments(fd, data);
+  appendAttachments(fd, data);
 
-	return fd;
+  return fd;
 }
 
 /** Creates an activity through the Laravel API. */
 export async function createActivity(
-	data: ActivityForm,
-	projectMitraId?: number
+  data: ActivityForm,
+  projectMitraId?: number
 ): Promise<Activity> {
-	const formData = buildActivityFormData(data, projectMitraId);
-	const response = await axiosClient.post<ResourceResponse<Activity>>('/activities', formData, {
-		headers: MULTIPART_HEADERS
-	});
+  const formData = buildActivityFormData(data, projectMitraId);
+  const response = await axiosClient.post<ResourceResponse<Activity>>('/activities', formData, {
+    headers: MULTIPART_HEADERS
+  });
 
-	return response.data.data;
+  return response.data.data;
 }
 
 /** Updates an activity through multipart POST with Laravel method override. */
 export async function updateActivity(
-	id: number,
-	data: ActivityEditForm,
-	projectMitraId?: number
+  id: number,
+  data: ActivityEditForm,
+  projectMitraId?: number
 ): Promise<Activity> {
-	const formData = buildActivityFormData(data, projectMitraId);
-	formData.append('_method', 'PUT');
+  const formData = buildActivityFormData(data, projectMitraId);
+  formData.append('_method', 'PUT');
 
-	const response = await axiosClient.post<ResourceResponse<Activity>>(
-		`/activities/${id}`,
-		formData,
-		{
-			headers: MULTIPART_HEADERS
-		}
-	);
+  const response = await axiosClient.post<ResourceResponse<Activity>>(
+    `/activities/${id}`,
+    formData,
+    {
+      headers: MULTIPART_HEADERS
+    }
+  );
 
-	return response.data.data;
+  return response.data.data;
 }
 
 /** Deletes an activity by id. */
 export async function deleteActivity(id: number): Promise<void> {
-	await axiosClient.delete(`/activities/${id}`);
+  await axiosClient.delete(`/activities/${id}`);
 }

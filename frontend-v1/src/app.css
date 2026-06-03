@@ -17,21 +17,21 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme inline {
-	--color-background: var(--background);
-	--color-foreground: var(--foreground);
-	--color-card: var(--card);
-	--color-card-foreground: var(--card-foreground);
-	--color-popover: var(--popover);
-	--color-popover-foreground: var(--popover-foreground);
-	--color-primary: var(--primary);
-	--color-primary-foreground: var(--primary-foreground);
-	--color-muted: var(--muted);
-	--color-muted-foreground: var(--muted-foreground);
-	--color-accent: var(--accent);
-	--color-accent-foreground: var(--accent-foreground);
-	--color-border: var(--border);
-	--color-destructive: var(--destructive);
-	--color-destructive-foreground: var(--destructive-foreground);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
 }
 
 /* =========================================================
@@ -39,80 +39,80 @@
    - Membantu browser memilih warna default gelap/terang pada kontrol native
    =======================================================*/
 html {
-	color-scheme: light;
+  color-scheme: light;
 }
 .dark {
-	color-scheme: dark;
+  color-scheme: dark;
 }
 
 /* =========================================================
    Scrollbar (konsisten light/dark) via CSS variables
    =======================================================*/
 :root {
-	--background: #f3f4f6;
-	--foreground: #111827;
-	--card: #ffffff;
-	--card-foreground: #111827;
-	--popover: #ffffff;
-	--popover-foreground: #111827;
-	--primary: #4f46e5;
-	--primary-foreground: #ffffff;
-	--muted: #f3f4f6;
-	--muted-foreground: #6b7280;
-	--accent: #e5e7eb;
-	--accent-foreground: #111827;
-	--border: #e5e7eb;
-	--destructive: #dc2626;
-	--destructive-foreground: #ffffff;
-	--sb-track: theme(colors.white);
-	--sb-thumb: theme(colors.gray.300);
-	--sb-size: 10px;
+  --background: #f3f4f6;
+  --foreground: #111827;
+  --card: #ffffff;
+  --card-foreground: #111827;
+  --popover: #ffffff;
+  --popover-foreground: #111827;
+  --primary: #4f46e5;
+  --primary-foreground: #ffffff;
+  --muted: #f3f4f6;
+  --muted-foreground: #6b7280;
+  --accent: #e5e7eb;
+  --accent-foreground: #111827;
+  --border: #e5e7eb;
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+  --sb-track: theme(colors.white);
+  --sb-thumb: theme(colors.gray.300);
+  --sb-size: 10px;
 }
 .dark {
-	--background: #262626;
-	--foreground: #f9fafb;
-	--card: #000000;
-	--card-foreground: #f9fafb;
-	--popover: #0a0a0a;
-	--popover-foreground: #f9fafb;
-	--primary: #4f46e5;
-	--primary-foreground: #ffffff;
-	--muted: #171717;
-	--muted-foreground: #d1d5db;
-	--accent: #262626;
-	--accent-foreground: #f9fafb;
-	--border: #374151;
-	--destructive: #ef4444;
-	--destructive-foreground: #ffffff;
-	--sb-track: theme(colors.black);
-	--sb-thumb: theme(colors.gray.500);
+  --background: #262626;
+  --foreground: #f9fafb;
+  --card: #000000;
+  --card-foreground: #f9fafb;
+  --popover: #0a0a0a;
+  --popover-foreground: #f9fafb;
+  --primary: #4f46e5;
+  --primary-foreground: #ffffff;
+  --muted: #171717;
+  --muted-foreground: #d1d5db;
+  --accent: #262626;
+  --accent-foreground: #f9fafb;
+  --border: #374151;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --sb-track: theme(colors.black);
+  --sb-thumb: theme(colors.gray.500);
 }
 
 /* Firefox */
 html {
-	scrollbar-width: thin; /* auto | thin | none */
-	scrollbar-color: var(--sb-thumb) var(--sb-track); /* thumb | track */
+  scrollbar-width: thin; /* auto | thin | none */
+  scrollbar-color: var(--sb-thumb) var(--sb-track); /* thumb | track */
 }
 
 /* WebKit (Chromium, Safari) */
 *::-webkit-scrollbar {
-	width: var(--sb-size);
-	height: var(--sb-size);
+  width: var(--sb-size);
+  height: var(--sb-size);
 }
 *::-webkit-scrollbar-track {
-	background: var(--sb-track);
+  background: var(--sb-track);
 }
 *::-webkit-scrollbar-thumb {
-	background-color: var(--sb-thumb);
-	border-radius: 9999px;
-	border: 2px solid transparent; /* padding agar thumb tidak terlalu tebal */
-	background-clip: padding-box;
+  background-color: var(--sb-thumb);
+  border-radius: 9999px;
+  border: 2px solid transparent; /* padding agar thumb tidak terlalu tebal */
+  background-clip: padding-box;
 }
 *::-webkit-scrollbar-thumb:hover {
-	background-color: theme(colors.gray.500);
+  background-color: theme(colors.gray.500);
 }
 .dark *::-webkit-scrollbar-thumb:hover {
-	background-color: theme(colors.gray.500);
+  background-color: theme(colors.gray.500);
 }
 
 /* =========================================================
@@ -123,12 +123,12 @@ html {
 
 /* Ikon kalender (mode terang): sedikit di-gelapkan agar kontras */
 input[type='date']::-webkit-calendar-picker-indicator {
-	filter: invert(0.2) contrast(1.2) opacity(0.9);
+  filter: invert(0.2) contrast(1.2) opacity(0.9);
 }
 
 /* Ikon kalender (mode gelap): dibuat terang & kontras */
 .dark input[type='date']::-webkit-calendar-picker-indicator {
-	filter: invert(0.2) brightness(1.2) contrast(1.1) opacity(0.95);
+  filter: invert(0.2) brightness(1.2) contrast(1.1) opacity(0.95);
 }
 
 /* Tambahan: pastikan kontrol tanggal/time ikut dark UI */
@@ -136,7 +136,7 @@ input[type='date']::-webkit-calendar-picker-indicator {
 .dark input[type='time'],
 .dark input[type='datetime-local'],
 .dark input[type='month'] {
-	color-scheme: dark; /* dorong UI kontrol jadi gelap (Chromium/Edge/Safari baru) */
+  color-scheme: dark; /* dorong UI kontrol jadi gelap (Chromium/Edge/Safari baru) */
 }
 
 /* =========================================================
@@ -144,40 +144,40 @@ input[type='date']::-webkit-calendar-picker-indicator {
    - Berlaku saat class `.dark` ada di <html>
    =======================================================*/
 .dark .flatpickr-calendar {
-	background: #0a0a0a; /* ~ bg-black/neutral-950 */
-	border-color: #374151; /* gray-700 */
-	color: #e5e7eb; /* gray-200 */
+  background: #0a0a0a; /* ~ bg-black/neutral-950 */
+  border-color: #374151; /* gray-700 */
+  color: #e5e7eb; /* gray-200 */
 }
 .dark .flatpickr-months,
 .dark .flatpickr-weekdays,
 .dark .flatpickr-day {
-	background: transparent;
-	color: #e5e7eb;
+  background: transparent;
+  color: #e5e7eb;
 }
 
 /* Hari "today" diberi outline/tepi bernuansa indigo */
 .dark .flatpickr-day.today {
-	border-color: #6366f1; /* indigo-500 */
+  border-color: #6366f1; /* indigo-500 */
 }
 
 /* Hari terpilih / rentang */
 .dark .flatpickr-day.selected,
 .dark .flatpickr-day.startRange,
 .dark .flatpickr-day.endRange {
-	background: #4f46e5; /* indigo-600 */
-	color: #ffffff;
+  background: #4f46e5; /* indigo-600 */
+  color: #ffffff;
 }
 
 /* Hover state hari di dark mode (sedikit gelap) */
 .dark .flatpickr-day:hover {
-	background: #111827; /* gray-900 */
+  background: #111827; /* gray-900 */
 }
 
 /* Navigasi bulan (panah & label) agar kontras di dark mode */
 .dark .flatpickr-months .flatpickr-prev-month,
 .dark .flatpickr-months .flatpickr-next-month,
 .dark .flatpickr-current-month {
-	color: #e5e7eb;
+  color: #e5e7eb;
 }
 
 /* =========================================================
@@ -185,25 +185,25 @@ input[type='date']::-webkit-calendar-picker-indicator {
    =======================================================*/
 /* SweetAlert2: dark mode */
 html.dark .swal2-popup {
-	background: #0a0a0a !important; /* mirip bg-neutral-950 */
-	color: #e5e7eb !important; /* text-gray-200 */
-	border-radius: 0.75rem; /* rounded-xl */
-	box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  background: #0a0a0a !important; /* mirip bg-neutral-950 */
+  color: #e5e7eb !important; /* text-gray-200 */
+  border-radius: 0.75rem; /* rounded-xl */
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
 }
 html.dark .swal2-title,
 html.dark .swal2-html-container {
-	color: #e5e7eb !important;
+  color: #e5e7eb !important;
 }
 html.dark .swal2-icon.swal2-success {
-	border-color: #22c55e !important; /* green-500 */
-	color: #22c55e !important;
+  border-color: #22c55e !important; /* green-500 */
+  color: #22c55e !important;
 }
 html.dark .swal2-icon.swal2-error {
-	border-color: #ef4444 !important; /* red-500 */
-	color: #ef4444 !important;
+  border-color: #ef4444 !important; /* red-500 */
+  color: #ef4444 !important;
 }
 html.dark .swal2-timer-progress-bar {
-	background: rgba(229, 231, 235, 0.3) !important; /* gray-200/30 */
+  background: rgba(229, 231, 235, 0.3) !important; /* gray-200/30 */
 }
 
 /* =========================================================
@@ -211,22 +211,22 @@ html.dark .swal2-timer-progress-bar {
    =======================================================*/
 html,
 body {
-	min-height: 100%;
+  min-height: 100%;
 }
 
 body {
-	background: var(--background);
-	color: var(--foreground);
-	font-family:
-		Inter,
-		ui-sans-serif,
-		system-ui,
-		-apple-system,
-		BlinkMacSystemFont,
-		'Segoe UI',
-		sans-serif;
-	font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
-	text-rendering: optimizeLegibility;
+  background: var(--background);
+  color: var(--foreground);
+  font-family:
+    Inter,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    sans-serif;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  text-rendering: optimizeLegibility;
 }
 
 button,
@@ -234,5 +234,5 @@ button,
 input,
 select,
 textarea {
-	touch-action: manipulation;
+  touch-action: manipulation;
 }
