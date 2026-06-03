@@ -4,6 +4,7 @@ import type {
   Activity,
   ActivityEditForm,
   ActivityFilterParams,
+  ActivityFormDependencies,
   ActivityForm,
   ActivityJenis,
   ActivityKategori,
@@ -13,6 +14,7 @@ import type {
 } from '$lib/types';
 
 export type ActivityListFormDeps = {
+  projects: ActivityFormDependencies['projects'];
   vendors: Option[];
   customers: Option[];
   kategoriList: ActivityKategori[];
@@ -29,6 +31,7 @@ export type ActivityListResult = {
 type ResourceResponse<T> = {
   data: T;
   message?: string;
+  form_dependencies?: ActivityFormDependencies;
 };
 
 const MULTIPART_HEADERS = {
@@ -38,6 +41,7 @@ const MULTIPART_HEADERS = {
 /** Returns empty dependencies when the backend omits optional metadata. */
 function getDefaultFormDeps(): ActivityListFormDeps {
   return {
+    projects: [],
     vendors: [],
     customers: [],
     kategoriList: [],
@@ -56,6 +60,28 @@ export async function fetchActivities(params: ActivityFilterParams): Promise<Act
     vendorOptions: response.data.vendor_options ?? [],
     formDeps: deps
       ? {
+          projects: deps.projects,
+          vendors: deps.vendors,
+          customers: deps.customers,
+          kategoriList: deps.kategori_list,
+          jenisList: deps.jenis_list
+        }
+      : getDefaultFormDeps()
+  };
+}
+
+/** Fetches a single activity and its form dependencies. */
+export async function fetchActivity(
+  id: string | number
+): Promise<{ activity: Activity; formDeps: ActivityListFormDeps }> {
+  const response = await axiosClient.get<ResourceResponse<Activity>>(`/activities/${id}`);
+  const deps = response.data.form_dependencies;
+
+  return {
+    activity: response.data.data,
+    formDeps: deps
+      ? {
+          projects: deps.projects,
           vendors: deps.vendors,
           customers: deps.customers,
           kategoriList: deps.kategori_list,

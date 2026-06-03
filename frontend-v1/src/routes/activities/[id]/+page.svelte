@@ -1,296 +1,236 @@
 <script lang="ts">
-  import { page } from '$app/stores';
-  import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
-  import axiosClient from '$lib/axiosClient';
+  import { page } from '$app/stores';
   import ActivityDetail from '$lib/components/detail/ActivityDetail.svelte';
   import ActivityFormModal from '$lib/components/form/ActivityFormModal.svelte';
+  import LoadingState from '$lib/components/common/LoadingState.svelte';
+  import { confirm } from '$lib/components/common/ConfirmDialog.svelte';
+  import { deleteActivity, fetchActivity, updateActivity } from '$lib/services/activityService';
   import { userPermissions } from '$lib/stores/permissions';
+  import { extractApiErrors } from '$lib/utils/errors';
+  import { formatDate } from '$lib/utils/formatters';
+  import { lockBodyScroll } from '$lib/utils/scroll-lock';
+  import { showError, showSuccess } from '$lib/utils/toast';
+  import type {
+    Activity,
+    ActivityEditForm,
+    ActivityForm,
+    ActivityJenis,
+    ActivityKategori,
+    ExistingAttachment,
+    Option,
+    ProjectSummary
+  } from '$lib/types';
 
-  // local state for the current activity id and loaded record
-  let activityId: string | null = null;
-  let activity: any = null;
-  let projects: any[] = [];
-  let vendors: any[] = [];
-  let loadingActivity = true;
-  let errorActivity = '';
-
-  // permissions
-  let canUpdateActivity = false;
-  let canDeleteActivity = false;
-
-  $: {
-    const perms = $userPermissions ?? [];
-    canUpdateActivity = perms.includes('activity-update');
-    canDeleteActivity = perms.includes('activity-delete');
-  }
-
-  // show/hide the edit modal
-  let showEditModal: boolean = false;
-
-  /**
-   * The form state mirrors the API payload for creating/updating an activity.
-   * It supports both new attachments (attachments, attachment_names, attachment_descriptions)
-   * and editing existing attachments (existing_attachments with id/name/description/original_name).
-   */
-  let form: {
-    name: string;
+  type NamedOption = { id: number; nama: string; email: string | null };
+  type ActivityProjectOption = ProjectSummary & {
+    mitra_id: number | null;
+    mitra?: NamedOption | null;
+  };
+  type ActivityModalForm = Omit<
+    ActivityForm,
+    'attachment_descriptions' | 'short_desc' | 'from' | 'to' | 'value'
+  > & {
     short_desc: string;
-    description: string;
-    project_id: string | number | '';
-    kategori: string | '';
-    value: number;
-    activity_date: string | '';
-    jenis: string | '';
+    from: string;
+    to: string;
+    value: number | string;
     mitra_id: number | string | '' | null;
-    from?: string | '';
-    to?: string | '';
-    attachments: File[];
-    attachment_names: string[];
     attachment_descriptions: string[];
-    existing_attachments?: Array<{
-      id: number;
-      name: string;
-      description?: string;
-      original_name?: string;
-      url: string;
-      size?: number;
-    }>;
-    removed_existing_ids?: number[];
-  } = {
-    name: '',
-    short_desc: '',
-    description: '',
-    project_id: '',
-    kategori: '',
-    value: 0,
-    activity_date: '',
-    jenis: '',
-    mitra_id: null,
-    from: '',
-    to: '',
-    attachments: [],
-    attachment_names: [],
-    attachment_descriptions: [],
-    existing_attachments: [],
-    removed_existing_ids: []
+  };
+  type ActivityModalEditForm = ActivityModalForm & {
+    existing_attachments: ExistingAttachment[];
+    removed_existing_ids: number[];
   };
 
-  // list kategori & jenis diisi dari backend
-  let activityKategoriList: string[] = [];
-  let activityJenisList: string[] = [];
+  function optionName(option: Option): string {
+    return option.nama ?? option.name ?? option.title ?? option.no_seri ?? String(option.id);
+  }
 
-  // fetch the activity details from the server and populate the form
-  async function fetchActivityDetails() {
+  function toNamedOptions(options: Option[]): NamedOption[] {
+    return options.map((option) => ({ id: option.id, nama: optionName(option), email: null }));
+  }
+
+  function normalizeExistingAttachments(
+    attachments: Activity['attachments']
+  ): ExistingAttachment[] {
+    return (attachments ?? []).flatMap((attachment) => {
+      if (typeof attachment.id !== 'number') return [];
+      return [
+        {
+          id: attachment.id,
+          name: attachment.name,
+          description: attachment.description ?? null,
+          size: attachment.size ?? null,
+          sizeLabel: attachment.sizeLabel ?? null,
+          path: attachment.path,
+          url: attachment.url,
+          original_name: attachment.name
+        }
+      ];
+    });
+  }
+
+  function makeForm(activityValue?: Activity): ActivityModalEditForm {
+    return {
+      name: activityValue?.name ?? '',
+      short_desc: activityValue?.short_desc ?? '',
+      description: activityValue?.description ?? '',
+      project_id: activityValue?.project_id ?? '',
+      kategori: activityValue?.kategori ?? '',
+      value: activityValue?.value ?? 0,
+      activity_date: activityValue?.activity_date
+        ? new Date(activityValue.activity_date).toISOString().split('T')[0]
+        : '',
+      jenis: activityValue?.jenis ?? '',
+      mitra_id: activityValue?.mitra_id ?? null,
+      from: activityValue?.from ?? '',
+      to: activityValue?.to ?? '',
+      attachments: [],
+      attachment_names: [],
+      attachment_descriptions: [],
+      existing_attachments: normalizeExistingAttachments(activityValue?.attachments ?? []),
+      removed_existing_ids: []
+    };
+  }
+
+  function withProjectMitra(
+    depsProjects: Array<ProjectSummary & { mitra_id: number | null }>,
+    vendors: NamedOption[],
+    customers: NamedOption[]
+  ): ActivityProjectOption[] {
+    const mitraMap = new Map<number, NamedOption>();
+    vendors.forEach((vendor) => mitraMap.set(vendor.id, vendor));
+    customers.forEach((customer) => mitraMap.set(customer.id, customer));
+
+    return depsProjects.map((project) => ({
+      ...project,
+      mitra: project.mitra_id ? (mitraMap.get(project.mitra_id) ?? null) : null
+    }));
+  }
+
+  let activity = $state<Activity | null>(null);
+  let projects = $state<ActivityProjectOption[]>([]);
+  let vendors = $state<NamedOption[]>([]);
+  let loadingActivity = $state(true);
+  let errorActivity = $state('');
+  let showEditModal = $state(false);
+  let form = $state<ActivityModalEditForm>(makeForm());
+  let activityKategoriList = $state<ActivityKategori[]>([]);
+  let activityJenisList = $state<ActivityJenis[]>([]);
+  let previousJenis = $state('');
+  let lastLoadedId = $state('');
+
+  let canUpdateActivity = $derived(($userPermissions ?? []).includes('activity-update'));
+  let canDeleteActivity = $derived(($userPermissions ?? []).includes('activity-delete'));
+
+  function projectMitraId(projectId: number | string | ''): number | undefined {
+    const selectedProject = projects.find((project) => project.id === Number(projectId));
+    return selectedProject?.mitra_id ?? undefined;
+  }
+
+  async function loadActivity(activityId: string): Promise<void> {
     loadingActivity = true;
     errorActivity = '';
-    activityId = $page.params.id ?? null;
-    if (!activityId) {
-      errorActivity = 'Activity ID tidak ditemukan.';
-      loadingActivity = false;
-      return;
-    }
     try {
-      const response = await axiosClient.get(`/activities/${activityId}`);
-      activity = response.data.data;
-      // Populate the form using the returned activity record
-      form = {
-        name: activity.name ?? '',
-        short_desc: activity.short_desc ?? '',
-        description: activity.description ?? '',
-        project_id: activity.project_id || '',
-        kategori: activity.kategori || '',
-        value: activity.kategori || 0,
-        activity_date: activity.activity_date
-          ? new Date(activity.activity_date).toISOString().split('T')[0]
-          : '',
-        jenis: activity.jenis || '',
-        mitra_id: activity.mitra_id || null,
-        from: activity.from || '',
-        to: activity.to || '',
-        attachments: [],
-        attachment_names: [],
-        attachment_descriptions: [],
-        // map existing attachments to include description and original_name for editing
-        existing_attachments: Array.isArray(activity.attachments)
-          ? activity.attachments.map((a: any) => ({
-              id: a.id,
-              // use assigned name or fallback to file_name; ensure a default label
-              name: a.name ?? a.file_name ?? 'Lampiran',
-              // keep description for editing
-              description: a.description ?? '',
-              // show original file name if available; fall back to file_name or name
-              original_name: a.original_name ?? a.file_name ?? a.name ?? '',
-              url: a.url ?? a.path ?? a.file_path,
-              size: a.size
-            }))
-          : [],
-        removed_existing_ids: []
-      };
-
-      // update mitra_id depending on jenis and selected project
-      if (form.jenis === 'Customer' && form.project_id) {
-        const selectedProject = projects.find((p) => p.id == form.project_id);
-        if (selectedProject?.mitra_id) form.mitra_id = selectedProject.mitra_id;
-      }
-
-      // Extract form dependencies from the same response
-      if (response.data.form_dependencies) {
-        const deps = response.data.form_dependencies;
-        projects = deps.projects || [];
-        vendors = deps.vendors || [];
-        // Optional customers fetch isn't provided by default unless it's in the payload. Backend returns customers via getFormDependenciesArray.
-        let customers = deps.customers || [];
-        
-        activityKategoriList = Array.isArray(deps.kategori_list) ? deps.kategori_list : [];
-        activityJenisList = Array.isArray(deps.jenis_list) ? deps.jenis_list : [];
-        
-        if (Array.isArray(projects) && Array.isArray(vendors)) {
-          const vendorMap = new Map(vendors.map((v: any) => [v.id, v]));
-          // Map customers too
-          const customerMap = new Map(customers.map((c: any) => [c.id, c]));
-          projects = projects.map((p: any) => ({
-            ...p,
-            mitra: p.mitra || (p.mitra_id ? vendorMap.get(p.mitra_id) : (p.customer_id ? customerMap.get(p.customer_id) : undefined))
-          }));
-        }
-      }
-
-    } catch (err: any) {
-      errorActivity =
-        err.response?.data?.message || 'Gagal memuat detail aktivitas.';
-      console.error('Error fetching activity details:', err.response || err);
+      const payload = await fetchActivity(activityId);
+      const vendorOptions = toNamedOptions(payload.formDeps.vendors);
+      const customerOptions = toNamedOptions(payload.formDeps.customers);
+      activity = payload.activity;
+      vendors = vendorOptions;
+      projects = withProjectMitra(payload.formDeps.projects, vendorOptions, customerOptions);
+      activityKategoriList = payload.formDeps.kategoriList;
+      activityJenisList = payload.formDeps.jenisList;
+      form = makeForm(payload.activity);
+    } catch (err: unknown) {
+      errorActivity = extractApiErrors(err);
+      showError(errorActivity);
     } finally {
       loadingActivity = false;
     }
   }
 
-
-
-  onMount(() => {
-    fetchActivityDetails();
-  });
-
-  function openEditModal() {
-    if (!canUpdateActivity) {
-      console.warn('User lacks activity-update permission');
-      return;
-    }
+  function openEditModal(): void {
+    if (!canUpdateActivity) return;
     showEditModal = true;
   }
 
-  function appendScalar(fd: FormData, key: string, val: any) {
-    if (val === null || val === undefined || val === '') return;
-    fd.append(key, String(val));
-  }
-
-  /**
-   * Build the multipart FormData payload for updating an activity.
-   * Includes both new file uploads and updates to existing attachment names/descriptions.
-   */
-  function buildFormDataForActivity() {
-    const fd = new FormData();
-    appendScalar(fd, 'name', form.name);
-    appendScalar(fd, 'short_desc', form.short_desc);
-    appendScalar(fd, 'description', form.description);
-    appendScalar(fd, 'project_id', form.project_id);
-    appendScalar(fd, 'kategori', form.kategori);
-    appendScalar(fd, 'value', form.value);
-    appendScalar(fd, 'activity_date', form.activity_date);
-    appendScalar(fd, 'jenis', form.jenis);
-    appendScalar(fd, 'from', form.from);
-    appendScalar(fd, 'to', form.to);
-    // Determine mitra_id based on jenis
-    if (form.jenis === 'Internal') {
-      fd.set('mitra_id', '1');
-    } else if (form.jenis === 'Customer') {
-      const selectedProject = projects.find((p) => p.id == form.project_id);
-      if (selectedProject?.mitra_id) fd.set('mitra_id', String(selectedProject.mitra_id));
-    } else if (form.jenis === 'Vendor' && form.mitra_id) {
-      fd.set('mitra_id', String(form.mitra_id));
-    }
-    // append new attachments
-    (form.attachments || []).forEach((file, i) => fd.append(`attachments[${i}]`, file));
-    (form.attachment_names || []).forEach((n, i) => {
-      if (n != null) fd.append(`attachment_names[${i}]`, n);
-    });
-    (form.attachment_descriptions || []).forEach((d, i) => {
-      if (d != null) fd.append(`attachment_descriptions[${i}]`, d);
-    });
-    // removed ids
-    (form.removed_existing_ids || []).forEach((id) => fd.append('removed_existing_ids[]', String(id)));
-    // existing attachment edits
-    (form.existing_attachments || []).forEach((att, i) => {
-      if (att.id != null) fd.append(`existing_attachment_ids[${i}]`, String(att.id));
-      if (att.name != null) fd.append(`existing_attachment_names[${i}]`, att.name);
-      if (att.description != null) fd.append(`existing_attachment_descriptions[${i}]`, att.description);
-    });
-    return fd;
-  }
-
-  async function handleSubmitUpdate() {
-    if (!activity?.id) return;
-    if (!canUpdateActivity) {
-      console.warn('Update activity blocked by permission');
-      return;
-    }
-
+  async function handleSubmitUpdate(): Promise<void> {
+    if (!activity?.id || !canUpdateActivity) return;
     try {
-      const formData = buildFormDataForActivity();
-      formData.append('_method', 'PUT');
-      await axiosClient.post(`/activities/${activity.id}`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
-      alert('Aktivitas berhasil diperbarui!');
-      goto(`/activities/${activity.id}`);
+      await updateActivity(activity.id, form as ActivityEditForm, projectMitraId(form.project_id));
+      showSuccess('Aktivitas berhasil diperbarui!');
       showEditModal = false;
-      fetchActivityDetails();
-    } catch (err: any) {
-      const messages = err.response?.data?.errors
-        ? Object.values(err.response.data.errors).flat().join('\n')
-        : err.response?.data?.message || 'Gagal memperbarui aktivitas.';
-      alert('Error:\n' + messages);
-      console.error('Update activity failed:', err.response || err);
+      await loadActivity(String(activity.id));
+    } catch (err: unknown) {
+      showError(extractApiErrors(err));
     }
   }
 
-  async function handleDelete() {
-    if (!activity?.id) return;
-    if (!confirm('Apakah Anda yakin ingin menghapus aktivitas ini?')) return;
+  async function handleDelete(): Promise<void> {
+    if (!activity?.id || !canDeleteActivity) return;
+    const confirmed = await confirm({
+      title: 'Hapus aktivitas?',
+      text: 'Aktivitas yang dihapus tidak dapat dikembalikan.',
+      confirmText: 'Hapus',
+      isDangerous: true
+    });
+    if (!confirmed) return;
+
     try {
-      await axiosClient.delete(`/activities/${activity.id}`);
-      alert('Aktivitas berhasil dihapus!');
-      goto('/activities');
-    } catch (err: any) {
-      alert(
-        'Gagal menghapus aktivitas: ' + (err.response?.data?.message || 'Terjadi kesalahan')
-      );
-      console.error('Delete activity failed:', err.response || err);
+      await deleteActivity(activity.id);
+      showSuccess('Aktivitas berhasil dihapus!');
+      await goto('/activities');
+    } catch (err: unknown) {
+      showError(extractApiErrors(err));
     }
   }
 
-  // Reactive statements to keep mitra_id in sync when jenis changes or when the modal is closed
-  let previousJenis = '';
-  $: if (showEditModal && form.jenis && form.jenis !== previousJenis && projects.length > 0) {
-    previousJenis = form.jenis;
-    if (form.jenis === 'Customer') {
-      const selectedProject = projects.find((p) => p.id == form.project_id);
-      form.mitra_id = selectedProject?.mitra_id || null;
-    } else if (form.jenis === 'Internal') {
+  function syncMitraFromJenis(): void {
+    if (form.jenis === 'Customer' && form.project_id) {
+      const nextMitraId = projectMitraId(form.project_id);
+      if (nextMitraId && form.mitra_id !== nextMitraId) form.mitra_id = nextMitraId;
+    } else if (form.jenis === 'Internal' && form.mitra_id !== '1') {
       form.mitra_id = '1';
-    } else if (form.jenis === 'Vendor') {
-      if (!Array.isArray(vendors) || !vendors.some((v) => v.id == form.mitra_id)) form.mitra_id = '';
-    } else {
+    } else if (
+      form.jenis === 'Vendor' &&
+      !vendors.some((vendor) => vendor.id === Number(form.mitra_id))
+    ) {
+      form.mitra_id = '';
+    } else if (!form.jenis) {
       form.mitra_id = null;
     }
   }
-  $: if (form.jenis === 'Customer' && form.project_id && projects.length > 0) {
-    const selectedProject = projects.find((p) => p.id == form.project_id);
-    if (selectedProject?.mitra_id && form.mitra_id !== selectedProject.mitra_id) form.mitra_id = selectedProject.mitra_id;
-  }
-  $: if (!showEditModal) {
-    previousJenis = '';
-  }
+
+  $effect(() => {
+    const activityId = $page.params.id;
+    if (activityId && activityId !== lastLoadedId) {
+      lastLoadedId = activityId;
+      void loadActivity(activityId);
+    }
+  });
+
+  $effect(() => {
+    if (!showEditModal) {
+      previousJenis = '';
+      return;
+    }
+
+    if (form.jenis !== previousJenis) {
+      previousJenis = form.jenis;
+      syncMitraFromJenis();
+      return;
+    }
+
+    if (form.jenis === 'Customer' && form.project_id) {
+      syncMitraFromJenis();
+    }
+  });
+
+  $effect(() => {
+    lockBodyScroll(showEditModal);
+    return () => lockBodyScroll(false);
+  });
 </script>
 
 <svelte:head>
@@ -298,38 +238,37 @@
 </svelte:head>
 
 {#if loadingActivity}
-  <p class="text-gray-900 dark:text-white">Memuat detail aktivitas...</p>
+  <LoadingState label="Memuat detail aktivitas..." />
 {:else if errorActivity}
   <p class="text-red-500">{errorActivity}</p>
 {:else if activity}
   <div class="mb-8 w-full min-w-0">
     <div class="mb-4 flex min-w-0 flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-      <div class="flex-1 min-w-0">
-        <h2 class="break-words text-2xl font-bold leading-7 text-gray-900 dark:text-white sm:text-2xl">
+      <div class="min-w-0 flex-1">
+        <h2
+          class="text-2xl leading-7 font-bold break-words text-gray-900 sm:text-2xl dark:text-white"
+        >
           {activity.name}
         </h2>
-        <div class="my-2 flex flex-col sm:flex-row sm:flex-wrap sm:mt-0 sm:space-x-6">
+        <div class="my-2 flex flex-col sm:mt-0 sm:flex-row sm:flex-wrap sm:space-x-6">
           <div class="my-2 flex items-center text-sm text-gray-500 dark:text-gray-300">
             <svg
-              class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400"
+              class="mr-1.5 h-5 w-5 flex-shrink-0 text-gray-400"
               fill="currentColor"
               viewBox="0 0 20 20"
+              aria-hidden="true"
             >
               <path
                 fill-rule="evenodd"
                 d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
                 clip-rule="evenodd"
-              />
+              ></path>
             </svg>
-            Aktivitas: {new Date(activity.activity_date).toLocaleDateString('id-ID', {
-              day: '2-digit',
-              month: 'long',
-              year: 'numeric'
-            })}
+            Aktivitas: {activity.activity_date ? formatDate(activity.activity_date, 'long') : '-'}
           </div>
           <div class="my-2 flex items-center text-sm">
             <span
-              class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 bg-gray-300 dark:bg-gray-700 text-gray-900 dark:text-gray-300"
+              class="inline-flex rounded-full bg-gray-300 px-2 text-xs leading-5 font-semibold text-gray-900 dark:bg-gray-700 dark:text-gray-300"
             >
               {activity.kategori}
             </span>
@@ -339,16 +278,20 @@
       <div class="flex shrink-0 flex-col gap-2 sm:flex-row">
         {#if canUpdateActivity}
           <button
-            on:click={openEditModal}
-            class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800"
+            type="button"
+            onclick={openEditModal}
+            class="inline-flex items-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm
+                   hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:outline-none dark:focus:ring-offset-gray-800"
           >
             Edit Aktivitas
           </button>
         {/if}
         {#if canDeleteActivity}
           <button
-            on:click={handleDelete}
-            class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 dark:focus:ring-offset-gray-800"
+            type="button"
+            onclick={handleDelete}
+            class="inline-flex items-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm
+                   hover:bg-red-700 focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:outline-none dark:focus:ring-offset-gray-800"
           >
             Hapus Aktivitas
           </button>
@@ -356,14 +299,14 @@
       </div>
     </div>
 
-    <div class="bg-white dark:bg-black shadow overflow-hidden">
+    <div class="overflow-hidden bg-white shadow dark:bg-black">
       <div class="px-4 py-5 sm:px-6">
         <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white">
           Informasi Aktivitas
         </h3>
       </div>
       <div class="border-t border-gray-200 dark:border-gray-700">
-        <ActivityDetail activity={activity} />
+        <ActivityDetail {activity} />
       </div>
     </div>
   </div>
@@ -372,10 +315,10 @@
 {#if activity}
   <ActivityFormModal
     bind:show={showEditModal}
+    bind:form
     title="Edit Aktivitas"
     submitLabel="Update Aktivitas"
     idPrefix="edit_activity"
-    {form}
     {projects}
     {vendors}
     {activityKategoriList}
