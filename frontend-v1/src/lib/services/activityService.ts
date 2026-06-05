@@ -28,6 +28,16 @@ export type ActivityListResult = {
   formDeps: ActivityListFormDeps;
 };
 
+export type ExtractedActivity = Partial<
+  Pick<
+    ActivityForm,
+    'name' | 'short_desc' | 'description' | 'kategori' | 'jenis' | 'activity_date' | 'from' | 'to'
+  >
+> & {
+  value?: number | string | null;
+  mitra_id?: number | string | null;
+};
+
 type ResourceResponse<T> = {
   data: T;
   message?: string;
@@ -159,4 +169,28 @@ export async function updateActivity(
 /** Deletes an activity by id. */
 export async function deleteActivity(id: number): Promise<void> {
   await axiosClient.delete(`/activities/${id}`);
+}
+
+/** Extracts activity form fields from an uploaded document through the AI endpoint. */
+export async function extractActivityFromDocument(
+  file: File,
+  projectId?: string | number
+): Promise<ExtractedActivity> {
+  const formData = new FormData();
+  formData.append('action', 'extract');
+  formData.append('document', file);
+
+  if (projectId) {
+    formData.append('project_id', String(projectId));
+  }
+
+  const response = await axiosClient.post<ResourceResponse<ExtractedActivity>>(
+    '/activities',
+    formData,
+    {
+      headers: MULTIPART_HEADERS
+    }
+  );
+
+  return response.data.data;
 }

@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { createEventDispatcher } from 'svelte';
   import { formatFileSize } from '$lib/utils/formatters';
 
   export type FileAttachmentPayload = {
@@ -22,19 +21,9 @@
     description: string;
   };
 
-  type FileAttachmentEvents = {
-    change: FileAttachmentPayload;
-    remove: FileAttachmentRemovePayload;
-    clear: Record<string, never>;
-    nameChange: FileAttachmentNamePayload;
-    descriptionChange: FileAttachmentDescriptionPayload;
-  };
-
-  const dispatch = createEventDispatcher<FileAttachmentEvents>();
-
   /**
    * Props for multi-file upload with bindable files, names, and descriptions.
-   * Callback props are the Svelte 5 API; dispatched events keep existing callers compatible.
+   * Callback props are the Svelte 5 API.
    */
   let {
     label = 'Attachment Files',
@@ -164,7 +153,6 @@
     const payload = getPayload();
     onChange?.(payload);
     onchange?.(payload);
-    dispatch('change', payload);
   }
 
   function applyFiles(nextFiles: File[]): void {
@@ -208,7 +196,6 @@
     const payload = { index, ...getPayload() };
     onRemove?.(payload);
     onremove?.(payload);
-    dispatch('remove', payload);
   }
 
   function handleRemoveAll(): void {
@@ -219,7 +206,6 @@
     emitChange();
     onClear?.();
     onclear?.();
-    dispatch('clear', {});
   }
 
   function handleDragEnter(): void {
@@ -302,7 +288,6 @@
     const payload = { index, name: newName };
     onNameChange?.(payload);
     onnameChange?.(payload);
-    dispatch('nameChange', payload);
     emitChange();
   }
 
@@ -313,7 +298,6 @@
     const payload = { index, description: newVal };
     onDescriptionChange?.(payload);
     ondescriptionChange?.(payload);
-    dispatch('descriptionChange', payload);
     emitChange();
   }
 

@@ -17,10 +17,22 @@ export type AuthTokenResponse = {
   expires_in: number;
 };
 
+export type RegisterPayload = {
+  name: string;
+  email: string;
+  password: string;
+  password_confirmation: string;
+};
+
 /** Sends user credentials to the JWT login endpoint. */
 export async function login(email: string, password: string): Promise<AuthTokenResponse> {
   const response = await axiosClient.post<AuthTokenResponse>('/auth/login', { email, password });
   return response.data;
+}
+
+/** Registers a new user account. */
+export async function register(payload: RegisterPayload): Promise<void> {
+  await axiosClient.post('/auth/register', payload);
 }
 
 /** Invalidates the current JWT token on the backend. */

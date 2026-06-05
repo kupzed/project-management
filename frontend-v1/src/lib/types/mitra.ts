@@ -2,6 +2,11 @@ import type { SortOrder } from './common';
 
 export type MitraCategory = 'pribadi' | 'perusahaan' | 'customer' | 'vendor';
 
+export type MitraKategoriOption = {
+  value: MitraCategory;
+  label: string;
+};
+
 export type Mitra = {
   id: number;
   nama: string;
@@ -62,4 +67,8 @@ export type MitraFilterParams = {
   per_page?: number;
   sort_by?: 'created';
   sort_dir?: SortOrder;
+};
+
+export type MitraFormDependencies = {
+  kategori_options: MitraKategoriOption[];
 };

@@ -1,12 +1,9 @@
 <script lang="ts">
-  import { createEventDispatcher } from 'svelte';
   import type { Snippet } from 'svelte';
-
-  const dispatch = createEventDispatcher<{ close: void }>();
 
   /**
    * Props for a reusable modal shell.
-   * `show` is bindable; close callbacks support Svelte 5 callers while dispatch keeps legacy pages working.
+   * `show` is bindable and close callbacks support Svelte 5 callers.
    */
   let {
     show = $bindable(false),
@@ -28,7 +25,6 @@
     show = false;
     onClose?.();
     onclose?.();
-    dispatch('close');
   }
 
   function handleKeydown(event: KeyboardEvent): void {

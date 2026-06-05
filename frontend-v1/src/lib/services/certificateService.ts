@@ -49,6 +49,19 @@ export async function fetchCertificates(
   };
 }
 
+/** Fetches a single certificate with edit form dependencies. */
+export async function fetchCertificate(id: string | number): Promise<{
+  certificate: Certificate;
+  formDeps: CertificateFormDependencies;
+}> {
+  const response = await axiosClient.get<ResourceResponse<Certificate>>(`/certificates/${id}`);
+
+  return {
+    certificate: response.data.data,
+    formDeps: response.data.form_dependencies ?? getDefaultFormDeps()
+  };
+}
+
 /** Builds multipart certificate payloads for create and edit flows. */
 export function buildCertificateFormData(data: CertificateForm, projectId: number): FormData;
 export function buildCertificateFormData(

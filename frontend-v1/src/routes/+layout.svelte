@@ -4,14 +4,16 @@
   import { goto } from '$app/navigation';
   import { page } from '$app/state';
   import { onMount, type Snippet } from 'svelte';
-  import axiosClient from '$lib/axiosClient';
+  import { confirm } from '$lib/components/common/ConfirmDialog.svelte';
   import MobileSidebar from '$lib/components/layout/MobileSidebar.svelte';
   import Sidebar from '$lib/components/layout/Sidebar.svelte';
   import TopNav from '$lib/components/layout/TopNav.svelte';
   import { getPageTitle } from '$lib/components/layout/nav';
+  import { getMe, logout as authLogout } from '$lib/services/authService';
   import { setPermissions, setRoles } from '$lib/stores/permissions';
   import { theme } from '$lib/stores/theme';
   import { currentUser, setUser } from '$lib/stores/user';
+  import { showError, showSuccess } from '$lib/utils/toast';
 
   let { children }: { children: Snippet } = $props();
 
@@ -28,15 +30,21 @@
   let shellOffset = $derived(sidebarCollapsed ? 'lg:pl-20' : 'lg:pl-64');
 
   async function logout() {
-    if (!confirm('Apakah Anda yakin ingin logout?')) return;
+    const confirmed = await confirm({
+      title: 'Apakah Anda yakin ingin logout?',
+      text: 'Sesi login Anda akan diakhiri.',
+      confirmText: 'Logout'
+    });
+
+    if (!confirmed) return;
 
     try {
-      await axiosClient.post('/auth/logout');
+      await authLogout();
       localStorage.removeItem('jwt_token');
       setUser(null);
       setRoles([]);
       setPermissions([]);
-      alert('Logout berhasil!');
+      showSuccess('Logout berhasil!');
       goto('/auth/login');
     } catch (error) {
       console.error('Logout failed:', error);
@@ -44,7 +52,7 @@
       setUser(null);
       setRoles([]);
       setPermissions([]);
-      alert('Logout gagal, namun Anda telah keluar dari sesi.');
+      showError('Logout gagal, namun Anda telah keluar dari sesi.');
       goto('/auth/login');
     }
   }
@@ -55,17 +63,14 @@
     if ($currentUser) return;
 
     try {
-      const res = await axiosClient.get('/auth/me');
-      if (res.status === 200) {
-        const data = res.data?.data ?? res.data;
-        setUser({
-          id: data.id,
-          name: data.name,
-          email: data.email
-        });
-        setRoles(data.roles ?? []);
-        setPermissions(data.permissions ?? []);
-      }
+      const data = await getMe();
+      setUser({
+        id: data.id,
+        name: data.name,
+        email: data.email
+      });
+      setRoles(data.roles ?? []);
+      setPermissions(data.permissions ?? []);
     } catch (err) {
       console.error('Failed to fetch user data:', err);
     }

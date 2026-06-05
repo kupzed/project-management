@@ -1,13 +1,10 @@
 <script lang="ts">
-  import { createEventDispatcher } from 'svelte';
   import type { Snippet } from 'svelte';
   import { fade, slide } from 'svelte/transition';
 
-  const dispatch = createEventDispatcher<{ close: void }>();
-
   /**
    * Props for a right-side drawer shell.
-   * `show` is bindable; close callbacks support Svelte 5 callers while dispatch keeps legacy pages working.
+   * `show` is bindable and close callbacks support Svelte 5 callers.
    */
   let {
     show = $bindable(false),
@@ -26,9 +23,9 @@
   } = $props();
 
   function closeDrawer(): void {
+    show = false;
     onClose?.();
     onclose?.();
-    dispatch('close');
   }
 
   function handleBackdropClick(event: MouseEvent): void {
