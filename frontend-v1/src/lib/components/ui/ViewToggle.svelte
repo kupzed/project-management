@@ -60,7 +60,7 @@
   tabindex="0"
   onkeydown={handleKeydown}
 >
-  {#each normalizedViews as view}
+  {#each normalizedViews as view (view)}
     <button
       type="button"
       onclick={() => setActiveView(view)}

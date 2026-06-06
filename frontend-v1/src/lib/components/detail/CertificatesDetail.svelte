@@ -1,6 +1,6 @@
 <script lang="ts">
   import { getCertificateStatusBadgeClasses } from '$lib/utils/badges';
-  import { formatFileSize } from '$lib/utils/formatters';
+  import { formatDate, formatFileSize } from '$lib/utils/formatters';
   import { storageUrl } from '$lib/utils/url';
   import type { Attachment } from '$lib/types';
 
@@ -46,10 +46,6 @@
    */
   let { certificates = null }: { certificates?: CertificateDetailPayload | null } = $props();
 
-  function getStatusBadgeClasses(status: string): string {
-    return getCertificateStatusBadgeClasses(status);
-  }
-
   function filenameFromPath(path: string): string {
     try {
       const clean = decodeURIComponent(path);
@@ -81,7 +77,8 @@
       attachment.caption ??
       undefined;
     const sizeLabel =
-      attachment.sizeLabel ?? (typeof attachment.size === 'number' ? formatFileSize(attachment.size) : undefined);
+      attachment.sizeLabel ??
+      (typeof attachment.size === 'number' ? formatFileSize(attachment.size) : undefined);
 
     return { url, filename, displayName, desc, sizeLabel };
   }
@@ -91,10 +88,12 @@
   ): NormalizedAttachment[] {
     if (!attachmentInput) return [];
 
-    return (Array.isArray(attachmentInput) ? attachmentInput : [attachmentInput]).flatMap((item) => {
-      const normalized = normalizeOneAttachment(item);
-      return normalized ? [normalized] : [];
-    });
+    return (Array.isArray(attachmentInput) ? attachmentInput : [attachmentInput]).flatMap(
+      (item) => {
+        const normalized = normalizeOneAttachment(item);
+        return normalized ? [normalized] : [];
+      }
+    );
   }
 
   let attachments = $derived(
@@ -103,23 +102,32 @@
 </script>
 
 {#if certificates}
-  <div class="bg-white dark:bg-black shadow border border-gray-200 dark:border-neutral-800 overflow-hidden sm:rounded-md">
+  <div
+    class="overflow-hidden border border-gray-200 bg-white shadow sm:rounded-md dark:border-neutral-800 dark:bg-black"
+  >
     <dl class="divide-y divide-gray-100 dark:divide-gray-800">
-      <div class="bg-white dark:bg-black px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+      <div class="bg-white px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 dark:bg-black">
         <dt class="text-sm font-medium text-gray-500 dark:text-gray-300">Nama</dt>
-        <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100 sm:mt-0 sm:col-span-2">{certificates.name}</dd>
+        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0 dark:text-gray-100">
+          {certificates.name}
+        </dd>
       </div>
 
-      <div class="bg-white dark:bg-black px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+      <div class="bg-white px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 dark:bg-black">
         <dt class="text-sm font-medium text-gray-500 dark:text-gray-300">No. Sertifikat</dt>
-        <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100 sm:mt-0 sm:col-span-2">{certificates.no_certificate}</dd>
+        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0 dark:text-gray-100">
+          {certificates.no_certificate}
+        </dd>
       </div>
 
-      <div class="bg-white dark:bg-black px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+      <div class="bg-white px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 dark:bg-black">
         <dt class="text-sm font-medium text-gray-500 dark:text-gray-300">Barang</dt>
-        <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100 sm:mt-0 sm:col-span-2">
+        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0 dark:text-gray-100">
           {#if certificates.barang_certificate}
-            <a href={`/barang-certificates/${certificates.barang_certificate.id}`} class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300">
+            <a
+              href={`/barang-certificates/${certificates.barang_certificate.id}`}
+              class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300"
+            >
               {certificates.barang_certificate.name}
             </a>
           {:else}
@@ -128,11 +136,14 @@
         </dd>
       </div>
 
-      <div class="bg-white dark:bg-black px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+      <div class="bg-white px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 dark:bg-black">
         <dt class="text-sm font-medium text-gray-500 dark:text-gray-300">Project</dt>
-        <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100 sm:mt-0 sm:col-span-2">
+        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0 dark:text-gray-100">
           {#if certificates.project}
-            <a href={`/projects/${certificates.project.id}`} class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300">
+            <a
+              href={`/projects/${certificates.project.id}`}
+              class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300"
+            >
               {certificates.project.name}
             </a>
           {:else}
@@ -141,31 +152,33 @@
         </dd>
       </div>
 
-      <div class="bg-white dark:bg-black px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+      <div class="bg-white px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 dark:bg-black">
         <dt class="text-sm font-medium text-gray-500 dark:text-gray-300">Status</dt>
-        <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100 sm:mt-0 sm:col-span-2">
-          <span class={`inline-flex rounded-full px-2 text-xs font-semibold leading-5 ${getStatusBadgeClasses(certificates.status ?? '')}`}>
+        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0 dark:text-gray-100">
+          <span
+            class={`inline-flex rounded-full px-2 text-xs leading-5 font-semibold ${getCertificateStatusBadgeClasses(certificates.status ?? '')}`}
+          >
             {certificates.status}
           </span>
         </dd>
       </div>
 
-      <div class="bg-white dark:bg-black px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+      <div class="bg-white px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 dark:bg-black">
         <dt class="text-sm font-medium text-gray-500 dark:text-gray-300">Tanggal Terbit</dt>
-        <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100 sm:mt-0 sm:col-span-2">
+        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0 dark:text-gray-100">
           {#if certificates.date_of_issue}
-            {new Date(certificates.date_of_issue).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}
+            {formatDate(certificates.date_of_issue)}
           {:else}
             <span class="text-gray-500 dark:text-gray-400">-</span>
           {/if}
         </dd>
       </div>
 
-      <div class="bg-white dark:bg-black px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+      <div class="bg-white px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6 dark:bg-black">
         <dt class="text-sm font-medium text-gray-500 dark:text-gray-300">Tanggal Expired</dt>
-        <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100 sm:mt-0 sm:col-span-2">
+        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0 dark:text-gray-100">
           {#if certificates.date_of_expired}
-            {new Date(certificates.date_of_expired).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}
+            {formatDate(certificates.date_of_expired)}
           {:else}
             <span class="text-gray-500 dark:text-gray-400">-</span>
           {/if}
@@ -173,25 +186,40 @@
       </div>
 
       <!-- ====== Lampiran (nama tampil + deskripsi) ====== -->
-      <div class="bg-white dark:bg-black px-4 py-2 sm:grid-cols-3 sm:gap-4 sm:px-6">
-        <dt class="text-sm mb-2 font-medium text-gray-500 dark:text-gray-300">Lampiran</dt>
-        <dd class="mt-1 text-sm grid grid-cols-1 sm:col-span-2">
+      <div class="bg-white px-4 py-2 sm:grid-cols-3 sm:gap-4 sm:px-6 dark:bg-black">
+        <dt class="mb-2 text-sm font-medium text-gray-500 dark:text-gray-300">Lampiran</dt>
+        <dd class="mt-1 grid grid-cols-1 text-sm sm:col-span-2">
           {#if attachments.length}
-            <ul role="list" class="divide-y divide-gray-100 dark:divide-white/5 rounded-md border border-gray-200/80 dark:border-white/20">
-              {#each attachments as file}
+            <ul
+              role="list"
+              class="divide-y divide-gray-100 rounded-md border border-gray-200/80 dark:divide-white/5 dark:border-white/20"
+            >
+              {#each attachments as file (file.url)}
                 <li class="py-4 pr-5 pl-4">
                   <div class="flex items-start gap-3">
                     <!-- Icon -->
-                    <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" class="w-5 h-5 shrink-0 text-gray-500 mt-0.5">
-                      <path fill-rule="evenodd" clip-rule="evenodd"
-                        d="M15.621 4.379a3 3 0 0 0-4.242 0l-7 7a3 3 0 0 0 4.241 4.243h.001l.497-.5a.75.75 0 0 1 1.064 1.057l-.498.501-.002.002a4.5 4.5 0 0 1-6.364-6.364l7-7a4.5 4.5 0 0 1 6.368 6.36l-3.455 3.553A2.625 2.625 0 1 1 9.52 9.52l3.45-3.451a.75.75 0 1 1 1.061 1.06l-3.45 3.451a1.125 1.125 0 0 0 1.587 1.595l3.454-3.553a3 3 0 0 0 0-4.242Z" />
+                    <svg
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                      aria-hidden="true"
+                      class="mt-0.5 h-5 w-5 shrink-0 text-gray-500"
+                    >
+                      <path
+                        fill-rule="evenodd"
+                        clip-rule="evenodd"
+                        d="M15.621 4.379a3 3 0 0 0-4.242 0l-7 7a3 3 0 0 0 4.241 4.243h.001l.497-.5a.75.75 0 0 1 1.064 1.057l-.498.501-.002.002a4.5 4.5 0 0 1-6.364-6.364l7-7a4.5 4.5 0 0 1 6.368 6.36l-3.455 3.553A2.625 2.625 0 1 1 9.52 9.52l3.45-3.451a.75.75 0 1 1 1.061 1.06l-3.45 3.451a1.125 1.125 0 0 0 1.587 1.595l3.454-3.553a3 3 0 0 0 0-4.242Z"
+                      />
                     </svg>
 
                     <div class="min-w-0 flex-1">
                       <div class="flex items-center gap-2">
-                        <span class="font-medium text-gray-900 dark:text-white">{file.displayName}</span>
+                        <span class="font-medium text-gray-900 dark:text-white"
+                          >{file.displayName}</span
+                        >
                         {#if file.sizeLabel}
-                          <span class="shrink-0 text-xs text-gray-500 dark:text-gray-400">{file.sizeLabel}</span>
+                          <span class="shrink-0 text-xs text-gray-500 dark:text-gray-400"
+                            >{file.sizeLabel}</span
+                          >
                         {/if}
                       </div>
                       {#if file.desc}
@@ -205,13 +233,22 @@
                         target="_blank"
                         rel="noopener"
                         download
-                        class="inline-flex items-center justify-center rounded-md p-1 hover:bg-gray-100 dark:hover:bg-white/10
-                               text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300
-                               focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                        class="inline-flex items-center justify-center rounded-md p-1 text-indigo-600 hover:bg-gray-100
+                               hover:text-indigo-700 focus:ring-2 focus:ring-indigo-500/50 focus:outline-none
+                               dark:text-indigo-400 dark:hover:bg-white/10 dark:hover:text-indigo-300"
                         aria-label={`Download ${file.displayName}`}
                         title={`Download ${file.displayName}`}
                       >
-                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <svg
+                          class="h-5 w-5"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="1.8"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          aria-hidden="true"
+                        >
                           <path d="M12 3v12m0 0 4-4m-4 4-4-4"></path>
                           <path d="M5 21h14"></path>
                         </svg>

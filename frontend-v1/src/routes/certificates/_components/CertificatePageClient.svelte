@@ -84,7 +84,6 @@
 
   let items = $state<Certificate[]>([]);
   let projects = $state<ProjectSummary[]>([]);
-  let barangCertificates = $state<Option[]>([]);
   let filteredBarangCertificates = $state<Option[]>([]);
   let statuses = $state<CertificateStatus[]>([]);
   let loading = $state(true);
@@ -131,7 +130,6 @@
       const result = await fetchCertificates(getParams());
       items = result.data;
       projects = result.formDeps.projects;
-      barangCertificates = result.formDeps.barang_certificates;
       statuses = result.formDeps.statuses;
       filteredBarangCertificates = result.formDeps.barang_options;
       currentPage = result.meta.current_page;
@@ -194,7 +192,6 @@
 
   function openCreateModal(): void {
     if (!canCreateCertificate) {
-      console.warn('User lacks certificate-create permission');
       return;
     }
 
@@ -205,7 +202,6 @@
 
   function openEditModal(item: Certificate): void {
     if (!canUpdateCertificate) {
-      console.warn('User lacks certificate-update permission');
       return;
     }
 
@@ -226,7 +222,6 @@
 
   async function handleSubmitCreate(): Promise<void> {
     if (!canCreateCertificate) {
-      console.warn('Create certificate blocked by permission');
       return;
     }
 
@@ -242,7 +237,6 @@
 
   async function handleSubmitUpdate(): Promise<void> {
     if (!canUpdateCertificate) {
-      console.warn('Update certificate blocked by permission');
       return;
     }
     if (!editingItem?.id) return;
@@ -259,7 +253,6 @@
 
   async function handleDelete(id: number): Promise<void> {
     if (!canDeleteCertificate) {
-      console.warn('Delete certificate blocked by permission');
       return;
     }
 

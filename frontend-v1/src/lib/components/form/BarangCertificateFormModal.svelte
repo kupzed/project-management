@@ -110,7 +110,7 @@
                      sm:text-sm/6 dark:bg-neutral-900 dark:text-gray-100 dark:outline-gray-700"
             >
               <option value="">Pilih Mitra</option>
-              {#each mitras as m}
+              {#each mitras as m (m.id)}
                 <option value={m.id}>{m.nama}</option>
               {/each}
             </select>

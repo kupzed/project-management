@@ -35,42 +35,7 @@
   import ProjectFilterBar from './ProjectFilterBar.svelte';
   import ProjectListView from './ProjectListView.svelte';
   import ProjectTableView from './ProjectTableView.svelte';
-
-  type View = 'table' | 'list';
-
-  function defaultProjectForm(): ProjectForm {
-    return {
-      name: '',
-      description: '',
-      status: '',
-      start_date: '',
-      finish_date: '',
-      mitra_id: '',
-      kategori: '',
-      lokasi: '',
-      no_po: '',
-      no_so: '',
-      is_cert_projects: false
-    };
-  }
-
-  function isRecord(value: unknown): value is Record<string, unknown> {
-    return typeof value === 'object' && value !== null;
-  }
-
-  function isMitraSummaryArray(value: unknown): value is MitraSummary[] {
-    return (
-      Array.isArray(value) &&
-      value.every((item) => {
-        if (!isRecord(item)) return false;
-        return typeof item.id === 'number' && typeof item.nama === 'string';
-      })
-    );
-  }
-
-  function toStringList<T extends string>(value: unknown): T[] {
-    return Array.isArray(value) ? value.filter((item): item is T => typeof item === 'string') : [];
-  }
+  import { defaultProjectForm, isMitraSummaryArray, toStringList, type View } from './project-page';
 
   let projects = $state<Project[]>([]);
   let customers = $state<MitraSummary[]>([]);

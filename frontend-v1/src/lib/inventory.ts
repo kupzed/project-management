@@ -91,15 +91,6 @@ export const STOCK_MOVEMENT_TYPE_OPTIONS: Array<{ value: StockMovementType; labe
   { value: 'project_allocation', label: 'Alokasi Project' }
 ];
 
-type ApiError = {
-  response?: {
-    data?: {
-      message?: string;
-      errors?: Record<string, string[]>;
-    };
-  };
-};
-
 export function normalizeMeta<T>(
   payload: PaginatedResponse<T>,
   fallbackLength: number
@@ -110,32 +101,6 @@ export function normalizeMeta<T>(
     per_page: payload.meta?.per_page ?? fallbackLength,
     total: payload.meta?.total ?? fallbackLength
   };
-}
-
-export function getApiErrorMessage(error: unknown, fallback: string): string {
-  const apiError = error as ApiError;
-  const errors = apiError.response?.data?.errors;
-
-  if (errors) {
-    return Object.values(errors).flat().join('\n');
-  }
-
-  return apiError.response?.data?.message ?? fallback;
-}
-
-export function formatDateTime(value?: string | null): string {
-  if (!value) return '-';
-
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
-
-  return new Intl.DateTimeFormat('id-ID', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  }).format(date);
 }
 
 export function formatNumber(value: number | string | null | undefined): string {

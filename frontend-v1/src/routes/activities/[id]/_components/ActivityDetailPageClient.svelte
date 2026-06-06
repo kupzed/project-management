@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { SvelteMap } from 'svelte/reactivity';
   import { goto } from '$app/navigation';
   import { page } from '$app/stores';
   import ActivityDetail from '$lib/components/detail/ActivityDetail.svelte';
@@ -99,7 +100,7 @@
     vendors: NamedOption[],
     customers: NamedOption[]
   ): ActivityProjectOption[] {
-    const mitraMap = new Map<number, NamedOption>();
+    const mitraMap = new SvelteMap<number, NamedOption>();
     vendors.forEach((vendor) => mitraMap.set(vendor.id, vendor));
     customers.forEach((customer) => mitraMap.set(customer.id, customer));
 

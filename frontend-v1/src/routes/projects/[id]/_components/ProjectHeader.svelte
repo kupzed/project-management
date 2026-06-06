@@ -4,8 +4,8 @@
   import type { Project } from '$lib/types';
 
   /**
-  * Header props for project identity and permission-gated project actions.
-  */
+   * Header props for project identity and permission-gated project actions.
+   */
   let {
     project,
     canUpdate,

@@ -1,25 +1,14 @@
 <script lang="ts">
   import { formatFileSize } from '$lib/utils/formatters';
-
-  export type FileAttachmentPayload = {
-    files: File[];
-    fileNames: string[];
-    fileDescriptions: string[];
-  };
-
-  export type FileAttachmentRemovePayload = FileAttachmentPayload & {
-    index: number;
-  };
-
-  export type FileAttachmentNamePayload = {
-    index: number;
-    name: string;
-  };
-
-  export type FileAttachmentDescriptionPayload = {
-    index: number;
-    description: string;
-  };
+  import FileAttachmentItem from './FileAttachmentItem.svelte';
+  import {
+    dedupeFiles,
+    validateFileSizes,
+    type FileAttachmentDescriptionPayload,
+    type FileAttachmentNamePayload,
+    type FileAttachmentPayload,
+    type FileAttachmentRemovePayload
+  } from './file-attachment';
 
   /**
    * Props for multi-file upload with bindable files, names, and descriptions.
@@ -106,34 +95,6 @@
     return { files, fileNames, fileDescriptions };
   }
 
-  function dedupeBySignature(arr: File[]): File[] {
-    const seen = new Set<string>();
-    const out: File[] = [];
-
-    for (const file of arr) {
-      const signature = `${file.name}|${file.size}|${file.lastModified}`;
-      if (!seen.has(signature)) {
-        seen.add(signature);
-        out.push(file);
-      }
-    }
-
-    return out;
-  }
-
-  function validateFiles(arr: File[]): { ok: boolean; reason?: string } {
-    for (const file of arr) {
-      if (maxSizeBytes && file.size > maxSizeBytes) {
-        return {
-          ok: false,
-          reason: `Ukuran "${file.name}" melebihi ${formatFileSize(maxSizeBytes)}.`
-        };
-      }
-    }
-
-    return { ok: true };
-  }
-
   function syncToInput(current: File[]): void {
     if (!fileInput) {
       return;
@@ -168,9 +129,9 @@
 
   function appendFiles(newFiles: File[]): void {
     errorMsg = null;
-    const combined = dedupeBySignature([...files, ...newFiles]);
+    const combined = dedupeFiles([...files, ...newFiles]);
     const limited = combined.slice(0, maxFiles);
-    const { ok, reason } = validateFiles(limited);
+    const { ok, reason } = validateFileSizes(limited, maxSizeBytes);
 
     if (!ok) {
       errorMsg = reason ?? invalidFileText;
@@ -234,53 +195,6 @@
 
   function triggerPicker(): void {
     fileInput?.click();
-  }
-
-  function shortenMiddle(name: string, max = 36): string {
-    if (!name || name.length <= max) {
-      return name;
-    }
-
-    const head = Math.ceil((max - 1) / 2);
-    const tail = Math.floor((max - 1) / 2);
-    return `${name.slice(0, head)}...${name.slice(-tail)}`;
-  }
-
-  function getFileIcon(fileName: string): string {
-    const ext = fileName.split('.').pop()?.toLowerCase();
-    switch (ext) {
-      case 'pdf':
-        return '\u{1F4C4}';
-      case 'jpg':
-      case 'jpeg':
-      case 'png':
-      case 'gif':
-      case 'webp':
-      case 'svg':
-        return '\u{1F5BC}\uFE0F';
-      case 'doc':
-      case 'docx':
-        return '\u{1F4DD}';
-      case 'xls':
-      case 'xlsx':
-        return '\u{1F4CA}';
-      case 'txt':
-        return '\u{1F4C3}';
-      case 'mp4':
-      case 'avi':
-      case 'mov':
-      case 'wmv':
-      case 'flv':
-      case 'webm':
-        return '\u{1F3A5}';
-      case 'mp3':
-      case 'wav':
-      case 'ogg':
-      case 'm4a':
-        return '\u{1F3B5}';
-      default:
-        return '\u{1F4CE}';
-    }
   }
 
   function updateFileName(index: number, newName: string): void {
@@ -387,78 +301,21 @@
   >
     {#if files.length > 0}
       <div class="space-y-3 text-left">
-        {#each files as file, index}
-          <div class="flex items-start gap-3 rounded-lg bg-gray-50 p-3 dark:bg-gray-800">
-            <span class="shrink-0 text-xl">{getFileIcon(file.name)}</span>
-            <div class="min-w-0 flex-1 space-y-2">
-              <input
-                type="text"
-                value={fileNames[index] ?? ''}
-                required
-                onclick={(event) => event.stopPropagation()}
-                onmousedown={(event) => event.stopPropagation()}
-                oninput={(event) => updateFileName(index, event.currentTarget.value)}
-                placeholder={fileNamePlaceholder}
-                class="w-full rounded border border-gray-300 bg-white px-2 py-1 text-sm
-                      text-gray-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500
-                      dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-              />
-              <input
-                type="text"
-                value={fileDescriptions[index] ?? ''}
-                onclick={(event) => event.stopPropagation()}
-                onmousedown={(event) => event.stopPropagation()}
-                oninput={(event) => updateFileDesc(index, event.currentTarget.value)}
-                placeholder={fileDescriptionPlaceholder}
-                class="w-full rounded border border-gray-300 bg-white px-2 py-1 text-sm
-                      text-gray-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500
-                      dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-              />
-              <div
-                class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400"
-              >
-                <span title={file.name} class="truncate">{shortenMiddle(file.name)}</span>
-                <span class="ml-2">{formatFileSize(file.size)}</span>
-                <span class="ml-auto flex items-center gap-1">
-                  <svg
-                    class="h-3 w-3 text-green-500"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M5 13l4 4L19 7"
-                    />
-                  </svg>
-                  {selectedFileText}
-                </span>
-              </div>
-            </div>
-            {#if showRemoveButton}
-              <button
-                type="button"
-                onclick={(event) => {
-                  event.stopPropagation();
-                  handleRemoveFile(index);
-                }}
-                class="shrink-0 rounded p-1 text-red-600 transition hover:bg-red-50
-                      hover:text-red-800 dark:text-red-400 dark:hover:bg-red-900/20 dark:hover:text-red-300"
-                aria-label={`${removeFileText} ${file.name}`}
-              >
-                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                  />
-                </svg>
-              </button>
-            {/if}
-          </div>
+        {#each files as file, index (file)}
+          <FileAttachmentItem
+            {file}
+            {index}
+            name={fileNames[index] ?? ''}
+            description={fileDescriptions[index] ?? ''}
+            namePlaceholder={fileNamePlaceholder}
+            descriptionPlaceholder={fileDescriptionPlaceholder}
+            selectedText={selectedFileText}
+            removeText={removeFileText}
+            {showRemoveButton}
+            onNameChange={updateFileName}
+            onDescriptionChange={updateFileDesc}
+            onRemove={handleRemoveFile}
+          />
         {/each}
       </div>
     {:else}

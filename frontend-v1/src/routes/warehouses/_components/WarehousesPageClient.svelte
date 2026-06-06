@@ -2,7 +2,6 @@
   import { onMount } from 'svelte';
   import Drawer from '$lib/components/Drawer.svelte';
   import Modal from '$lib/components/Modal.svelte';
-  import Pagination from '$lib/components/Pagination.svelte';
   import { confirm } from '$lib/components/common/ConfirmDialog.svelte';
   import {
     createWarehouse,
@@ -16,6 +15,7 @@
   import { showError, showSuccess } from '$lib/utils/toast';
   import { extractApiErrors } from '$lib/utils/errors';
   import { formatNumber, type Warehouse } from '$lib/inventory';
+  import WarehouseTable from './WarehouseTable.svelte';
 
   let warehouses = $state<Warehouse[]>([]);
   let selectedWarehouse = $state<Warehouse | null>(null);
@@ -210,145 +210,23 @@
     </div>
   </div>
 
-  <div class="overflow-hidden rounded-lg bg-white shadow-sm dark:bg-black">
-    <div class="overflow-x-auto">
-      <table class="w-full min-w-[860px] divide-y divide-gray-200 dark:divide-gray-800">
-        <thead class="bg-gray-50 dark:bg-neutral-900">
-          <tr>
-            <th
-              class="px-4 py-3 text-left text-xs font-bold tracking-wide text-gray-500 uppercase dark:text-gray-300"
-            >
-              Gudang
-            </th>
-            <th
-              class="px-4 py-3 text-left text-xs font-bold tracking-wide text-gray-500 uppercase dark:text-gray-300"
-            >
-              Lokasi
-            </th>
-            <th
-              class="px-4 py-3 text-right text-xs font-bold tracking-wide text-gray-500 uppercase dark:text-gray-300"
-            >
-              Item Stok
-            </th>
-            <th
-              class="px-4 py-3 text-right text-xs font-bold tracking-wide text-gray-500 uppercase dark:text-gray-300"
-            >
-              Aksi
-            </th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
-          {#if loading}
-            <tr>
-              <td colspan="4" class="px-4 py-8 text-center text-sm text-gray-500"
-                >Memuat gudang...</td
-              >
-            </tr>
-          {:else if error}
-            <tr>
-              <td colspan="4" class="px-4 py-8 text-center text-sm text-red-600">{error}</td>
-            </tr>
-          {:else if warehouses.length === 0}
-            <tr>
-              <td colspan="4" class="px-4 py-8 text-center text-sm text-gray-500"
-                >Belum ada gudang.</td
-              >
-            </tr>
-          {:else}
-            {#each warehouses as warehouse (warehouse.id)}
-              <tr class="hover:bg-gray-50 dark:hover:bg-neutral-950">
-                <td class="px-4 py-4 text-sm font-semibold text-gray-900 dark:text-gray-100">
-                  {warehouse.name}
-                </td>
-                <td class="px-4 py-4 text-sm text-gray-600 dark:text-gray-300">
-                  {warehouse.location || '-'}
-                </td>
-                <td
-                  class="px-4 py-4 text-right text-sm font-semibold text-gray-700 dark:text-gray-200"
-                >
-                  {formatNumber(warehouse.inventories_count ?? 0)}
-                </td>
-                <td class="px-4 py-4 text-right">
-                  <div class="inline-flex items-center gap-2">
-                    <button
-                      type="button"
-                      onclick={() => void openDetailDrawer(warehouse)}
-                      class="rounded-md p-2 text-yellow-600 hover:bg-yellow-50 hover:text-yellow-800 dark:text-yellow-400 dark:hover:bg-yellow-950"
-                      title="Detail"
-                      aria-label="Detail gudang"
-                    >
-                      <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-width="2"
-                          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                        />
-                        <path
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-width="2"
-                          d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                        />
-                      </svg>
-                    </button>
-
-                    {#if canUpdate}
-                      <button
-                        type="button"
-                        onclick={() => openEditModal(warehouse)}
-                        class="rounded-md p-2 text-blue-600 hover:bg-blue-50 hover:text-blue-800 dark:text-blue-400 dark:hover:bg-blue-950"
-                        title="Edit"
-                        aria-label="Edit gudang"
-                      >
-                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                          />
-                        </svg>
-                      </button>
-                    {/if}
-
-                    {#if canDelete}
-                      <button
-                        type="button"
-                        onclick={() => void deleteWarehouse(warehouse)}
-                        class="rounded-md p-2 text-red-600 hover:bg-red-50 hover:text-red-800 dark:text-red-400 dark:hover:bg-red-950"
-                        title="Hapus"
-                        aria-label="Hapus gudang"
-                      >
-                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7h6m2 0H7m3 0V5a2 2 0 012-2h0a2 2 0 012 2v2"
-                          />
-                        </svg>
-                      </button>
-                    {/if}
-                  </div>
-                </td>
-              </tr>
-            {/each}
-          {/if}
-        </tbody>
-      </table>
-    </div>
-
-    <Pagination
-      {currentPage}
-      {lastPage}
-      {totalItems}
-      itemsPerPage={perPage}
-      {perPageOptions}
-      onPageChange={handlePageChange}
-      onPerPageChange={handlePerPageChange}
-    />
-  </div>
+  <WarehouseTable
+    {warehouses}
+    {loading}
+    {error}
+    {currentPage}
+    {lastPage}
+    {totalItems}
+    {perPage}
+    {perPageOptions}
+    {canUpdate}
+    {canDelete}
+    onDetail={openDetailDrawer}
+    onEdit={openEditModal}
+    onDelete={deleteWarehouse}
+    onPageChange={handlePageChange}
+    onPerPageChange={handlePerPageChange}
+  />
 </div>
 
 <Modal bind:show={showModal} title={editingWarehouse ? 'Edit Gudang' : 'Tambah Gudang'}>

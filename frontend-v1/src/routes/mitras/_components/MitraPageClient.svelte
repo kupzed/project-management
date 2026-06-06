@@ -158,7 +158,6 @@
 
   function openCreateModal(): void {
     if (!canCreateMitra) {
-      console.warn('User lacks mitra-create permission');
       return;
     }
 
@@ -168,7 +167,6 @@
 
   function openEditModal(mitra: Mitra): void {
     if (!canUpdateMitra) {
-      console.warn('User lacks mitra-update permission');
       return;
     }
 
@@ -184,7 +182,6 @@
 
   async function handleSubmitCreate(): Promise<void> {
     if (!canCreateMitra) {
-      console.warn('Create mitra blocked by permission');
       return;
     }
 
@@ -215,7 +212,6 @@
 
   async function handleDelete(mitraId: number): Promise<void> {
     if (!canDeleteMitra) {
-      console.warn('Delete mitra blocked by permission');
       return;
     }
 

@@ -5,53 +5,14 @@
   import { extractActivityFromDocument } from '$lib/services/activityService';
   import { extractApiErrors } from '$lib/utils/errors';
   import { formatFileSize } from '$lib/utils/formatters';
-  import type { ExistingAttachment, Project } from '$lib/types';
-
-  type ActivityModalForm = {
-    name: string;
-    short_desc: string;
-    description: string;
-    project_id: string | number | '';
-    kategori: string;
-    activity_date: string;
-    jenis: string;
-    mitra_id?: number | string | '' | null;
-    from?: string;
-    to?: string;
-    value: number | string;
-    attachments: File[];
-    attachment_names: string[];
-    attachment_descriptions: string[];
-    existing_attachments?: Array<
-      Omit<ExistingAttachment, 'path' | 'url'> & { path?: string; url?: string | null }
-    >;
-    removed_existing_ids?: number[];
-  };
-  type ActivityModalEditForm = ActivityModalForm & {
-    existing_attachments: ExistingAttachment[];
-    removed_existing_ids: number[];
-  };
-
-  type ProjectOption = Pick<Project, 'id' | 'name' | 'mitra_id' | 'mitra'>;
-  type VendorOption = { id: number; nama: string };
-  function makeDefaultForm(): ActivityModalForm {
-    return {
-      name: '',
-      short_desc: '',
-      description: '',
-      project_id: '',
-      kategori: '',
-      value: 0,
-      activity_date: '',
-      jenis: '',
-      mitra_id: '',
-      from: '',
-      to: '',
-      attachments: [],
-      attachment_names: [],
-      attachment_descriptions: []
-    };
-  }
+  import ActivityFormFields from './ActivityFormFields.svelte';
+  import {
+    makeDefaultActivityForm,
+    type ActivityModalEditForm,
+    type ActivityModalForm,
+    type ProjectOption,
+    type VendorOption
+  } from './activity-form';
 
   /**
    * Activity form modal props. `show` and `form` are bindable for create/edit state.
@@ -63,7 +24,7 @@
     idPrefix = 'activity',
     allowRemoveAttachment = true,
     showProjectSelect = true,
-    form = $bindable(makeDefaultForm()),
+    form = $bindable(makeDefaultActivityForm()),
     projects = [],
     vendors = [],
     activityKategoriList = [],
@@ -266,201 +227,20 @@
 
   <form onsubmit={handleFormSubmit} autocomplete="off">
     <fieldset disabled={isSubmitting || isExtracting} class="space-y-4">
-      <div>
-        <label
-          for={`${idPrefix}_name`}
-          class="block text-sm/6 font-medium text-gray-900 dark:text-white">Nama Aktivitas</label
-        >
-        <input
-          id={`${idPrefix}_name`}
-          type="text"
-          bind:value={form.name}
-          required
-          placeholder="Masukkan nama aktivitas"
-          class="mt-2 block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6 dark:bg-neutral-900 dark:text-gray-100 dark:outline-gray-700 dark:placeholder:text-gray-500"
-        />
-      </div>
-
-      {#if showProjectSelect}
-        <div>
-          <label
-            for={`${idPrefix}_project_id`}
-            class="block text-sm/6 font-medium text-gray-900 dark:text-white">Project</label
-          >
-          <select
-            id={`${idPrefix}_project_id`}
-            bind:value={form.project_id}
-            required
-            class="mt-2 block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6 dark:bg-neutral-900 dark:text-gray-100 dark:outline-gray-700"
-          >
-            <option value="">Pilih Project</option>
-            {#each projects as project (project.id)}<option value={project.id}
-                >{project.name}</option
-              >{/each}
-          </select>
-        </div>
-      {/if}
-
-      <div>
-        <label
-          for={`${idPrefix}_jenis`}
-          class="block text-sm/6 font-medium text-gray-900 dark:text-white">Jenis</label
-        >
-        <select
-          id={`${idPrefix}_jenis`}
-          bind:value={form.jenis}
-          required
-          class="mt-2 block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6 dark:bg-neutral-900 dark:text-gray-100 dark:outline-gray-700"
-        >
-          <option value="">Pilih Jenis</option>
-          {#each activityJenisList as jenis}<option value={jenis}>{jenis}</option>{/each}
-        </select>
-      </div>
-
-      {#if form.jenis === 'Customer'}
-        <p class="text-sm text-gray-500 dark:text-gray-400">
-          Customer akan otomatis dipilih berdasarkan Project.
-        </p>
-      {:else if form.jenis === 'Vendor'}
-        <div>
-          <label
-            for={`${idPrefix}_mitra_id_vendor`}
-            class="block text-sm/6 font-medium text-gray-900 dark:text-white">Vendor</label
-          >
-          <select
-            id={`${idPrefix}_mitra_id_vendor`}
-            bind:value={form.mitra_id}
-            required
-            class="mt-2 block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6 dark:bg-neutral-900 dark:text-gray-100 dark:outline-gray-700"
-          >
-            <option value="">Pilih Vendor</option>
-            {#each vendors as vendor (vendor.id)}<option value={vendor.id}>{vendor.nama}</option
-              >{/each}
-          </select>
-        </div>
-      {/if}
-
-      <div>
-        <label
-          for={`${idPrefix}_kategori`}
-          class="block text-sm/6 font-medium text-gray-900 dark:text-white">Kategori</label
-        >
-        <select
-          id={`${idPrefix}_kategori`}
-          bind:value={form.kategori}
-          required
-          class="mt-2 block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6 dark:bg-neutral-900 dark:text-gray-100 dark:outline-gray-700"
-        >
-          <option value="">Pilih Kategori</option>
-          {#each activityKategoriList as kategori}<option value={kategori}>{kategori}</option
-            >{/each}
-        </select>
-      </div>
-
-      <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <div>
-          <label
-            for={`${idPrefix}_from`}
-            class="block text-sm/6 font-medium text-gray-900 dark:text-white">From (Optional)</label
-          >
-          <input
-            id={`${idPrefix}_from`}
-            bind:value={form.from}
-            placeholder="Dari"
-            class="mt-2 block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6 dark:bg-neutral-900 dark:text-gray-100 dark:outline-gray-700 dark:placeholder:text-gray-500"
-          />
-        </div>
-        <div>
-          <label
-            for={`${idPrefix}_to`}
-            class="block text-sm/6 font-medium text-gray-900 dark:text-white">To (Optional)</label
-          >
-          <input
-            id={`${idPrefix}_to`}
-            bind:value={form.to}
-            placeholder="Ke"
-            class="mt-2 block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6 dark:bg-neutral-900 dark:text-gray-100 dark:outline-gray-700 dark:placeholder:text-gray-500"
-          />
-        </div>
-      </div>
-
-      <div>
-        <label
-          for={`${idPrefix}_short_desc`}
-          class="block text-sm/6 font-medium text-gray-900 dark:text-white"
-          >Deskripsi Singkat (Max: 80 Karakter)</label
-        >
-        <textarea
-          id={`${idPrefix}_short_desc`}
-          bind:value={form.short_desc}
-          oninput={trimShortDescription}
-          rows="2"
-          required
-          maxlength={MAX_SHORT_DESC}
-          placeholder="Masukkan deskripsi singkat"
-          class="mt-2 block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6 dark:bg-neutral-900 dark:text-gray-100 dark:outline-gray-700 dark:placeholder:text-gray-500"
-        ></textarea>
-        <div class="mt-1 text-right text-xs text-gray-500 dark:text-gray-400">
-          {shortDescLen}/{MAX_SHORT_DESC}
-        </div>
-      </div>
-
-      <div>
-        <label
-          for={`${idPrefix}_description`}
-          class="block text-sm/6 font-medium text-gray-900 dark:text-white">Deskripsi</label
-        >
-        <textarea
-          id={`${idPrefix}_description`}
-          bind:value={form.description}
-          rows="4"
-          required
-          placeholder="Masukkan deskripsi aktivitas"
-          class="mt-2 block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6 dark:bg-neutral-900 dark:text-gray-100 dark:outline-gray-700 dark:placeholder:text-gray-500"
-        ></textarea>
-      </div>
-
-      {#if showValueInput}
-        <div
-          class="rounded-lg border border-emerald-100 bg-emerald-50 p-4 transition-all duration-300 ease-in-out dark:border-emerald-800 dark:bg-emerald-900/20"
-        >
-          <label
-            for={`${idPrefix}_value`}
-            class="mb-1 block text-sm font-medium text-emerald-800 dark:text-emerald-400"
-            >Nilai / Value (Rp)</label
-          >
-          <input
-            id={`${idPrefix}_value`}
-            type="number"
-            step="0.01"
-            min="0"
-            bind:value={form.value}
-            class="block w-full rounded-md border-emerald-300 bg-white py-1 pl-3 text-gray-900 focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm dark:border-emerald-700 dark:bg-neutral-900 dark:text-white"
-            placeholder="0.00"
-            required={showValueInput}
-          />
-          <div class="mt-1 flex items-start justify-between">
-            <p class="text-xs text-emerald-600 dark:text-emerald-500">Wajib diisi (Angka saja).</p>
-            <p class="text-sm font-semibold text-emerald-700 dark:text-emerald-400">
-              Terbaca: {formattedValuePreview}
-            </p>
-          </div>
-        </div>
-      {/if}
-
-      <div>
-        <label
-          for={`${idPrefix}_activity_date`}
-          class="block text-sm/6 font-medium text-gray-900 dark:text-white">Tanggal Aktivitas</label
-        >
-        <input
-          id={`${idPrefix}_activity_date`}
-          type="date"
-          bind:value={form.activity_date}
-          required
-          class="mt-2 block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6 dark:bg-neutral-900 dark:text-gray-100 dark:outline-gray-700"
-        />
-      </div>
+      <ActivityFormFields
+        bind:form
+        {idPrefix}
+        {showProjectSelect}
+        {projects}
+        {vendors}
+        {activityKategoriList}
+        {activityJenisList}
+        maxShortDescription={MAX_SHORT_DESC}
+        shortDescriptionLength={shortDescLen}
+        {showValueInput}
+        {formattedValuePreview}
+        onTrimShortDescription={trimShortDescription}
+      />
 
       <FileAttachment
         id={`${idPrefix}_attachments`}
@@ -544,16 +324,5 @@
   :global(.break-all) {
     word-break: break-all;
     overflow-wrap: anywhere;
-  }
-
-  input[type='number']::-webkit-inner-spin-button,
-  input[type='number']::-webkit-outer-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-  }
-
-  input[type='number'] {
-    appearance: textfield;
-    -moz-appearance: textfield;
   }
 </style>

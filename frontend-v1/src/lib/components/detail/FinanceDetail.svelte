@@ -84,7 +84,6 @@
 
   async function handleSave(): Promise<void> {
     if (!canUpdateFinance) {
-      console.warn('User lacks finance-update permission');
       return;
     }
     if (!activity?.id) return;

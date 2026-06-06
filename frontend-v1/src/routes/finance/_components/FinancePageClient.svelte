@@ -142,10 +142,6 @@
     }
   }
 
-  function formatRupiah(val: number) {
-    return formatCurrency(val);
-  }
-
   onMount(() => {
     void fetchReport();
     void fetchProjects();
@@ -171,7 +167,7 @@
           ...row,
           ...detail.item, // Update with data from new FinanceResource
           value: nextValue,
-          value_formatted: detail.value_formatted ?? formatRupiah(nextValue)
+          value_formatted: detail.value_formatted ?? formatCurrency(nextValue)
         };
       }
       return row;
@@ -296,25 +292,6 @@
       </button>
     </div>
   </div>
-
-  <!-- <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-    <div class="bg-white dark:bg-black p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 md:col-span-1">
-      <p class="text-gray-500 dark:text-gray-400 text-sm font-medium uppercase tracking-wide">
-        {reportMode === 'month' ? 'Total Nilai (Periode Terpilih)' : 'Total Nilai (Project Terpilih)'}
-      </p>
-      <h2 class="text-3xl font-bold text-emerald-600 dark:text-emerald-400 mt-2">
-        {formatRupiah(meta.total_value || 0)}
-      </h2>
-      <p class="text-xs text-gray-400 mt-1">
-        {reportMode === 'month' && meta.period
-          ? `Periode ${meta.period}`
-          : reportMode === 'project' && meta?.project?.name
-            ? `Project ${meta.project.name}`
-            : ''}
-      </p>
-      <p class="text-xs text-gray-400 mt-1">Total {meta.total_records} transaksi</p>
-    </div>
-  </div> -->
 
   <div class="overflow-hidden bg-white shadow-sm dark:bg-black">
     <div class="overflow-x-auto">

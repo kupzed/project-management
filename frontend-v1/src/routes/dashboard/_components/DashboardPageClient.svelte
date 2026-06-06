@@ -9,6 +9,7 @@
     type DashboardTotals
   } from '$lib/services/dashboardService';
   import { extractApiErrors } from '$lib/utils/errors';
+  import { formatDate } from '$lib/utils/formatters';
 
   // ==== STATE ====
   let loading = $state(true);
@@ -383,11 +384,7 @@
                         : ''}
                     </p>
                     <p class="mt-1 text-sm text-gray-500 sm:mt-0 dark:text-gray-300">
-                      Mulai: {new Date(project.start_date).toLocaleDateString('id-ID', {
-                        day: '2-digit',
-                        month: 'long',
-                        year: 'numeric'
-                      })}
+                      Mulai: {formatDate(project.start_date, 'long')}
                     </p>
                   </div>
                 </a>

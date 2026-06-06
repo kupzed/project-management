@@ -7,7 +7,13 @@
   import ProjectFormModal from '$lib/components/form/ProjectFormModal.svelte';
   import { deleteProject, fetchProject, updateProject } from '$lib/services/projectService';
   import { userPermissions } from '$lib/stores/permissions';
-  import type { MitraSummary, Project, ProjectForm, ProjectKategori, ProjectStatus } from '$lib/types';
+  import type {
+    MitraSummary,
+    Project,
+    ProjectForm,
+    ProjectKategori,
+    ProjectStatus
+  } from '$lib/types';
   import { PROJECT_KATEGORI_OPTIONS, PROJECT_STATUS_OPTIONS } from '$lib/constants';
   import { extractApiErrors } from '$lib/utils/errors';
   import { lockBodyScroll } from '$lib/utils/scroll-lock';
@@ -158,14 +164,22 @@
   <p class="text-red-500">{error}</p>
 {:else if project}
   <div class="mb-8 flex w-full min-w-0 flex-col">
-    <ProjectHeader {project} canUpdate={canUpdateProject} canDelete={canDeleteProject} onEdit={openEditProjectModal} onDelete={handleDeleteProject} />
+    <ProjectHeader
+      {project}
+      canUpdate={canUpdateProject}
+      canDelete={canDeleteProject}
+      onEdit={openEditProjectModal}
+      onDelete={handleDeleteProject}
+    />
 
     <ProjectTabs bind:activeTab showCertificateTab={project.is_cert_projects} />
 
     {#if activeTab === 'detail'}
       <div class="mb-8 overflow-hidden bg-white shadow dark:bg-black">
         <div class="px-4 py-5 sm:px-6">
-          <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white">Informasi Project</h3>
+          <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white">
+            Informasi Project
+          </h3>
         </div>
         <div class="border-t border-gray-100 dark:border-gray-700">
           <ProjectDetail {project} />
@@ -187,6 +201,16 @@
   </div>
 
   {#if showEditModal}
-    <ProjectFormModal bind:show={showEditModal} bind:form={editProjectForm} title="Edit Project" submitLabel="Update Project" idPrefix="edit_project" {customers} {projectStatuses} {projectKategoris} onSubmit={handleSubmitUpdateProject} />
+    <ProjectFormModal
+      bind:show={showEditModal}
+      bind:form={editProjectForm}
+      title="Edit Project"
+      submitLabel="Update Project"
+      idPrefix="edit_project"
+      {customers}
+      {projectStatuses}
+      {projectKategoris}
+      onSubmit={handleSubmitUpdateProject}
+    />
   {/if}
 {/if}

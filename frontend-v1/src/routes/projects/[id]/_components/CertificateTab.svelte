@@ -1,14 +1,10 @@
 <script lang="ts">
   import Drawer from '$lib/components/Drawer.svelte';
-  import Pagination from '$lib/components/Pagination.svelte';
   import CertificatesDetail from '$lib/components/detail/CertificatesDetail.svelte';
   import CertificateFormModal from '$lib/components/form/CertificateFormModal.svelte';
-  import EmptyState from '$lib/components/common/EmptyState.svelte';
-  import LoadingState from '$lib/components/common/LoadingState.svelte';
   import { confirm } from '$lib/components/common/ConfirmDialog.svelte';
   import DateFilterDropdown from '$lib/components/ui/DateFilterDropdown.svelte';
   import SearchInput from '$lib/components/ui/SearchInput.svelte';
-  import StatusBadge from '$lib/components/ui/StatusBadge.svelte';
   import ViewToggle, { type ViewToggleView } from '$lib/components/ui/ViewToggle.svelte';
   import { CERTIFICATE_STATUS_OPTIONS, DEFAULT_PER_PAGE, PER_PAGE_OPTIONS } from '$lib/constants';
   import {
@@ -19,30 +15,26 @@
   } from '$lib/services/certificateService';
   import { userPermissions } from '$lib/stores/permissions';
   import { extractApiErrors } from '$lib/utils/errors';
-  import { formatDate } from '$lib/utils/formatters';
   import { showError, showSuccess } from '$lib/utils/toast';
   import type {
     Certificate,
     CertificateFilterParams,
-    CertificateForm,
     CertificateSortBy,
     CertificateStatus,
-    ExistingAttachment,
     Option,
     Project,
     SortOrder
   } from '$lib/types';
-  import RowActions from './RowActions.svelte';
-
-  type CertificateModalForm = Omit<CertificateForm, 'attachment_descriptions'> & {
-    attachment_descriptions: string[];
-    existing_attachments?: ExistingAttachment[];
-    removed_existing_ids?: number[];
-  };
+  import CertificateTabResults from './CertificateTabResults.svelte';
+  import {
+    makeCreateCertificateForm,
+    makeEditCertificateForm,
+    type CertificateModalForm
+  } from './certificate-tab';
 
   /**
-  * Certificate tab props. The tab owns certificate filters, pagination, drawers, and CRUD state.
-  */
+   * Certificate tab props. The tab owns certificate filters, pagination, drawers, and CRUD state.
+   */
   let { project }: { project: Project } = $props();
 
   let certificates = $state<Certificate[]>([]);
@@ -69,63 +61,14 @@
   let showDetailDrawer = $state(false);
   let selectedCertificate = $state<Certificate | null>(null);
   let editingCertificate = $state<Certificate | null>(null);
-  let certificateForm = $state<CertificateModalForm>(makeCreateForm());
+  function initialCertificateForm(): CertificateModalForm {
+    return makeCreateCertificateForm(project.id);
+  }
+  let certificateForm = $state<CertificateModalForm>(initialCertificateForm());
   let pageOptions = $derived([...PER_PAGE_OPTIONS]);
   let canCreate = $derived(($userPermissions ?? []).includes('certificate-create'));
   let canUpdate = $derived(($userPermissions ?? []).includes('certificate-update'));
   let canDelete = $derived(($userPermissions ?? []).includes('certificate-delete'));
-
-  function makeCreateForm(): CertificateModalForm {
-    return {
-      name: '',
-      no_certificate: '',
-      project_id: project.id,
-      barang_certificate_id: '',
-      status: '',
-      date_of_issue: '',
-      date_of_expired: '',
-      attachments: [],
-      attachment_names: [],
-      attachment_descriptions: []
-    };
-  }
-
-  function makeEditForm(certificate: Certificate): CertificateModalForm {
-    return {
-      ...makeCreateForm(),
-      name: certificate.name,
-      no_certificate: certificate.no_certificate,
-      barang_certificate_id: certificate.barang_certificate_id ?? '',
-      status: certificate.status,
-      date_of_issue: certificate.date_of_issue ?? '',
-      date_of_expired: certificate.date_of_expired ?? '',
-      existing_attachments: normalizeExistingAttachments(certificate.attachments ?? []),
-      removed_existing_ids: []
-    };
-  }
-
-  function normalizeExistingAttachments(
-    attachments: Certificate['attachments']
-  ): ExistingAttachment[] {
-    return (attachments ?? []).flatMap((attachment) => {
-      if (typeof attachment.id !== 'number') {
-        return [];
-      }
-
-      return [
-        {
-          id: attachment.id,
-          name: attachment.name,
-          description: attachment.description ?? null,
-          size: attachment.size ?? null,
-          sizeLabel: attachment.sizeLabel ?? null,
-          path: attachment.path,
-          url: attachment.url,
-          original_name: attachment.name
-        }
-      ];
-    });
-  }
 
   function buildParams(): CertificateFilterParams {
     return {
@@ -176,13 +119,13 @@
   }
 
   function openCreateCertificateModal(): void {
-    certificateForm = makeCreateForm();
+    certificateForm = makeCreateCertificateForm(project.id);
     showCreateModal = true;
   }
 
   function openEditCertificateModal(certificate: Certificate): void {
     editingCertificate = certificate;
-    certificateForm = makeEditForm(certificate);
+    certificateForm = makeEditCertificateForm(project.id, certificate);
     showEditModal = true;
   }
 
@@ -253,7 +196,7 @@
       class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-semibold text-gray-900 sm:w-auto dark:border-gray-700 dark:bg-neutral-900 dark:text-gray-100"
     >
       <option value="">Status: Semua</option>
-      {#each statuses as status}<option value={status}>{status}</option>{/each}
+      {#each statuses as status (status)}<option value={status}>{status}</option>{/each}
     </select>
     <div class="w-full flex-grow sm:w-auto">
       <SearchInput
@@ -305,137 +248,24 @@
     </div>
   </div>
 
-  {#if loading}
-    <LoadingState label="Memuat sertifikat..." />
-  {:else if error}
-    <p class="text-red-500">{error}</p>
-  {:else if certificates.length === 0}
-    <div class="overflow-hidden bg-white shadow sm:rounded-md dark:bg-black">
-      <EmptyState title="Belum ada sertifikat untuk proyek ini." />
-    </div>
-  {:else if view === 'list'}
-    <div class="overflow-hidden bg-white shadow sm:rounded-md dark:bg-black">
-      <ul class="divide-y divide-gray-200 dark:divide-gray-700">
-        {#each certificates as item (item.id)}
-          <li>
-            <button
-              type="button"
-              class="block w-full cursor-pointer px-4 py-4 text-left hover:bg-gray-50 sm:px-6 dark:hover:bg-neutral-950"
-              onclick={() => openCertificateDetailDrawer(item)}
-            >
-              <div class="flex items-center justify-between">
-                <p class="truncate text-sm font-medium text-indigo-600 dark:text-indigo-400">
-                  {item.name}
-                </p>
-                <StatusBadge status={item.status} type="certificate" />
-              </div>
-              <div class="mt-2 sm:flex sm:justify-between">
-                <p class="text-sm text-gray-500 dark:text-gray-300">
-                  Barang: {item.barang_certificate?.name || '-'} | No: {item.no_certificate}
-                </p>
-                <p class="mt-2 text-sm text-gray-500 sm:mt-0 dark:text-gray-300">
-                  Terbit: {item.date_of_issue ? formatDate(item.date_of_issue, 'long') : '-'}
-                </p>
-              </div>
-            </button>
-            <div class="px-4 py-2 sm:px-6">
-              <RowActions
-                itemName={item.name}
-                {canUpdate}
-                {canDelete}
-                onDetail={() => openCertificateDetailDrawer(item)}
-                onEdit={() => openEditCertificateModal(item)}
-                onDelete={() => handleDeleteCertificate(item.id)}
-              />
-            </div>
-          </li>
-        {/each}
-      </ul>
-      <Pagination
-        {currentPage}
-        {lastPage}
-        {totalItems}
-        itemsPerPage={perPage}
-        perPageOptions={pageOptions}
-        onPageChange={(page) => (currentPage = page)}
-        onPerPageChange={handlePerPageChange}
-      />
-    </div>
-  {:else}
-    <div class="mt-4 rounded-lg bg-white shadow-md dark:bg-black">
-      <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-300 dark:divide-gray-700">
-          <thead class="bg-gray-50 dark:bg-neutral-900"
-            ><tr
-              ><th
-                class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100"
-                >Nama Sertifikat</th
-              ><th
-                class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100"
-                >No. Sertifikat</th
-              ><th
-                class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100"
-                >Barang Sertifikat</th
-              ><th
-                class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100"
-                >Status</th
-              ><th
-                class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100"
-                >Terbit</th
-              ><th
-                class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100"
-                >Expired</th
-              ><th
-                class="w-28 px-3 py-3.5 text-right text-sm font-semibold text-gray-900 dark:text-gray-100"
-                >Aksi</th
-              ></tr
-            ></thead
-          >
-          <tbody class="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-black">
-            {#each certificates as item (item.id)}
-              <tr
-                ><td class="px-3 py-4 text-sm font-medium whitespace-nowrap"
-                  ><button
-                    type="button"
-                    class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300"
-                    onclick={() => openCertificateDetailDrawer(item)}>{item.name}</button
-                  ></td
-                ><td class="px-3 py-4 text-sm whitespace-nowrap text-gray-500 dark:text-gray-300"
-                  >{item.no_certificate}</td
-                ><td class="px-3 py-4 text-sm whitespace-nowrap text-gray-500 dark:text-gray-300"
-                  >{item.barang_certificate?.name || '-'}</td
-                ><td class="px-3 py-4 text-sm whitespace-nowrap"
-                  ><StatusBadge status={item.status} type="certificate" /></td
-                ><td class="px-3 py-4 text-sm whitespace-nowrap text-gray-500 dark:text-gray-300"
-                  >{item.date_of_issue ? formatDate(item.date_of_issue) : '-'}</td
-                ><td class="px-3 py-4 text-sm whitespace-nowrap text-gray-500 dark:text-gray-300"
-                  >{item.date_of_expired ? formatDate(item.date_of_expired) : '-'}</td
-                ><td class="px-3 py-4 text-sm whitespace-nowrap"
-                  ><RowActions
-                    itemName={item.name}
-                    {canUpdate}
-                    {canDelete}
-                    onDetail={() => openCertificateDetailDrawer(item)}
-                    onEdit={() => openEditCertificateModal(item)}
-                    onDelete={() => handleDeleteCertificate(item.id)}
-                  /></td
-                ></tr
-              >
-            {/each}
-          </tbody>
-        </table>
-      </div>
-      <Pagination
-        {currentPage}
-        {lastPage}
-        {totalItems}
-        itemsPerPage={perPage}
-        perPageOptions={pageOptions}
-        onPageChange={(page) => (currentPage = page)}
-        onPerPageChange={handlePerPageChange}
-      />
-    </div>
-  {/if}
+  <CertificateTabResults
+    {loading}
+    {error}
+    {certificates}
+    {view}
+    {currentPage}
+    {lastPage}
+    {totalItems}
+    {perPage}
+    {pageOptions}
+    {canUpdate}
+    {canDelete}
+    onOpenDetail={openCertificateDetailDrawer}
+    onEdit={openEditCertificateModal}
+    onDelete={handleDeleteCertificate}
+    onPageChange={(page) => (currentPage = page)}
+    onPerPageChange={handlePerPageChange}
+  />
 </div>
 
 <CertificateFormModal

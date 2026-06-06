@@ -57,7 +57,7 @@
               class="rounded-md border border-gray-300 bg-white px-2 py-1 text-xs text-gray-900
                      dark:border-gray-700 dark:bg-neutral-900 dark:text-gray-100"
             >
-              {#each perPageOptions as opt}
+              {#each perPageOptions as opt (opt)}
                 <option value={opt}>{opt}</option>
               {/each}
             </select>
@@ -80,9 +80,9 @@
             First
           </button>
 
-          <!-- svelte-ignore a11y_consider_explicit_label -->
           <button
             onclick={() => goToPage(currentPage - 1)}
+            aria-label="Halaman sebelumnya"
             disabled={currentPage === 1}
             class="rounded-md border border-gray-300 bg-white p-1 text-gray-700 hover:bg-gray-50
                   focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none
@@ -105,9 +105,9 @@
             Page {currentPage} of {lastPage}
           </span>
 
-          <!-- svelte-ignore a11y_consider_explicit_label -->
           <button
             onclick={() => goToPage(currentPage + 1)}
+            aria-label="Halaman berikutnya"
             disabled={currentPage === lastPage}
             class="rounded-md border border-gray-300 bg-white p-1 text-gray-700 hover:bg-gray-50
                   focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none
@@ -123,7 +123,6 @@
             </svg>
           </button>
 
-          <!-- svelte-ignore a11y_consider_explicit_label -->
           <button
             onclick={() => goToPage(lastPage)}
             disabled={currentPage === lastPage}
@@ -150,7 +149,7 @@
               class="rounded-md border border-gray-300 bg-white px-2 py-1 text-xs text-gray-900
                     dark:border-gray-700 dark:bg-neutral-900 dark:text-gray-100"
             >
-              {#each perPageOptions as opt}
+              {#each perPageOptions as opt (opt)}
                 <option value={opt}>{opt}</option>
               {/each}
             </select>
@@ -175,9 +174,9 @@
             First
           </button>
 
-          <!-- svelte-ignore a11y_consider_explicit_label -->
           <button
             onclick={() => goToPage(currentPage - 1)}
+            aria-label="Halaman sebelumnya"
             disabled={currentPage === 1}
             class="rounded-md border border-gray-300 bg-white p-1.5 text-gray-700 hover:bg-gray-50
                    focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none
@@ -200,9 +199,9 @@
             Page {currentPage} of {lastPage}
           </span>
 
-          <!-- svelte-ignore a11y_consider_explicit_label -->
           <button
             onclick={() => goToPage(currentPage + 1)}
+            aria-label="Halaman berikutnya"
             disabled={currentPage === lastPage}
             class="rounded-md border border-gray-300 bg-white p-1.5 text-gray-700 hover:bg-gray-50
                    focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none

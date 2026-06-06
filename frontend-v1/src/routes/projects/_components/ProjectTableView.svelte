@@ -102,9 +102,7 @@
               >{truncate(project.lokasi, 40)}</td
             >
             <td class="px-3 py-4 text-sm whitespace-nowrap text-gray-500 dark:text-gray-300">
-              {project.start_date
-                ? new Date(project.start_date).toLocaleDateString('id-ID', { year: 'numeric' })
-                : '-'}
+              {project.start_date ? formatDate(project.start_date, 'year') : '-'}
             </td>
             <td class="px-3 py-4 text-sm text-gray-500 dark:text-gray-300"
               >{project.kategori || '-'}</td

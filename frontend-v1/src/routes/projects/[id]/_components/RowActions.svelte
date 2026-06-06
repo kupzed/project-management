@@ -1,7 +1,7 @@
 <script lang="ts">
   /**
-  * Icon-only row actions for detail/edit/delete controls.
-  */
+   * Icon-only row actions for detail/edit/delete controls.
+   */
   let {
     itemName,
     canUpdate = false,
