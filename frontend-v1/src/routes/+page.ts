@@ -5,13 +5,13 @@ export const ssr = false;
 export const prerender = false;
 
 export async function load() {
-	const token = localStorage.getItem('jwt_token');
+  const token = localStorage.getItem('jwt_token');
 
-	// Jika sudah login (ada token) -> ke dashboard
-	if (token) {
-		return redirect(302, '/dashboard');
-	}
+  // Jika sudah login (ada token) -> ke dashboard
+  if (token) {
+    return redirect(302, '/dashboard');
+  }
 
-	// Jika belum login -> ke halaman login
-	return redirect(302, '/auth/login');
+  // Jika belum login -> ke halaman login
+  return redirect(302, '/auth/login');
 }

@@ -1,295 +1,196 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
-  import { page } from '$app/stores';
   import { goto } from '$app/navigation';
-  import axiosClient from '$lib/axiosClient';
-  import CertificateFormModal from '$lib/components/form/CertificateFormModal.svelte';
+  import { page } from '$app/stores';
+  import LoadingState from '$lib/components/common/LoadingState.svelte';
+  import { confirm } from '$lib/components/common/ConfirmDialog.svelte';
   import CertificateDetail from '$lib/components/detail/CertificatesDetail.svelte';
+  import CertificateFormModal from '$lib/components/form/CertificateFormModal.svelte';
+  import {
+    deleteCertificate,
+    fetchCertificate,
+    fetchCertificates,
+    updateCertificate
+  } from '$lib/services/certificateService';
   import { userPermissions } from '$lib/stores/permissions';
+  import { extractApiErrors } from '$lib/utils/errors';
+  import { lockBodyScroll } from '$lib/utils/scroll-lock';
+  import { showError, showSuccess } from '$lib/utils/toast';
+  import type {
+    Certificate,
+    CertificateEditForm,
+    CertificateStatus,
+    ExistingAttachment,
+    Option,
+    ProjectSummary
+  } from '$lib/types';
 
-  /**
-   * Types for project options and attachment items. Existing attachments now
-   * include optional description and original_name fields so the user can
-   * modify them in the edit form.
-   */
-  type Option = { id: number; name?: string; title?: string; no_seri?: string };
-  type AttachmentItem = {
-    id: number;
-    name: string;
-    description?: string;
-    original_name?: string;
-    url: string;
-    size?: number;
+  type CertificateModalForm = Omit<CertificateEditForm, 'attachment_descriptions'> & {
+    attachment_descriptions: string[];
   };
 
-  let item: any = null;
-  let loading = true;
-  let error = '';
-
-  let projects: Option[] = [];
-  let barangCertificates: Option[] = [];
-  let filteredBarangCertificates: Option[] = [];
-
-  // permissions
-  let canUpdateCertificate = false;
-  let canDeleteCertificate = false;
-
-  $: {
-    const perms = $userPermissions ?? [];
-    canUpdateCertificate = perms.includes('certificate-update');
-    canDeleteCertificate = perms.includes('certificate-delete');
+  function normalizeExistingAttachments(
+    attachments: Certificate['attachments']
+  ): ExistingAttachment[] {
+    return (attachments ?? []).flatMap((attachment) => {
+      if (typeof attachment.id !== 'number') return [];
+      return [
+        {
+          id: attachment.id,
+          name: attachment.name ?? 'Lampiran',
+          description: attachment.description ?? null,
+          size: attachment.size ?? null,
+          sizeLabel: attachment.sizeLabel ?? null,
+          path: attachment.path,
+          url: attachment.url,
+          original_name: attachment.name
+        }
+      ];
+    });
   }
 
-  // control display of edit modal
-  let showEditModal = false;
+  function makeForm(certificate?: Certificate): CertificateModalForm {
+    return {
+      name: certificate?.name ?? '',
+      no_certificate: certificate?.no_certificate ?? '',
+      project_id: certificate?.project_id ?? '',
+      barang_certificate_id: certificate?.barang_certificate_id ?? '',
+      status: certificate?.status ?? '',
+      date_of_issue: certificate?.date_of_issue
+        ? new Date(certificate.date_of_issue).toISOString().split('T')[0]
+        : '',
+      date_of_expired: certificate?.date_of_expired
+        ? new Date(certificate.date_of_expired).toISOString().split('T')[0]
+        : '',
+      attachments: [],
+      attachment_names: [],
+      attachment_descriptions: [],
+      existing_attachments: normalizeExistingAttachments(certificate?.attachments ?? []),
+      removed_existing_ids: []
+    };
+  }
 
-  /**
-   * Form state for editing a certificate. This includes arrays for new file
-   * uploads (attachments, attachment_names, attachment_descriptions),
-   * as well as existing attachments that can be renamed or have their
-   * descriptions updated.
-   */
-  let form: {
-    name: string;
-    no_certificate: string;
-    project_id: number | '' | null;
-    barang_certificate_id: number | '' | null;
-    status: string;
-    date_of_issue: string;
-    date_of_expired: string;
-    attachments: File[];
-    attachment_names: string[];
-    attachment_descriptions: string[];
-    existing_attachments: AttachmentItem[];
-    removed_existing_ids: number[];
-  } = {
-    name: '',
-    no_certificate: '',
-    project_id: '',
-    barang_certificate_id: '',
-    status: '',
-    date_of_issue: '',
-    date_of_expired: '',
-    attachments: [],
-    attachment_names: [],
-    attachment_descriptions: [],
-    existing_attachments: [],
-    removed_existing_ids: []
-  };
+  let item = $state<Certificate | null>(null);
+  let loading = $state(true);
+  let error = $state('');
+  let projects = $state<ProjectSummary[]>([]);
+  let filteredBarangCertificates = $state<Option[]>([]);
+  let statuses = $state<CertificateStatus[]>([]);
+  let showEditModal = $state(false);
+  let form = $state<CertificateModalForm>(makeForm());
 
-  let statuses: string[] = [];
+  let canUpdateCertificate = $derived(($userPermissions ?? []).includes('certificate-update'));
+  let canDeleteCertificate = $derived(($userPermissions ?? []).includes('certificate-delete'));
 
-  $: id = $page.params.id;
+  async function loadDetail(id: string): Promise<void> {
+    loading = true;
+    error = '';
+    try {
+      const result = await fetchCertificate(id);
+      item = result.certificate;
+      form = makeForm(result.certificate);
+      projects = result.formDeps.projects;
+      statuses = result.formDeps.statuses;
+      filteredBarangCertificates = result.formDeps.barang_options;
+    } catch (err) {
+      error = extractApiErrors(err);
+    } finally {
+      loading = false;
+    }
+  }
 
-  // Dependencies are fetched alongside detail via form_dependencies
-
-  // Fetch certificates by project when user selects a different project
-  async function fetchBarangCertificatesByProject(projectId: number) {
+  async function fetchBarangCertificatesByProject(projectId: number): Promise<void> {
     if (!projectId) {
       filteredBarangCertificates = [];
       return;
     }
+
     try {
-      // Panggil endpoint utama /certificates dengan filter project_id
-      // Agar kita bisa mendapat form_dependencies yang terfilter secara otomatis
-      const res = await axiosClient.get('/certificates', { params: { project_id: projectId, per_page: 5 } });
-      const root = res.data ?? {};
-      const formDeps = root.form_dependencies ?? root.meta?.form_dependencies ?? {};
-      filteredBarangCertificates = formDeps.barang_options ?? [];
+      const result = await fetchCertificates({ project_id: projectId, per_page: 5 });
+      filteredBarangCertificates = result.formDeps.barang_options;
     } catch (err) {
       console.error('Failed to fetch barang certificates by project', err);
       filteredBarangCertificates = [];
     }
   }
 
-  function handleProjectChange(projectId: number | '' | null) {
+  function handleProjectChange(projectId: number | '' | null): void {
+    form.barang_certificate_id = '';
     if (projectId) {
-      fetchBarangCertificatesByProject(Number(projectId));
-      form.barang_certificate_id = '';
-    } else {
-      filteredBarangCertificates = [];
-      form.barang_certificate_id = '';
+      void fetchBarangCertificatesByProject(Number(projectId));
+      return;
     }
-  }
 
-  function closeEditModal() {
-    showEditModal = false;
     filteredBarangCertificates = [];
   }
 
-  // Fetch a certificate's details when opening the page
-  async function fetchDetail() {
-    loading = true;
-    error = '';
-    try {
-      const res = await axiosClient.get(`/certificates/${id}`);
-      const root = res.data ?? {};
-      item = root.data ?? root;
-
-      const formDeps = root.form_dependencies ?? root.meta?.form_dependencies ?? {};
-      if (formDeps.projects) projects = formDeps.projects;
-      if (formDeps.barang_certificates) barangCertificates = formDeps.barang_certificates;
-      if (formDeps.statuses) statuses = formDeps.statuses;
-      if (formDeps.barang_options) filteredBarangCertificates = formDeps.barang_options;
-    } catch (err: any) {
-      error = err.response?.data?.message || 'Gagal memuat detail.';
-    } finally {
-      loading = false;
-    }
-  }
-
-  onMount(() => {
-    fetchDetail();
-  });
-
-  /**
-   * Initialize the form with the current certificate details and open the edit modal.
-   * Existing attachments are mapped to include description and original_name to allow editing.
-   */
-  function openEditModal() {
-    if (!canUpdateCertificate) {
-      console.warn('User lacks certificate-update permission');
+  function openEditModal(): void {
+    if (!item || !canUpdateCertificate) {
       return;
     }
-    if (!item) return;
-    form = {
-      name: item.name ?? '',
-      no_certificate: item.no_certificate ?? '',
-      project_id: item.project_id ?? '',
-      barang_certificate_id: item.barang_certificate_id ?? '',
-      status: item.status ?? '',
-      date_of_issue: item.date_of_issue
-        ? new Date(item.date_of_issue).toISOString().split('T')[0]
-        : '',
-      date_of_expired: item.date_of_expired
-        ? new Date(item.date_of_expired).toISOString().split('T')[0]
-        : '',
-      attachments: [],
-      attachment_names: [],
-      attachment_descriptions: [],
-      existing_attachments: Array.isArray(item.attachments)
-        ? item.attachments.map((a: any) => ({
-            id: a.id,
-            name: a.name ?? a.file_name ?? 'Lampiran',
-            // include description for editing
-            description: a.description ?? '',
-            // show original file name if available; fall back to file_name or assigned name
-            original_name: a.original_name ?? a.file_name ?? a.name ?? '',
-            url: a.url ?? a.path ?? a.file_path,
-            size: a.size
-          }))
-        : [],
-      removed_existing_ids: []
-    };
-    if (item.project_id && typeof item.project_id === 'number') {
-      fetchBarangCertificatesByProject(item.project_id);
+
+    form = makeForm(item);
+    if (item.project_id) {
+      void fetchBarangCertificatesByProject(item.project_id);
     } else {
       filteredBarangCertificates = [];
     }
     showEditModal = true;
   }
 
-  function appendScalar(fd: FormData, key: string, val: any) {
-    if (val === null || val === undefined || val === '') return;
-    fd.append(key, String(val));
+  function closeEditModal(): void {
+    showEditModal = false;
+    filteredBarangCertificates = [];
   }
 
-  /**
-   * Build a FormData object for updating a certificate. Handles new attachments,
-   * removal of existing ones, and editing of existing attachment names/descriptions.
-   */
-  function buildFormData() {
-    const fd = new FormData();
-    appendScalar(fd, 'name', form.name);
-    appendScalar(fd, 'no_certificate', form.no_certificate);
-    appendScalar(fd, 'project_id', form.project_id);
-    appendScalar(fd, 'barang_certificate_id', form.barang_certificate_id);
-    appendScalar(fd, 'status', form.status);
-    appendScalar(fd, 'date_of_issue', form.date_of_issue);
-    appendScalar(fd, 'date_of_expired', form.date_of_expired);
-    // new attachments
-    (form.attachments || []).forEach((file, i) => fd.append(`attachments[${i}]`, file));
-    (form.attachment_names || []).forEach((n, i) => {
-      if (n != null) fd.append(`attachment_names[${i}]`, n);
-    });
-    (form.attachment_descriptions || []).forEach((d, i) => {
-      if (d != null) fd.append(`attachment_descriptions[${i}]`, d);
-    });
-    // removed existing attachments
-    (form.removed_existing_ids || []).forEach((id) => fd.append('removed_existing_ids[]', String(id)));
-    // edits to existing attachments
-    (form.existing_attachments || []).forEach((att, i) => {
-      if (att.id != null) fd.append(`existing_attachment_ids[${i}]`, String(att.id));
-      if (att.name != null) fd.append(`existing_attachment_names[${i}]`, att.name);
-      if (att.description != null) fd.append(`existing_attachment_descriptions[${i}]`, att.description);
-    });
-    return fd;
-  }
-
-  async function handleSubmitUpdate() {
-    if (!canUpdateCertificate) {
-      console.warn('Update certificate blocked by permission');
+  async function handleSubmitUpdate(): Promise<void> {
+    if (!item || !canUpdateCertificate) {
       return;
     }
+
     try {
-      const fd = buildFormData();
-      fd.append('_method', 'PUT');
-      await axiosClient.post(`/certificates/${id}`, fd, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
-      alert('Data berhasil diperbarui!');
+      const updated = await updateCertificate(item.id, form);
+      item = updated;
+      form = makeForm(updated);
       closeEditModal();
-      await fetchDetail();
-      goto(`/certificates/${id}`);
-    } catch (err: any) {
-      const messages = err.response?.data?.errors
-        ? Object.values(err.response.data.errors).flat().join('\n')
-        : err.response?.data?.message || 'Gagal memperbarui data.';
-      alert('Error:\n' + messages);
+      showSuccess('Data berhasil diperbarui!');
+    } catch (err) {
+      showError(extractApiErrors(err));
     }
   }
 
-  async function handleDelete() {
-    if (!canDeleteCertificate) {
-      console.warn('Delete certificate blocked by permission');
+  async function handleDelete(): Promise<void> {
+    if (!item || !canDeleteCertificate) {
       return;
     }
-    if (!confirm('Apakah Anda yakin ingin menghapus data ini?')) return;
+
+    const accepted = await confirm({
+      title: 'Hapus sertifikat?',
+      text: 'Apakah Anda yakin ingin menghapus data ini?',
+      confirmText: 'Hapus',
+      isDangerous: true
+    });
+    if (!accepted) return;
+
     try {
-      await axiosClient.delete(`/certificates/${id}`);
-      alert('Data berhasil dihapus!');
-      goto('/certificates');
-    } catch (err: any) {
-      alert('Gagal menghapus data: ' + (err.response?.data?.message || 'Terjadi kesalahan'));
+      await deleteCertificate(item.id);
+      showSuccess('Data berhasil dihapus!');
+      await goto('/certificates');
+    } catch (err) {
+      showError(extractApiErrors(err));
     }
   }
 
-  // --- kunci scroll saat membuka drawer & modal ---
-  function lockBodyScroll(lock: boolean) {
-    const body = document.body;
-    if (!body) return;
-    if (lock) {
-      const scrollY = window.scrollY;
-      body.dataset.scrollY = String(scrollY);
-      body.style.position = 'fixed';
-      body.style.top = `-${scrollY}px`;
-      body.style.left = '0';
-      body.style.right = '0';
-      body.style.overflow = 'hidden';
-      body.style.width = '100%';
-    } else {
-      const y = Number(body.dataset.scrollY || '0');
-      body.style.position = '';
-      body.style.top = '';
-      body.style.left = '';
-      body.style.right = '';
-      body.style.overflow = '';
-      body.style.width = '';
-      delete body.dataset.scrollY;
-      window.scrollTo(0, y);
+  $effect(() => {
+    const id = $page.params.id;
+    if (id) {
+      void loadDetail(id);
     }
-  }
-  $: lockBodyScroll(showEditModal);
+  });
+
+  $effect(() => {
+    lockBodyScroll(showEditModal);
+    return () => lockBodyScroll(false);
+  });
 </script>
 
 <svelte:head>
@@ -297,7 +198,7 @@
 </svelte:head>
 
 {#if loading}
-  <p class="text-gray-900 dark:text-white">Memuat detail...</p>
+  <LoadingState label="Memuat detail sertifikat..." />
 {:else if error}
   <p class="text-red-500">{error}</p>
 {:else if !item}
@@ -305,8 +206,10 @@
 {:else}
   <div class="mb-8 w-full min-w-0">
     <div class="mb-4 flex min-w-0 flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-      <div class="flex-1 min-w-0">
-        <h2 class="break-words text-2xl font-bold leading-7 text-gray-900 dark:text-white sm:text-2xl">
+      <div class="min-w-0 flex-1">
+        <h2
+          class="text-2xl leading-7 font-bold break-words text-gray-900 sm:text-2xl dark:text-white"
+        >
           {item.name}
         </h2>
         <div class="my-2 text-sm text-gray-500 dark:text-gray-300">
@@ -316,16 +219,20 @@
       <div class="flex shrink-0 flex-col gap-2 sm:flex-row">
         {#if canUpdateCertificate}
           <button
-            on:click={openEditModal}
-            class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800"
+            type="button"
+            onclick={openEditModal}
+            class="inline-flex items-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm
+                   hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:outline-none dark:focus:ring-offset-gray-800"
           >
             Edit
           </button>
         {/if}
         {#if canDeleteCertificate}
           <button
-            on:click={handleDelete}
-            class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 dark:focus:ring-offset-gray-800"
+            type="button"
+            onclick={handleDelete}
+            class="inline-flex items-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm
+                   hover:bg-red-700 focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:outline-none dark:focus:ring-offset-gray-800"
           >
             Hapus
           </button>
@@ -333,7 +240,7 @@
       </div>
     </div>
 
-    <div class="bg-white dark:bg-black shadow overflow-hidden">
+    <div class="overflow-hidden bg-white shadow dark:bg-black">
       <div class="px-4 py-5 sm:px-6">
         <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white">
           Informasi Sertifikat
@@ -350,11 +257,11 @@
     title="Edit Certificate"
     submitLabel="Update"
     idPrefix="edit"
-    {form}
+    bind:form
     {projects}
     barangOptions={filteredBarangCertificates}
-    statuses={Array.from(statuses)}
-    handleProjectChange={handleProjectChange}
+    {statuses}
+    {handleProjectChange}
     allowRemoveAttachment={true}
     onSubmit={handleSubmitUpdate}
     onClose={closeEditModal}

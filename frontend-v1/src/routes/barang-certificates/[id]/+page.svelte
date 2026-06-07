@@ -1,136 +1,107 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
-  import { page } from '$app/stores';
   import { goto } from '$app/navigation';
-  import axiosClient from '$lib/axiosClient';
+  import { page } from '$app/stores';
+  import LoadingState from '$lib/components/common/LoadingState.svelte';
+  import { confirm } from '$lib/components/common/ConfirmDialog.svelte';
   import BarangCertificatesDetail from '$lib/components/detail/BarangCertificatesDetail.svelte';
   import BarangCertificateFormModal from '$lib/components/form/BarangCertificateFormModal.svelte';
+  import {
+    deleteBarangCertificate,
+    fetchBarangCertificate,
+    updateBarangCertificate
+  } from '$lib/services/barangCertificateService';
   import { userPermissions } from '$lib/stores/permissions';
+  import { extractApiErrors } from '$lib/utils/errors';
+  import { lockBodyScroll } from '$lib/utils/scroll-lock';
+  import { showError, showSuccess } from '$lib/utils/toast';
+  import type { BarangCertificate, BarangCertificateForm, MitraSummary } from '$lib/types';
 
-  type Mitra = { id: number; nama: string };
-
-  let item: any = null;
-  let loading = true;
-  let error = '';
-
-  // Dependencies
-  let mitras: Mitra[] = [];
-
-  // Edit state
-  let showEditModal = false;
-  let canUpdateBarangCert = false;
-  let canDeleteBarangCert = false;
-
-  $: {
-    const perms = $userPermissions ?? [];
-    canUpdateBarangCert = perms.includes('bc-update');
-    canDeleteBarangCert = perms.includes('bc-delete');
-  }
-
-  let form: { name: string; no_seri: string; mitra_id: number | '' | null } = {
-    name: '',
-    no_seri: '',
-    mitra_id: ''
+  type BarangCertificateModalForm = Omit<BarangCertificateForm, 'mitra_id'> & {
+    mitra_id: number | '' | null;
   };
 
-  $: id = $page.params.id;
+  function makeForm(item?: BarangCertificate): BarangCertificateModalForm {
+    return {
+      name: item?.name ?? '',
+      no_seri: item?.no_seri ?? '',
+      mitra_id: item?.mitra_id ?? ''
+    };
+  }
 
+  let item = $state<BarangCertificate | null>(null);
+  let loading = $state(true);
+  let error = $state('');
+  let mitras = $state<MitraSummary[]>([]);
+  let showEditModal = $state(false);
+  let form = $state<BarangCertificateModalForm>(makeForm());
 
+  let canUpdateBarangCert = $derived(($userPermissions ?? []).includes('bc-update'));
+  let canDeleteBarangCert = $derived(($userPermissions ?? []).includes('bc-delete'));
 
-  async function fetchDetail() {
+  async function loadDetail(id: string): Promise<void> {
     loading = true;
     error = '';
     try {
-      const res = await axiosClient.get(`/barang-certificates/${id}`);
-      item = res.data?.data ?? res.data;
-      mitras = res.data?.form_dependencies?.mitras ?? mitras;
-    } catch (err: any) {
-      error = err.response?.data?.message || 'Gagal memuat detail.';
+      const result = await fetchBarangCertificate(id);
+      item = result.barangCertificate;
+      form = makeForm(result.barangCertificate);
+      mitras = result.formDeps.mitras;
+    } catch (err) {
+      error = extractApiErrors(err);
     } finally {
       loading = false;
     }
   }
 
-  onMount(() => {
-    fetchDetail();
-  });
-
-  function openEditModal() {
-    if (!canUpdateBarangCert) {
-      console.warn('User lacks bc-update permission');
-      return;
-    }
-    if (!item) return;
-    form = {
-      name: item.name ?? '',
-      no_seri: item.no_seri ?? '',
-      mitra_id: item.mitra_id ?? ''
-    };
+  function openEditModal(): void {
+    if (!item || !canUpdateBarangCert) return;
+    form = makeForm(item);
     showEditModal = true;
   }
 
-  async function handleSubmitUpdate() {
-    if (!canUpdateBarangCert) {
-      console.warn('Update barang certificate blocked by permission');
-      return;
-    }
+  async function handleSubmitUpdate(): Promise<void> {
+    if (!item || !canUpdateBarangCert) return;
     try {
-      await axiosClient.put(`/barang-certificates/${id}`, form);
-      alert('Data berhasil diperbarui!');
+      const updated = await updateBarangCertificate(item.id, form as BarangCertificateForm);
+      item = updated;
+      form = makeForm(updated);
       showEditModal = false;
-      await fetchDetail();
-      goto(`/barang-certificates/${id}`);
-    } catch (err: any) {
-      const messages = err.response?.data?.errors
-        ? Object.values(err.response.data.errors).flat().join('\n')
-        : err.response?.data?.message || 'Gagal memperbarui data.';
-      alert('Error:\n' + messages);
-      console.error('Update failed:', err.response || err);
+      showSuccess('Data berhasil diperbarui!');
+    } catch (err) {
+      showError(extractApiErrors(err));
     }
   }
 
-  async function handleDelete() {
-    if (!canDeleteBarangCert) {
-      console.warn('Delete barang certificate blocked by permission');
-      return;
-    }
-    if (!confirm('Apakah Anda yakin ingin menghapus data ini?')) return;
+  async function handleDelete(): Promise<void> {
+    if (!item || !canDeleteBarangCert) return;
+    const accepted = await confirm({
+      title: 'Hapus barang certificate?',
+      text: 'Apakah Anda yakin ingin menghapus data ini?',
+      confirmText: 'Hapus',
+      isDangerous: true
+    });
+    if (!accepted) return;
+
     try {
-      await axiosClient.delete(`/barang-certificates/${id}`);
-      alert('Data berhasil dihapus!');
-      goto('/barang-certificates');
-    } catch (err: any) {
-      alert('Gagal menghapus data: ' + (err.response?.data?.message || 'Terjadi kesalahan'));
-      console.error('Delete failed:', err.response || err);
+      await deleteBarangCertificate(item.id);
+      showSuccess('Data berhasil dihapus!');
+      await goto('/barang-certificates');
+    } catch (err) {
+      showError(extractApiErrors(err));
     }
   }
 
-  // --- kunci scroll saat membuka drawer & modal ---
-  function lockBodyScroll(lock: boolean) {
-    const body = document.body;
-    if (!body) return;
-    if (lock) {
-      const scrollY = window.scrollY;
-      body.dataset.scrollY = String(scrollY);
-      body.style.position = 'fixed';
-      body.style.top = `-${scrollY}px`;
-      body.style.left = '0';
-      body.style.right = '0';
-      body.style.overflow = 'hidden';
-      body.style.width = '100%';
-    } else {
-      const y = Number(body.dataset.scrollY || '0');
-      body.style.position = '';
-      body.style.top = '';
-      body.style.left = '';
-      body.style.right = '';
-      body.style.overflow = '';
-      body.style.width = '';
-      delete body.dataset.scrollY;
-      window.scrollTo(0, y);
+  $effect(() => {
+    const id = $page.params.id;
+    if (id) {
+      void loadDetail(id);
     }
-  }
-  $: lockBodyScroll(showEditModal);
+  });
+
+  $effect(() => {
+    lockBodyScroll(showEditModal);
+    return () => lockBodyScroll(false);
+  });
 </script>
 
 <svelte:head>
@@ -138,7 +109,7 @@
 </svelte:head>
 
 {#if loading}
-  <p class="text-gray-900 dark:text-white">Memuat detail...</p>
+  <LoadingState label="Memuat detail barang sertifikat..." />
 {:else if error}
   <p class="text-red-500">{error}</p>
 {:else if !item}
@@ -146,8 +117,10 @@
 {:else}
   <div class="mb-8 w-full min-w-0">
     <div class="mb-4 flex min-w-0 flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-      <div class="flex-1 min-w-0">
-        <h2 class="break-words text-2xl font-bold leading-7 text-gray-900 dark:text-white sm:text-2xl">
+      <div class="min-w-0 flex-1">
+        <h2
+          class="text-2xl leading-7 font-bold break-words text-gray-900 sm:text-2xl dark:text-white"
+        >
           {item.name}
         </h2>
         <div class="my-2 text-sm text-gray-500 dark:text-gray-300">
@@ -157,20 +130,20 @@
       <div class="flex shrink-0 flex-col gap-2 sm:flex-row">
         {#if canUpdateBarangCert}
           <button
-            on:click={openEditModal}
-            class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white
-                   bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500
-                   dark:focus:ring-offset-gray-800"
+            type="button"
+            onclick={openEditModal}
+            class="inline-flex items-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm
+                   hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:outline-none dark:focus:ring-offset-gray-800"
           >
             Edit
           </button>
         {/if}
         {#if canDeleteBarangCert}
           <button
-            on:click={handleDelete}
-            class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white
-                   bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500
-                   dark:focus:ring-offset-gray-800"
+            type="button"
+            onclick={handleDelete}
+            class="inline-flex items-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm
+                   hover:bg-red-700 focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:outline-none dark:focus:ring-offset-gray-800"
           >
             Hapus
           </button>
@@ -178,9 +151,11 @@
       </div>
     </div>
 
-    <div class="bg-white dark:bg-black shadow overflow-hidden">
+    <div class="overflow-hidden bg-white shadow dark:bg-black">
       <div class="px-4 py-5 sm:px-6">
-        <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white">Informasi Barang Certificate</h3>
+        <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white">
+          Informasi Barang Certificate
+        </h3>
       </div>
       <div class="border-t border-gray-200 dark:border-gray-700">
         <BarangCertificatesDetail barangCertificates={item} />
@@ -193,7 +168,7 @@
     title="Edit Barang Certificate"
     submitLabel="Update"
     idPrefix="edit"
-    {form}
+    bind:form
     {mitras}
     showMitra={true}
     onSubmit={handleSubmitUpdate}
