@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -38,6 +39,11 @@ class SlidingWindowThrottle
         int $decaySeconds = 60,
         string $prefix = 'sliding_throttle'
     ): Response {
+        // Skip throttle untuk user yang sudah login
+        if (Auth::check()) {
+            return $next($request);
+        }
+
         $key = $this->resolveRequestKey($request, $prefix);
 
         // Gunakan atomic lock untuk mencegah race condition pada concurrent requests

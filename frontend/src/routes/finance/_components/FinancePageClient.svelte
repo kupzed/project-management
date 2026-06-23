@@ -14,7 +14,6 @@
   } from '$lib/services/financeService';
   import { extractApiErrors } from '$lib/utils/errors';
   import { formatCurrency } from '$lib/utils/formatters';
-  import { lockBodyScroll } from '$lib/utils/scroll-lock';
 
   const emptyMeta: FinanceReportMeta = {
     total_records: 0,
@@ -185,10 +184,6 @@
       openFinanceDetailDrawer(item);
     }
   }
-
-  $effect(() => {
-    lockBodyScroll(showDetailDrawer);
-  });
 </script>
 
 <div class="flex flex-col gap-6">

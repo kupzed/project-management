@@ -1,4 +1,6 @@
 /** Locks or restores document body scrolling while drawers and modals are open. */
+let activeLocks = 0;
+
 export function lockBodyScroll(lock: boolean): void {
   if (typeof document === 'undefined' || typeof window === 'undefined') {
     return;
@@ -10,6 +12,7 @@ export function lockBodyScroll(lock: boolean): void {
   }
 
   if (lock) {
+    activeLocks++;
     if (body.dataset.scrollLocked === 'true') {
       return;
     }
@@ -23,6 +26,11 @@ export function lockBodyScroll(lock: boolean): void {
     body.style.right = '0';
     body.style.overflow = 'hidden';
     body.style.width = '100%';
+    return;
+  }
+
+  activeLocks = Math.max(0, activeLocks - 1);
+  if (activeLocks > 0) {
     return;
   }
 
@@ -41,3 +49,4 @@ export function lockBodyScroll(lock: boolean): void {
   delete body.dataset.scrollY;
   window.scrollTo(0, y);
 }
+

@@ -13,7 +13,6 @@
   } from '$lib/services/certificateService';
   import { userPermissions } from '$lib/stores/permissions';
   import { extractApiErrors } from '$lib/utils/errors';
-  import { lockBodyScroll } from '$lib/utils/scroll-lock';
   import { showError, showSuccess } from '$lib/utils/toast';
   import type {
     Certificate,
@@ -185,11 +184,6 @@
     if (id) {
       void loadDetail(id);
     }
-  });
-
-  $effect(() => {
-    lockBodyScroll(showEditModal);
-    return () => lockBodyScroll(false);
   });
 </script>
 

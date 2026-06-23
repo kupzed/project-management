@@ -8,6 +8,7 @@ Aplikasi menggunakan **JWT (JSON Web Token)** melalui package `php-open-source-s
 - **Token storage:** `localStorage` di browser
 - **Token type:** Bearer token
 - **Token lifetime:** Dikonfigurasi di `config/jwt.php` (default 60 menit)
+- **Rate limiting bypass:** Rate limiting (throttle) di-bypass sepenuhnya setelah user berhasil terautentikasi (login). Rate limiting tetap aktif untuk guest/user yang belum login.
 
 ## Auth Provider
 

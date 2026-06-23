@@ -10,7 +10,6 @@
   import { userPermissions } from '$lib/stores/permissions';
   import { extractApiErrors } from '$lib/utils/errors';
   import { formatDate } from '$lib/utils/formatters';
-  import { lockBodyScroll } from '$lib/utils/scroll-lock';
   import { showError, showSuccess } from '$lib/utils/toast';
   import type {
     Activity,
@@ -226,11 +225,6 @@
     if (form.jenis === 'Customer' && form.project_id) {
       syncMitraFromJenis();
     }
-  });
-
-  $effect(() => {
-    lockBodyScroll(showEditModal);
-    return () => lockBodyScroll(false);
   });
 </script>
 

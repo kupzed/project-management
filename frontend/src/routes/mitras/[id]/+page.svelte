@@ -8,7 +8,6 @@
   import { deleteMitra, fetchMitra, updateMitra } from '$lib/services/mitraService';
   import { userPermissions } from '$lib/stores/permissions';
   import { extractApiErrors } from '$lib/utils/errors';
-  import { lockBodyScroll } from '$lib/utils/scroll-lock';
   import { showError, showSuccess } from '$lib/utils/toast';
   import type { Mitra, MitraForm } from '$lib/types';
   import MitraCategoryBadges from '../_components/MitraCategoryBadges.svelte';
@@ -129,11 +128,6 @@
 
   $effect(() => {
     if (activeTab === 'barang') hasVisitedBarang = true;
-  });
-
-  $effect(() => {
-    lockBodyScroll(showEditModal);
-    return () => lockBodyScroll(false);
   });
 </script>
 

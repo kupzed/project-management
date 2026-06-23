@@ -21,6 +21,8 @@ Authorization: Bearer {access_token}
 | Auth routes  | 5 req / 60 detik  | `sliding_throttle:5,60,auth`        |
 | API routes   | 15 req / 60 detik | `sliding_throttle:15,60,api`        |
 
+> **Catatan:** Rate limiting hanya berlaku untuk user yang belum terautentikasi (guest). Setelah user berhasil login/terautentikasi, rate limiting (throttle) akan di-bypass sepenuhnya.
+
 ---
 
 ## Auth

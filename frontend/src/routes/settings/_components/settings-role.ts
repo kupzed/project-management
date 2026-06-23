@@ -20,7 +20,14 @@ export function createEmptyModules(
 }
 
 export function cloneModules(modules: ModulesState): ModulesState {
-  return structuredClone(modules);
+  // Avoid structuredClone() — Svelte 5 $state proxies are not cloneable by it.
+  // ModulesState only contains nested boolean primitives, so a manual deep
+  // copy via Object.entries + spread is sufficient and proxy-safe.
+  const clone: ModulesState = {};
+  for (const [moduleKey, actions] of Object.entries(modules)) {
+    clone[moduleKey] = { ...actions };
+  }
+  return clone;
 }
 
 export function buildPermissionsPayload(

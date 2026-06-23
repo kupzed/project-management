@@ -16,7 +16,6 @@
   } from '$lib/types';
   import { PROJECT_KATEGORI_OPTIONS, PROJECT_STATUS_OPTIONS } from '$lib/constants';
   import { extractApiErrors } from '$lib/utils/errors';
-  import { lockBodyScroll } from '$lib/utils/scroll-lock';
   import { showError, showSuccess } from '$lib/utils/toast';
   import ActivityTab from './_components/ActivityTab.svelte';
   import CertificateTab from './_components/CertificateTab.svelte';
@@ -146,11 +145,6 @@
   $effect(() => {
     if (activeTab === 'activity') hasVisitedActivity = true;
     if (activeTab === 'certificates') hasVisitedCertificates = true;
-  });
-
-  $effect(() => {
-    lockBodyScroll(showEditModal);
-    return () => lockBodyScroll(false);
   });
 </script>
 

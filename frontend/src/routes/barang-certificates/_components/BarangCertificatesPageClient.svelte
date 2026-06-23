@@ -19,7 +19,6 @@
   } from '$lib/services/barangCertificateService';
   import { userPermissions } from '$lib/stores/permissions';
   import { extractApiErrors } from '$lib/utils/errors';
-  import { lockBodyScroll } from '$lib/utils/scroll-lock';
   import { showError, showSuccess } from '$lib/utils/toast';
   import type {
     BarangCertificate,
@@ -167,11 +166,6 @@
       showError(extractApiErrors(err));
     }
   }
-
-  $effect(() => {
-    lockBodyScroll(showDetailDrawer || showCreateModal || showEditModal);
-    return () => lockBodyScroll(false);
-  });
 
   onMount(() => {
     void fetchList();

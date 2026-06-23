@@ -18,7 +18,6 @@
   } from '$lib/services/certificateService';
   import { userPermissions } from '$lib/stores/permissions';
   import { extractApiErrors } from '$lib/utils/errors';
-  import { lockBodyScroll } from '$lib/utils/scroll-lock';
   import { showError, showSuccess } from '$lib/utils/toast';
   import type {
     Certificate,
@@ -272,10 +271,6 @@
       showError(extractApiErrors(err));
     }
   }
-
-  $effect(() => {
-    lockBodyScroll(showDetailDrawer || showCreateModal || showEditModal);
-  });
 
   onMount(() => {
     void fetchList();

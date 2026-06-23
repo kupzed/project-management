@@ -1,6 +1,17 @@
 # Changelog
 
-Format mengikuti [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
+## [2026-06-23] — feat(api): bypass rate limiting for authenticated users
+
+- Menghindari rate limiting (SlidingWindowThrottle) ketika user sudah terautentikasi (login), dan tetap menerapkannya jika user belum login.
+- File yang diubah:
+  - `app/Http/Middleware/SlidingWindowThrottle.php`
+  - `tests/Feature/RateLimiterTest.php`
+  - `docs/api-reference.md`
+  - `docs/jwt-auth.md`
+  - `docs/architecture.md`
+- Dampak yang perlu diketahui:
+  - User terautentikasi tidak akan lagi dibatasi oleh rate limiter pada endpoint API/auth terlindungi.
+  - Rate limiter (5 req/60s) tetap membatasi guest pada endpoint register & login.
 
 ## [Unreleased]
 
