@@ -19,7 +19,6 @@
   } from '$lib/services/projectService';
   import { userPermissions } from '$lib/stores/permissions';
   import { extractApiErrors } from '$lib/utils/errors';
-  import { lockBodyScroll } from '$lib/utils/scroll-lock';
   import { showError, showSuccess } from '$lib/utils/toast';
   import type {
     Activity,
@@ -229,13 +228,6 @@
       showError(extractApiErrors(err));
     }
   }
-
-  $effect(() => {
-    lockBodyScroll(
-      showDetailDrawer || showActivityDetailDrawer || showCreateModal || showEditModal
-    );
-    return () => lockBodyScroll(false);
-  });
 
   onMount(() => {
     void loadProjects();

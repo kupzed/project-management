@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { Snippet } from 'svelte';
+  import { lockBodyScroll } from '$lib/utils/scroll-lock';
 
   /**
    * Props for a reusable modal shell.
@@ -20,6 +21,15 @@
     onClose?: () => void;
     onclose?: () => void;
   } = $props();
+
+  $effect(() => {
+    if (show) {
+      lockBodyScroll(true);
+      return () => {
+        lockBodyScroll(false);
+      };
+    }
+  });
 
   function closeModal(): void {
     show = false;

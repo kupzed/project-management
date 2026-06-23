@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { Snippet } from 'svelte';
   import { fade, slide } from 'svelte/transition';
+  import { lockBodyScroll } from '$lib/utils/scroll-lock';
 
   /**
    * Props for a right-side drawer shell.
@@ -21,6 +22,15 @@
     onClose?: () => void;
     onclose?: () => void;
   } = $props();
+
+  $effect(() => {
+    if (show) {
+      lockBodyScroll(true);
+      return () => {
+        lockBodyScroll(false);
+      };
+    }
+  });
 
   function closeDrawer(): void {
     show = false;
