@@ -130,7 +130,9 @@ Backend menggunakan custom **Sliding Window Throttle** middleware:
 ```
 Request masuk
   │
-  ├── Counter < limit? → Increment counter, reset TTL, lanjutkan request
+  ├── User terautentikasi (login)? → YA → Bypass throttle, lanjutkan request
+  │
+  ├── TIDAK → Counter < limit? → Increment counter, reset TTL, lanjutkan request
   │
   └── Counter >= limit? → Tolak dengan 429 Too Many Requests
                            Return Retry-After header
@@ -139,8 +141,8 @@ Request masuk
 
 Konfigurasi:
 
-- Auth routes: `5 request / 60 detik`
-- API routes: `15 request / 60 detik`
+- Auth routes: `5 request / 60 detik` (hanya berlaku jika belum terautentikasi)
+- API routes: `15 request / 60 detik` (hanya berlaku jika belum terautentikasi)
 
 ## Alur Activity Logging
 
