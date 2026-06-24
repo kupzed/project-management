@@ -11,6 +11,8 @@ import {
   type StockMovementType,
   type Warehouse
 } from '$lib/inventory';
+import type { ExistingAttachment } from '$lib/types';
+import { appendAttachments, appendScalar } from '$lib/utils/form-data';
 
 export type InventoryListResult<T> = {
   data: T[];
@@ -36,12 +38,20 @@ export type ItemFilterParams = {
   per_page?: number;
 };
 
-export type ItemFormPayload = {
+export type ItemForm = {
   sku: string;
-  category_id: number;
+  category_id: number | '';
   name: string;
   unit: string;
-  minimum_stock: number;
+  minimum_stock: number | '';
+  attachments?: File[];
+  attachment_names?: string[];
+  attachment_descriptions?: Array<string | null>;
+};
+
+export type ItemEditForm = ItemForm & {
+  existing_attachments?: ExistingAttachment[];
+  removed_existing_ids?: number[];
 };
 
 export type WarehouseFilterParams = {
@@ -76,6 +86,7 @@ export type StockMovementPayload = {
   project_id?: number;
   occurred_at?: string;
   allocated_at?: string;
+  placement?: string;
 };
 
 function listResult<T>(payload: PaginatedResponse<T>): InventoryListResult<T> {
@@ -115,6 +126,22 @@ export async function deleteCategory(id: number): Promise<void> {
   await axiosClient.delete(`/categories/${id}`);
 }
 
+const MULTIPART_HEADERS = {
+  'Content-Type': 'multipart/form-data'
+} as const;
+
+export function buildItemFormData(data: ItemForm | ItemEditForm): FormData {
+  const fd = new FormData();
+  appendScalar(fd, 'sku', data.sku);
+  appendScalar(fd, 'category_id', data.category_id);
+  appendScalar(fd, 'name', data.name);
+  appendScalar(fd, 'unit', data.unit);
+  appendScalar(fd, 'minimum_stock', data.minimum_stock);
+
+  appendAttachments(fd, data);
+  return fd;
+}
+
 /** Fetches item records and their stock summaries. */
 export async function fetchItems(
   params: ItemFilterParams = {}
@@ -126,15 +153,28 @@ export async function fetchItems(
   return listResult(response.data);
 }
 
+/** Fetches a single item record. */
+export async function fetchItem(id: number): Promise<Item> {
+  const response = await axiosClient.get<{ data: Item }>(`/items/${id}`);
+  return response.data.data;
+}
+
 /** Creates an item record. */
-export async function createItem(form: ItemFormPayload): Promise<Item> {
-  const response = await axiosClient.post<{ data: Item }>('/items', form);
+export async function createItem(form: ItemForm): Promise<Item> {
+  const formData = buildItemFormData(form);
+  const response = await axiosClient.post<{ data: Item }>('/items', formData, {
+    headers: MULTIPART_HEADERS
+  });
   return response.data.data;
 }
 
 /** Updates an item record. */
-export async function updateItem(id: number, form: ItemFormPayload): Promise<Item> {
-  const response = await axiosClient.put<{ data: Item }>(`/items/${id}`, form);
+export async function updateItem(id: number, form: ItemEditForm): Promise<Item> {
+  const formData = buildItemFormData(form);
+  formData.append('_method', 'PUT');
+  const response = await axiosClient.post<{ data: Item }>(`/items/${id}`, formData, {
+    headers: MULTIPART_HEADERS
+  });
   return response.data.data;
 }
 
@@ -199,6 +239,26 @@ export async function createStockMovement(
   );
 
   return response.data.data;
+}
+
+/** Fetches a single stock movement. */
+export async function fetchStockMovement(id: number): Promise<StockMovement> {
+  const response = await axiosClient.get<{ data: StockMovement }>(`/stock-movements/${id}`);
+  return response.data.data;
+}
+
+/** Updates a stock movement. */
+export async function updateStockMovement(
+  id: number,
+  payload: { quantity: number; notes?: string | null; occurred_at?: string | null }
+): Promise<StockMovement> {
+  const response = await axiosClient.put<{ data: StockMovement }>(`/stock-movements/${id}`, payload);
+  return response.data.data;
+}
+
+/** Deletes a stock movement. */
+export async function deleteStockMovement(id: number): Promise<void> {
+  await axiosClient.delete(`/stock-movements/${id}`);
 }
 
 /** Fetches lightweight project options for stock movement allocation. */

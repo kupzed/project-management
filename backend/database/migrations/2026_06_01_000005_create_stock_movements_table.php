@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('destination_warehouse_id')->nullable()->constrained('warehouses')->restrictOnDelete();
             $table->foreignId('project_id')->nullable()->constrained('projects')->restrictOnDelete();
             $table->unsignedInteger('quantity');
+            $table->string('placement', 100)->nullable();
             $table->text('notes')->nullable();
             $table->timestamp('occurred_at')->useCurrent();
             $table->timestamps();

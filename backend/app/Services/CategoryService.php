@@ -13,6 +13,7 @@ class CategoryService
     public function getPaginatedCategories(array $filters, int $perPage): LengthAwarePaginator
     {
         return Category::query()
+            ->withCount('items')
             ->when($filters['type'] ?? null, fn ($query, $type) => $query->where('type', $type))
             ->when($filters['search'] ?? null, function ($query, $search) {
                 $query->where('name', 'like', "%{$search}%");

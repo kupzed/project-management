@@ -200,10 +200,7 @@ class RoleController extends Controller
             ['key' => 'category', 'label' => 'Kategori'],
             ['key' => 'warehouse', 'label' => 'Gudang'],
             ['key' => 'item', 'label' => 'Item'],
-            ['key' => 'stock-movement', 'label' => 'Mutasi Stok', 'actions' => [
-                ['key' => 'view', 'label' => 'View'],
-                ['key' => 'create', 'label' => 'Create'],
-            ]],
+            ['key' => 'stock-movement', 'label' => 'Mutasi Stok'],
         ];
 
         $actions = [

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StockMovementRequest;
+use App\Http\Requests\StockMovementUpdateRequest;
 use App\Http\Resources\StockMovementResource;
 use App\Models\StockMovement;
 use App\Services\WarehouseService;
@@ -21,6 +22,8 @@ class StockMovementController extends Controller
             'transfer',
             'allocateProject',
         ]);
+        $this->middleware('permission:stock-movement-update')->only(['update']);
+        $this->middleware('permission:stock-movement-delete')->only(['destroy']);
     }
 
     public function index(Request $request)
@@ -82,6 +85,25 @@ class StockMovementController extends Controller
             'message' => 'Project material allocation recorded successfully',
             'data' => new StockMovementResource($movement),
         ], 201);
+    }
+
+    public function update(StockMovementUpdateRequest $request, StockMovement $stockMovement)
+    {
+        $movement = $this->warehouseService->updateStockMovement($stockMovement, $request->validated());
+
+        return response()->json([
+            'message' => 'Stock movement updated successfully',
+            'data' => new StockMovementResource($movement),
+        ]);
+    }
+
+    public function destroy(StockMovement $stockMovement)
+    {
+        $this->warehouseService->deleteStockMovement($stockMovement);
+
+        return response()->json([
+            'message' => 'Stock movement deleted successfully',
+        ]);
     }
 
     private function resolvePerPage(Request $request): int

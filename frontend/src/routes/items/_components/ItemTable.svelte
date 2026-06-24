@@ -1,5 +1,6 @@
 <script lang="ts">
   import Pagination from '$lib/components/Pagination.svelte';
+  import RowActionButtons from '$lib/components/ui/RowActionButtons.svelte';
   import { formatNumber, type Item } from '$lib/inventory';
 
   /** Item table with stock status, actions, and pagination. */
@@ -14,6 +15,7 @@
     perPageOptions,
     canUpdate,
     canDelete,
+    onDetail,
     onEdit,
     onDelete,
     onPageChange,
@@ -29,6 +31,7 @@
     perPageOptions: number[];
     canUpdate: boolean;
     canDelete: boolean;
+    onDetail: (item: Item) => void;
     onEdit: (item: Item) => void;
     onDelete: (item: Item) => void;
     onPageChange: (page: number) => void;
@@ -105,43 +108,15 @@
                 {formatNumber(item.minimum_stock)}
               </td>
               <td class="px-4 py-4 text-right">
-                <div class="inline-flex items-center gap-2">
-                  {#if canUpdate}
-                    <button
-                      type="button"
-                      onclick={() => onEdit(item)}
-                      class="rounded-md p-2 text-blue-600 hover:bg-blue-50 hover:text-blue-800 dark:text-blue-400 dark:hover:bg-blue-950"
-                      title="Edit"
-                      aria-label="Edit item"
-                    >
-                      <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-width="2"
-                          d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                        />
-                      </svg>
-                    </button>
-                  {/if}
-                  {#if canDelete}
-                    <button
-                      type="button"
-                      onclick={() => onDelete(item)}
-                      class="rounded-md p-2 text-red-600 hover:bg-red-50 hover:text-red-800 dark:text-red-400 dark:hover:bg-red-950"
-                      title="Hapus"
-                      aria-label="Hapus item"
-                    >
-                      <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-width="2"
-                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7h6m2 0H7m3 0V5a2 2 0 012-2h0a2 2 0 012 2v2"
-                        />
-                      </svg>
-                    </button>
-                  {/if}
+                <div class="inline-flex w-full justify-end">
+                  <RowActionButtons
+                    label={item.name}
+                    canEdit={canUpdate}
+                    {canDelete}
+                    onDetail={() => onDetail(item)}
+                    onEdit={() => onEdit(item)}
+                    onDelete={() => onDelete(item)}
+                  />
                 </div>
               </td>
             </tr>

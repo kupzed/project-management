@@ -28,15 +28,15 @@ Permission mengikuti format `{module}-{action}`.
 | `category`       | ✅   | ✅     | ✅     | ✅     |
 | `warehouse`      | ✅   | ✅     | ✅     | ✅     |
 | `item`           | ✅   | ✅     | ✅     | ✅     |
-| `stock-movement` | ✅   | ✅     | —      | —      |
+| `stock-movement` | ✅   | ✅     | ✅     | ✅     |
 
-**Total permission:** 36
+**Total permission:** 38
 
 ## Mapping Role → Permission
 
 | Role          | Permission                                   |
 | ------------- | -------------------------------------------- |
-| `super_admin` | Semua 36 permission                          |
+| `super_admin` | Semua 38 permission                          |
 | `admin`       | Semua kecuali yang berakhiran `-delete`       |
 | `staff`       | Kosong dari role (diatur per user oleh admin) |
 | `user`        | Kosong dari role (diatur per user oleh admin) |

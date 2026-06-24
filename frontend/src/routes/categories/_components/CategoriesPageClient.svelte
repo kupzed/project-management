@@ -3,6 +3,7 @@
   import Modal from '$lib/components/Modal.svelte';
   import Pagination from '$lib/components/Pagination.svelte';
   import { confirm } from '$lib/components/common/ConfirmDialog.svelte';
+  import RowActionButtons from '$lib/components/ui/RowActionButtons.svelte';
   import {
     createCategory,
     deleteCategory as deleteCategoryRecord,
@@ -227,6 +228,11 @@
             <th
               class="px-4 py-3 text-right text-xs font-bold tracking-wide text-gray-500 uppercase dark:text-gray-300"
             >
+              Terpakai
+            </th>
+            <th
+              class="px-4 py-3 text-right text-xs font-bold tracking-wide text-gray-500 uppercase dark:text-gray-300"
+            >
               Aksi
             </th>
           </tr>
@@ -234,17 +240,17 @@
         <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
           {#if loading}
             <tr>
-              <td colspan="3" class="px-4 py-8 text-center text-sm text-gray-500"
+              <td colspan="4" class="px-4 py-8 text-center text-sm text-gray-500"
                 >Memuat kategori...</td
               >
             </tr>
           {:else if error}
             <tr>
-              <td colspan="3" class="px-4 py-8 text-center text-sm text-red-600">{error}</td>
+              <td colspan="4" class="px-4 py-8 text-center text-sm text-red-600">{error}</td>
             </tr>
           {:else if categories.length === 0}
             <tr>
-              <td colspan="3" class="px-4 py-8 text-center text-sm text-gray-500">
+              <td colspan="4" class="px-4 py-8 text-center text-sm text-gray-500">
                 Belum ada kategori.
               </td>
             </tr>
@@ -261,45 +267,26 @@
                     {typeLabel(category.type)}
                   </span>
                 </td>
+                <td
+                  class="px-4 py-4 text-right text-sm font-medium text-gray-600 dark:text-gray-300"
+                >
+                  <span
+                    class={category.items_count && category.items_count > 0
+                      ? 'font-semibold text-indigo-600 dark:text-indigo-400'
+                      : ''}
+                  >
+                    {category.items_count ?? 0} data
+                  </span>
+                </td>
                 <td class="px-4 py-4 text-right text-sm">
-                  <div class="inline-flex items-center gap-2">
-                    {#if canUpdate}
-                      <button
-                        type="button"
-                        onclick={() => openEditModal(category)}
-                        class="rounded-md p-2 text-blue-600 hover:bg-blue-50 hover:text-blue-800 dark:text-blue-400 dark:hover:bg-blue-950"
-                        title="Edit"
-                        aria-label="Edit kategori"
-                      >
-                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                          />
-                        </svg>
-                      </button>
-                    {/if}
-
-                    {#if canDelete}
-                      <button
-                        type="button"
-                        onclick={() => void deleteCategory(category)}
-                        class="rounded-md p-2 text-red-600 hover:bg-red-50 hover:text-red-800 dark:text-red-400 dark:hover:bg-red-950"
-                        title="Hapus"
-                        aria-label="Hapus kategori"
-                      >
-                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7h6m2 0H7m3 0V5a2 2 0 012-2h0a2 2 0 012 2v2"
-                          />
-                        </svg>
-                      </button>
-                    {/if}
+                  <div class="inline-flex w-full justify-end">
+                    <RowActionButtons
+                      label={category.name}
+                      canEdit={canUpdate}
+                      {canDelete}
+                      onEdit={() => openEditModal(category)}
+                      onDelete={() => void deleteCategory(category)}
+                    />
                   </div>
                 </td>
               </tr>

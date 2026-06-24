@@ -49,6 +49,7 @@ class StockMovementResource extends JsonResource
             }),
             'quantity' => $this->quantity,
             'notes' => $this->notes,
+            'placement' => $this->placement,
             'occurred_at' => $this->occurred_at?->format('Y-m-d H:i:s'),
             'created_at' => $this->created_at?->format('Y-m-d H:i:s'),
             'updated_at' => $this->updated_at?->format('Y-m-d H:i:s'),

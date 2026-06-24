@@ -315,6 +315,11 @@
                     Item
                   </th>
                   <th
+                    class="px-4 py-3 text-left text-xs font-bold tracking-wide text-gray-500 uppercase"
+                  >
+                    Rak
+                  </th>
+                  <th
                     class="px-4 py-3 text-right text-xs font-bold tracking-wide text-gray-500 uppercase"
                   >
                     Quantity
@@ -324,7 +329,7 @@
               <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
                 {#if !selectedWarehouse.inventories || selectedWarehouse.inventories.length === 0}
                   <tr>
-                    <td colspan="2" class="px-4 py-6 text-center text-sm text-gray-500">
+                    <td colspan="3" class="px-4 py-6 text-center text-sm text-gray-500">
                       Belum ada stok di gudang ini.
                     </td>
                   </tr>
@@ -338,6 +343,9 @@
                         <div class="mt-1 font-mono text-xs text-gray-500">
                           {inventory.item?.sku ?? '-'} · {inventory.item?.unit ?? '-'}
                         </div>
+                      </td>
+                      <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-300">
+                        {inventory.placement ?? '-'}
                       </td>
                       <td
                         class="px-4 py-3 text-right text-sm font-bold text-gray-900 dark:text-gray-100"

@@ -64,6 +64,7 @@ class StockMovementRequest extends FormRequest
             'item_id' => ['required', 'integer', 'exists:items,id'],
             'quantity' => ['required', 'integer', 'min:1'],
             'notes' => ['nullable', 'string'],
+            'placement' => ['nullable', 'string', 'max:100'],
         ];
     }
 

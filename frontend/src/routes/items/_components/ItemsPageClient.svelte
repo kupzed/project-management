@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import Modal from '$lib/components/Modal.svelte';
+  import Drawer from '$lib/components/Drawer.svelte';
   import { confirm } from '$lib/components/common/ConfirmDialog.svelte';
   import {
     createItem,
@@ -8,20 +9,29 @@
     fetchCategories,
     fetchItems as fetchItemRecords,
     updateItem,
-    type ItemFormPayload
+    type ItemForm as ApiItemForm,
+    type ItemEditForm as ApiItemEditForm
   } from '$lib/services/inventoryService';
   import { userPermissions } from '$lib/stores/permissions';
   import { showError, showSuccess } from '$lib/utils/toast';
   import { extractApiErrors } from '$lib/utils/errors';
-  import { type Category, type Item } from '$lib/inventory';
+  import { type Category, type Item, formatNumber } from '$lib/inventory';
+  import { formatFileSize } from '$lib/utils/formatters';
+  import type { ExistingAttachment } from '$lib/types';
+  import FileAttachment from '$lib/components/FileAttachment.svelte';
   import ItemTable from './ItemTable.svelte';
 
-  type ItemForm = {
+  type ItemFormState = {
     sku: string;
     category_id: string;
     name: string;
     unit: string;
     minimum_stock: number;
+    attachments: File[];
+    attachment_names: string[];
+    attachment_descriptions: string[];
+    existing_attachments: ExistingAttachment[];
+    removed_existing_ids: number[];
   };
 
   let items = $state<Item[]>([]);
@@ -38,13 +48,26 @@
 
   let showModal = $state(false);
   let editingItem = $state<Item | null>(null);
-  let form = $state<ItemForm>({
+  let form = $state<ItemFormState>({
     sku: '',
     category_id: '',
     name: '',
     unit: 'pcs',
-    minimum_stock: 0
+    minimum_stock: 0,
+    attachments: [],
+    attachment_names: [],
+    attachment_descriptions: [],
+    existing_attachments: [],
+    removed_existing_ids: []
   });
+
+  let showDetailDrawer = $state(false);
+  let selectedItem = $state<Item | null>(null);
+
+  function openDetail(item: Item) {
+    selectedItem = item;
+    showDetailDrawer = true;
+  }
 
   let canCreate = $derived(($userPermissions ?? []).includes('item-create'));
   let canUpdate = $derived(($userPermissions ?? []).includes('item-update'));
@@ -102,7 +125,12 @@
       category_id: categories[0]?.id ? String(categories[0].id) : '',
       name: '',
       unit: 'pcs',
-      minimum_stock: 0
+      minimum_stock: 0,
+      attachments: [],
+      attachment_names: [],
+      attachment_descriptions: [],
+      existing_attachments: [],
+      removed_existing_ids: []
     };
   }
 
@@ -121,29 +149,59 @@
       category_id: String(item.category_id),
       name: item.name,
       unit: item.unit,
-      minimum_stock: item.minimum_stock
+      minimum_stock: item.minimum_stock,
+      attachments: [],
+      attachment_names: [],
+      attachment_descriptions: [],
+      existing_attachments: item.attachments
+        ? item.attachments.map((att) => ({
+            id: att.id!,
+            name: att.name,
+            description: att.description,
+            size: att.size,
+            sizeLabel: att.sizeLabel,
+            path: att.path,
+            url: att.url
+          }))
+        : [],
+      removed_existing_ids: []
     };
     showModal = true;
   }
 
-  function payloadFromForm(): ItemFormPayload {
-    return {
-      sku: form.sku,
-      category_id: Number(form.category_id),
-      name: form.name,
-      unit: form.unit,
-      minimum_stock: Number(form.minimum_stock)
-    };
+  function removeExistingAttachment(id: number): void {
+    form.removed_existing_ids = [...(form.removed_existing_ids ?? []), id];
+    form.existing_attachments = (form.existing_attachments ?? []).filter((item) => item.id !== id);
   }
 
   async function submitItem() {
     try {
-      const payload = payloadFromForm();
-
       if (editingItem) {
+        const payload: ApiItemEditForm = {
+          sku: form.sku,
+          category_id: Number(form.category_id),
+          name: form.name,
+          unit: form.unit,
+          minimum_stock: Number(form.minimum_stock),
+          attachments: form.attachments,
+          attachment_names: form.attachment_names,
+          attachment_descriptions: form.attachment_descriptions,
+          existing_attachments: form.existing_attachments,
+          removed_existing_ids: form.removed_existing_ids
+        };
         await updateItem(editingItem.id, payload);
         showSuccess('Item berhasil diperbarui.');
       } else {
+        const payload: ApiItemForm = {
+          sku: form.sku,
+          category_id: Number(form.category_id),
+          name: form.name,
+          unit: form.unit,
+          minimum_stock: Number(form.minimum_stock),
+          attachments: form.attachments,
+          attachment_names: form.attachment_names,
+          attachment_descriptions: form.attachment_descriptions
+        };
         await createItem(payload);
         showSuccess('Item berhasil ditambahkan.');
       }
@@ -266,6 +324,7 @@
     {perPageOptions}
     {canUpdate}
     {canDelete}
+    onDetail={openDetail}
     onEdit={openEditModal}
     onDelete={deleteItem}
     onPageChange={handlePageChange}
@@ -340,7 +399,7 @@
         >
           <option value="" disabled>Pilih kategori</option>
           {#each categories as category (category.id)}
-            <option value={category.id}>{category.name}</option>
+            <option value={String(category.id)}>{category.name}</option>
           {/each}
         </select>
       </div>
@@ -362,6 +421,57 @@
       </div>
     </div>
 
+    <div>
+      <FileAttachment
+        id="item-attachments"
+        label="Lampiran"
+        bind:files={form.attachments}
+        bind:fileNames={form.attachment_names}
+        bind:fileDescriptions={form.attachment_descriptions}
+        maxFiles={10}
+      />
+    </div>
+
+    {#if form.existing_attachments && form.existing_attachments.length > 0}
+      <div class="mt-3 space-y-3">
+        <p class="text-sm font-medium text-gray-900 dark:text-white">Lampiran Lama</p>
+        {#each form.existing_attachments as attachment (attachment.id)}
+          <div class="space-y-2 rounded border border-gray-200 p-3 text-sm dark:border-gray-700">
+            <div class="flex items-center justify-between">
+              <a
+                class="truncate font-medium text-indigo-600 hover:underline dark:text-indigo-400"
+                href={attachment.url}
+                target="_blank"
+                rel="noreferrer"
+              >
+                {attachment.name}
+              </a>
+              <button
+                type="button"
+                class="text-xs font-semibold text-red-600 hover:text-red-700 dark:text-red-400"
+                onclick={() => removeExistingAttachment(attachment.id)}
+              >
+                Hapus
+              </button>
+            </div>
+            <input
+              type="text"
+              bind:value={attachment.name}
+              required
+              placeholder="Nama lampiran"
+              class="w-full rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-neutral-900 dark:text-gray-100"
+            />
+            <input
+              type="text"
+              bind:value={attachment.description}
+              placeholder="Deskripsi lampiran (opsional)"
+              class="w-full rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-neutral-900 dark:text-gray-100"
+            />
+          </div>
+        {/each}
+      </div>
+    {/if}
+
     <div class="flex justify-end gap-2 pt-2">
       <button
         type="button"
@@ -379,3 +489,142 @@
     </div>
   </form>
 </Modal>
+
+<Drawer bind:show={showDetailDrawer} title="Detail Item" width="max-w-md">
+  {#if selectedItem}
+    <div class="space-y-6 p-1">
+      <!-- Item Info Card -->
+      <div
+        class="rounded-lg border border-gray-100 bg-gray-50 p-4 dark:border-neutral-800 dark:bg-neutral-900"
+      >
+        <h3 class="mb-3 text-base font-bold text-gray-900 dark:text-white">{selectedItem.name}</h3>
+        <div class="grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
+          <div>
+            <span class="block text-xs font-semibold tracking-wider text-gray-500 uppercase"
+              >SKU</span
+            >
+            <span class="font-mono font-semibold text-gray-800 dark:text-gray-200"
+              >{selectedItem.sku}</span
+            >
+          </div>
+          <div>
+            <span class="block text-xs font-semibold tracking-wider text-gray-500 uppercase"
+              >Kategori</span
+            >
+            <span class="text-gray-800 dark:text-gray-200"
+              >{selectedItem.category?.name ?? '-'}</span
+            >
+          </div>
+          <div>
+            <span class="block text-xs font-semibold tracking-wider text-gray-500 uppercase"
+              >Unit</span
+            >
+            <span class="text-gray-800 dark:text-gray-200">{selectedItem.unit}</span>
+          </div>
+          <div>
+            <span class="block text-xs font-semibold tracking-wider text-gray-500 uppercase"
+              >Minimum Stok</span
+            >
+            <span class="text-gray-800 dark:text-gray-200"
+              >{formatNumber(selectedItem.minimum_stock)}</span
+            >
+          </div>
+        </div>
+      </div>
+
+      <!-- Warehouse Inventories Locations -->
+      <div>
+        <h4 class="mb-2 text-sm font-bold text-gray-900 dark:text-white">Lokasi & Stok Gudang</h4>
+        {#if selectedItem.inventories && selectedItem.inventories.filter((inv) => inv.quantity > 0).length > 0}
+          <div
+            class="divide-y divide-gray-100 rounded-md border border-gray-200 bg-white dark:divide-gray-800 dark:border-gray-800 dark:bg-black"
+          >
+            {#each selectedItem.inventories as inv}
+              {#if inv.quantity > 0}
+                <div class="flex items-center justify-between p-3 text-sm">
+                  <div>
+                    <span class="font-semibold text-gray-900 dark:text-white"
+                      >{inv.warehouse?.name}</span
+                    >
+                    {#if inv.placement}
+                      <span
+                        class="ml-2 inline-flex items-center rounded border border-indigo-100/30 bg-indigo-50 px-2 py-0.5 text-xs font-medium text-indigo-700 dark:bg-indigo-950/30 dark:text-indigo-400"
+                      >
+                        Rak: {inv.placement}
+                      </span>
+                    {/if}
+                  </div>
+                  <span
+                    class="rounded-full bg-gray-100 px-2.5 py-1 text-xs font-bold text-gray-900 dark:bg-neutral-800 dark:text-white"
+                  >
+                    {formatNumber(inv.quantity)}
+                  </span>
+                </div>
+              {/if}
+            {/each}
+          </div>
+        {:else}
+          <p
+            class="rounded bg-gray-50 p-3 text-center text-sm text-gray-500 dark:bg-neutral-900 dark:text-gray-400"
+          >
+            Stok kosong di seluruh gudang.
+          </p>
+        {/if}
+      </div>
+
+      <!-- Attachments Section -->
+      <div>
+        <h4 class="mb-2 text-sm font-bold text-gray-900 dark:text-white">File Lampiran</h4>
+        {#if selectedItem.attachments && selectedItem.attachments.length > 0}
+          <div class="space-y-2">
+            {#each selectedItem.attachments as att}
+              <div
+                class="flex flex-col gap-1 rounded-lg border border-gray-200 bg-white p-3 text-sm shadow-sm transition-colors hover:border-gray-300 dark:border-gray-800 dark:bg-neutral-950 dark:hover:border-neutral-800"
+              >
+                <div class="flex items-center justify-between gap-2">
+                  <a
+                    href={att.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    class="flex items-center gap-1.5 font-semibold break-all text-indigo-600 hover:underline dark:text-indigo-400"
+                  >
+                    <svg
+                      class="h-4 w-4 shrink-0 text-gray-400"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"
+                      />
+                    </svg>
+                    {att.name}
+                  </a>
+                  {#if att.size}
+                    <span class="shrink-0 text-xs text-gray-400">({formatFileSize(att.size)})</span>
+                  {/if}
+                </div>
+                {#if att.description}
+                  <p
+                    class="mt-1 border-l-2 border-gray-100 pl-5 text-xs text-gray-500 dark:border-neutral-800 dark:text-gray-400"
+                  >
+                    {att.description}
+                  </p>
+                {/if}
+              </div>
+            {/each}
+          </div>
+        {:else}
+          <p
+            class="rounded bg-gray-50 p-3 text-center text-sm text-gray-500 dark:bg-neutral-900 dark:text-gray-400"
+          >
+            Tidak ada lampiran.
+          </p>
+        {/if}
+      </div>
+    </div>
+  {/if}
+</Drawer>

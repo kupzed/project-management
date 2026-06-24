@@ -21,8 +21,16 @@ class InventorySeeder extends Seeder
     {
         // ── 1. Categories ────────────────────────────────────────────
         $itemCategories = [
-            'Solar Panel', 'Inverter', 'Baterai', 'Kabel', 'Mounting',
-            'Controller', 'Lampu LED', 'Tiang', 'Aksesoris', 'Alat Ukur',
+            'Solar Panel',
+            'Inverter',
+            'Baterai',
+            'Kabel',
+            'Mounting',
+            'Controller',
+            'Lampu LED',
+            'Tiang',
+            'Aksesoris',
+            'Alat Ukur',
         ];
 
         foreach ($itemCategories as $name) {
@@ -111,7 +119,10 @@ class InventorySeeder extends Seeder
             foreach ($selectedWarehouses as $warehouse) {
                 Inventory::firstOrCreate(
                     ['item_id' => $item->id, 'warehouse_id' => $warehouse->id],
-                    ['quantity' => rand(10, 300)]
+                    [
+                        'quantity' => rand(10, 300),
+                        'placement' => 'Rak ' . chr(rand(65, 70)) . '-' . rand(1, 10),
+                    ]
                 );
                 $inventoryCount++;
             }
@@ -133,6 +144,7 @@ class InventorySeeder extends Seeder
                 'destination_warehouse_id' => $inv->warehouse_id,
                 'project_id' => null,
                 'quantity' => $inv->quantity,
+                'placement' => $inv->placement,
                 'notes' => 'Stok awal - pengadaan',
                 'occurred_at' => now()->subMonths(rand(3, 6))->subDays(rand(0, 30)),
             ]);
@@ -149,6 +161,7 @@ class InventorySeeder extends Seeder
                 'destination_warehouse_id' => $inv->warehouse_id,
                 'project_id' => null,
                 'quantity' => rand(10, 80),
+                'placement' => $inv->placement ?? ('Rak ' . chr(rand(65, 70)) . '-' . rand(1, 10)),
                 'notes' => collect(['Pembelian dari supplier', 'Pengadaan rutin', 'Restock bulanan', 'PO dari vendor'])->random(),
                 'occurred_at' => now()->subMonths(rand(1, 3))->subDays(rand(0, 30)),
             ]);
@@ -167,6 +180,7 @@ class InventorySeeder extends Seeder
                 'destination_warehouse_id' => $destWarehouse->id,
                 'project_id' => null,
                 'quantity' => rand(5, 30),
+                'placement' => 'Rak ' . chr(rand(65, 70)) . '-' . rand(1, 10),
                 'notes' => collect(['Mutasi antar gudang', 'Pemerataan stok', 'Permintaan site'])->random(),
                 'occurred_at' => now()->subMonths(rand(0, 2))->subDays(rand(0, 30)),
             ]);

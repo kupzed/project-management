@@ -34,7 +34,11 @@ class ItemController extends Controller
 
     public function store(ItemRequest $request)
     {
-        $item = $this->itemService->createItem($request->validated());
+        $files = $request->file('attachments', []);
+        $names = $request->input('attachment_names', []);
+        $descs = $request->input('attachment_descriptions', []);
+
+        $item = $this->itemService->createItem($request->validated(), $files, $names, $descs);
 
         return response()->json([
             'message' => 'Item created successfully',
@@ -53,7 +57,18 @@ class ItemController extends Controller
 
     public function update(ItemRequest $request, Item $item)
     {
-        $item = $this->itemService->updateItem($item, $request->validated());
+        $files         = $request->file('attachments', []);
+        $names         = $request->input('attachment_names', []);
+        $descs         = $request->input('attachment_descriptions', []);
+        $removedIds    = $request->input('removed_existing_ids', []);
+        $existingIds   = $request->input('existing_attachment_ids', []);
+        $existingNames = $request->input('existing_attachment_names', []);
+        $existingDescs = $request->input('existing_attachment_descriptions', []);
+
+        $item = $this->itemService->updateItem(
+            $item, $request->validated(), $files, $names, $descs,
+            $removedIds, $existingIds, $existingNames, $existingDescs
+        );
 
         return response()->json([
             'message' => 'Item updated successfully',
