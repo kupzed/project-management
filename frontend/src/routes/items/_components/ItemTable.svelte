@@ -1,5 +1,6 @@
 <script lang="ts">
   import Pagination from '$lib/components/Pagination.svelte';
+  import RowActionButtons from '$lib/components/ui/RowActionButtons.svelte';
   import { formatNumber, type Item } from '$lib/inventory';
 
   /** Item table with stock status, actions, and pagination. */
@@ -87,6 +88,24 @@
                 <div class="mt-1 font-mono text-xs text-gray-500 dark:text-gray-400">
                   {item.sku}
                 </div>
+                {#if item.attachments && item.attachments.length > 0}
+                  <div class="mt-2 flex flex-wrap gap-1.5">
+                    {#each item.attachments as att}
+                      <a
+                        href={att.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        class="inline-flex items-center gap-1 rounded bg-gray-100 px-1.5 py-0.5 text-[10px] font-medium text-gray-700 hover:bg-gray-200 dark:bg-neutral-800 dark:text-gray-300 dark:hover:bg-neutral-700"
+                        title={att.description || att.name}
+                      >
+                        <svg class="h-3 w-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                        </svg>
+                        <span class="max-w-[120px] truncate">{att.name}</span>
+                      </a>
+                    {/each}
+                  </div>
+                {/if}
               </td>
               <td class="px-4 py-4 text-sm text-gray-600 dark:text-gray-300">
                 {item.category?.name ?? '-'}
@@ -100,48 +119,33 @@
                 >
                   {formatNumber(totalStock(item))}
                 </span>
+                {#if item.inventories && item.inventories.length > 0}
+                  <div class="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
+                    {#each item.inventories as inv}
+                      {#if inv.quantity > 0}
+                        <div class="truncate">
+                          {inv.warehouse?.name}: <strong>{formatNumber(inv.quantity)}</strong>
+                          {#if inv.placement}
+                            <span class="ml-1 text-gray-400 dark:text-gray-500">(Rak: {inv.placement})</span>
+                          {/if}
+                        </div>
+                      {/if}
+                    {/each}
+                  </div>
+                {/if}
               </td>
               <td class="px-4 py-4 text-right text-sm font-medium text-gray-700 dark:text-gray-300">
                 {formatNumber(item.minimum_stock)}
               </td>
               <td class="px-4 py-4 text-right">
-                <div class="inline-flex items-center gap-2">
-                  {#if canUpdate}
-                    <button
-                      type="button"
-                      onclick={() => onEdit(item)}
-                      class="rounded-md p-2 text-blue-600 hover:bg-blue-50 hover:text-blue-800 dark:text-blue-400 dark:hover:bg-blue-950"
-                      title="Edit"
-                      aria-label="Edit item"
-                    >
-                      <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-width="2"
-                          d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                        />
-                      </svg>
-                    </button>
-                  {/if}
-                  {#if canDelete}
-                    <button
-                      type="button"
-                      onclick={() => onDelete(item)}
-                      class="rounded-md p-2 text-red-600 hover:bg-red-50 hover:text-red-800 dark:text-red-400 dark:hover:bg-red-950"
-                      title="Hapus"
-                      aria-label="Hapus item"
-                    >
-                      <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-width="2"
-                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7h6m2 0H7m3 0V5a2 2 0 012-2h0a2 2 0 012 2v2"
-                        />
-                      </svg>
-                    </button>
-                  {/if}
+                <div class="inline-flex justify-end w-full">
+                  <RowActionButtons
+                    label={item.name}
+                    canEdit={canUpdate}
+                    {canDelete}
+                    onEdit={() => onEdit(item)}
+                    onDelete={() => onDelete(item)}
+                  />
                 </div>
               </td>
             </tr>

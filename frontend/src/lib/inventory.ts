@@ -1,3 +1,5 @@
+import type { Attachment } from './types';
+
 export type CategoryType = 'item' | 'project' | 'activity' | 'certificate';
 export type StockMovementType = 'inbound' | 'outbound' | 'transfer' | 'project_allocation';
 
@@ -41,6 +43,7 @@ export type Item = {
   unit: string;
   minimum_stock: number;
   inventories?: Inventory[];
+  attachments?: Attachment[];
   created_at?: string | null;
   updated_at?: string | null;
 };
@@ -50,6 +53,7 @@ export type Inventory = {
   item_id: number;
   warehouse_id: number;
   quantity: number;
+  placement?: string | null;
   item?: Item | null;
   warehouse?: Pick<Warehouse, 'id' | 'name'> | null;
 };

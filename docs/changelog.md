@@ -1,5 +1,17 @@
 # Changelog
 
+## [2026-06-24] — feat(inventory): add item attachments, placement, and stock movement CRUD
+
+- Menambahkan fitur lampiran (attachments) untuk master data items/material (file upload, rename, delete).
+- Menambahkan field `placement` (rak/lokasi penyimpanan) pada tabel `inventories` dan menampilkan lokasinya di detail drawer gudang serta tabel item.
+- Menghapus batasan immutable pada mutasi stok (stock movements) dan mengimplementasikan CRUD (show detail, edit quantity/catatan/waktu, dan delete mutasi dengan penyesuaian stok otomatis).
+- File yang diubah:
+  - Backend: `database/migrations/2026_06_24_000001_create_item_attachments_table.php`, `database/migrations/2026_06_01_000004_create_inventories_table.php`, `app/Models/ItemAttachment.php`, `app/Models/Item.php`, `app/Models/Inventory.php`, `app/Models/StockMovement.php`, `app/Services/ItemService.php`, `app/Services/WarehouseService.php`, `app/Http/Controllers/ItemController.php`, `app/Http/Controllers/StockMovementController.php`, `app/Http/Requests/ItemRequest.php`, `app/Http/Requests/StockMovementUpdateRequest.php`, `app/Http/Resources/ItemResource.php`, `app/Http/Resources/WarehouseResource.php`, `database/seeders/RolePermissionSeeder.php`, `app/Http/Controllers/RoleController.php`, `routes/api.php`
+  - Frontend: `src/lib/inventory.ts`, `src/lib/services/inventoryService.ts`, `src/routes/items/_components/ItemsPageClient.svelte`, `src/routes/items/_components/ItemTable.svelte`, `src/routes/warehouses/_components/WarehousesPageClient.svelte`, `src/routes/stock-movements/_components/stock-movement.ts`, `src/routes/stock-movements/_components/StockMovementsPageClient.svelte`, `src/routes/stock-movements/_components/StockMovementModal.svelte`
+- Dampak yang perlu diketahui:
+  - Perlu menjalankan `php artisan migrate` atau `php artisan migrate:fresh` untuk memperbarui skema database (tabel `item_attachments` baru dan kolom `placement` pada `inventories`).
+  - Mutasi stok sekarang bisa diedit dan didelete, dan akan melakukan adjustment otomatis pada jumlah stok barang di gudang asal/tujuan.
+
 ## [2026-06-23] — feat(api): bypass rate limiting for authenticated users
 
 - Menghindari rate limiting (SlidingWindowThrottle) ketika user sudah terautentikasi (login), dan tetap menerapkannya jika user belum login.

@@ -7,6 +7,7 @@
   let {
     show = $bindable(false),
     action,
+    isEdit = false,
     form = $bindable(),
     items,
     warehouses,
@@ -15,6 +16,7 @@
   }: {
     show?: boolean;
     action: MovementAction;
+    isEdit?: boolean;
     form: MovementForm;
     items: Item[];
     warehouses: Warehouse[];
@@ -23,7 +25,7 @@
   } = $props();
 </script>
 
-<Modal bind:show title={`Catat ${actionLabel(action)}`} maxWidth="max-w-2xl">
+<Modal bind:show title={isEdit ? 'Edit Mutasi Stok' : `Catat ${actionLabel(action)}`} maxWidth="max-w-2xl">
   <form class="space-y-4" onsubmit={onSubmit}>
     <div class="grid gap-4 sm:grid-cols-2">
       <div>
@@ -35,7 +37,8 @@
           id="movement-item"
           bind:value={form.item_id}
           required
-          class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-neutral-900 dark:text-gray-100"
+          disabled={isEdit}
+          class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-indigo-500 focus:ring-indigo-500 disabled:bg-gray-100 disabled:text-gray-500 dark:border-gray-700 dark:bg-neutral-900 dark:text-gray-100 dark:disabled:bg-neutral-800 dark:disabled:text-gray-400"
         >
           <option value="" disabled>Pilih item</option>
           {#each items as item (item.id)}
@@ -71,7 +74,8 @@
             id="movement-destination"
             bind:value={form.destination_warehouse_id}
             required
-            class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-neutral-900 dark:text-gray-100"
+            disabled={isEdit}
+            class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-indigo-500 focus:ring-indigo-500 disabled:bg-gray-100 disabled:text-gray-500 dark:border-gray-700 dark:bg-neutral-900 dark:text-gray-100 dark:disabled:bg-neutral-800 dark:disabled:text-gray-400"
           >
             <option value="" disabled>Pilih gudang</option>
             {#each warehouses as warehouse (warehouse.id)}
@@ -81,16 +85,30 @@
         </div>
         <div>
           <label
-            for="movement-date"
-            class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Waktu</label
+            for="movement-placement"
+            class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Rak (Placement)</label
           >
           <input
-            id="movement-date"
-            type="datetime-local"
-            bind:value={form.occurred_at}
-            class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-neutral-900 dark:text-gray-100"
+            id="movement-placement"
+            type="text"
+            bind:value={form.placement}
+            placeholder="Contoh: Rak A-1"
+            disabled={isEdit}
+            class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-indigo-500 focus:ring-indigo-500 disabled:bg-gray-100 disabled:text-gray-500 dark:border-gray-700 dark:bg-neutral-900 dark:text-gray-100 dark:disabled:bg-neutral-800 dark:disabled:text-gray-400"
           />
         </div>
+      </div>
+      <div>
+        <label
+          for="movement-date"
+          class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Waktu</label
+        >
+        <input
+          id="movement-date"
+          type="datetime-local"
+          bind:value={form.occurred_at}
+          class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-neutral-900 dark:text-gray-100"
+        />
       </div>
     {:else if action === 'outbound'}
       <div class="grid gap-4 sm:grid-cols-2">
@@ -104,7 +122,8 @@
             id="movement-source"
             bind:value={form.source_warehouse_id}
             required
-            class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-neutral-900 dark:text-gray-100"
+            disabled={isEdit}
+            class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-indigo-500 focus:ring-indigo-500 disabled:bg-gray-100 disabled:text-gray-500 dark:border-gray-700 dark:bg-neutral-900 dark:text-gray-100 dark:disabled:bg-neutral-800 dark:disabled:text-gray-400"
           >
             <option value="" disabled>Pilih gudang</option>
             {#each warehouses as warehouse (warehouse.id)}
@@ -137,7 +156,8 @@
             id="movement-source"
             bind:value={form.source_warehouse_id}
             required
-            class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-neutral-900 dark:text-gray-100"
+            disabled={isEdit}
+            class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-indigo-500 focus:ring-indigo-500 disabled:bg-gray-100 disabled:text-gray-500 dark:border-gray-700 dark:bg-neutral-900 dark:text-gray-100 dark:disabled:bg-neutral-800 dark:disabled:text-gray-400"
           >
             <option value="" disabled>Pilih gudang</option>
             {#each warehouses as warehouse (warehouse.id)}
@@ -155,7 +175,8 @@
             id="movement-destination"
             bind:value={form.destination_warehouse_id}
             required
-            class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-neutral-900 dark:text-gray-100"
+            disabled={isEdit}
+            class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-indigo-500 focus:ring-indigo-500 disabled:bg-gray-100 disabled:text-gray-500 dark:border-gray-700 dark:bg-neutral-900 dark:text-gray-100 dark:disabled:bg-neutral-800 dark:disabled:text-gray-400"
           >
             <option value="" disabled>Pilih gudang</option>
             {#each warehouses as warehouse (warehouse.id)}
@@ -164,17 +185,33 @@
           </select>
         </div>
       </div>
-      <div>
-        <label
-          for="movement-date"
-          class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Waktu</label
-        >
-        <input
-          id="movement-date"
-          type="datetime-local"
-          bind:value={form.occurred_at}
-          class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-neutral-900 dark:text-gray-100"
-        />
+      <div class="grid gap-4 sm:grid-cols-2">
+        <div>
+          <label
+            for="movement-placement"
+            class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Rak Tujuan (Placement)</label
+          >
+          <input
+            id="movement-placement"
+            type="text"
+            bind:value={form.placement}
+            placeholder="Contoh: Rak A-1"
+            disabled={isEdit}
+            class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-indigo-500 focus:ring-indigo-500 disabled:bg-gray-100 disabled:text-gray-500 dark:border-gray-700 dark:bg-neutral-900 dark:text-gray-100 dark:disabled:bg-neutral-800 dark:disabled:text-gray-400"
+          />
+        </div>
+        <div>
+          <label
+            for="movement-date"
+            class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Waktu</label
+          >
+          <input
+            id="movement-date"
+            type="datetime-local"
+            bind:value={form.occurred_at}
+            class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-neutral-900 dark:text-gray-100"
+          />
+        </div>
       </div>
     {:else}
       <div class="grid gap-4 sm:grid-cols-2">
@@ -187,7 +224,8 @@
             id="movement-project"
             bind:value={form.project_id}
             required
-            class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-neutral-900 dark:text-gray-100"
+            disabled={isEdit}
+            class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-indigo-500 focus:ring-indigo-500 disabled:bg-gray-100 disabled:text-gray-500 dark:border-gray-700 dark:bg-neutral-900 dark:text-gray-100 dark:disabled:bg-neutral-800 dark:disabled:text-gray-400"
           >
             <option value="" disabled>Pilih project</option>
             {#each projects as project (project.id)}
@@ -204,7 +242,8 @@
             id="movement-warehouse"
             bind:value={form.warehouse_id}
             required
-            class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-neutral-900 dark:text-gray-100"
+            disabled={isEdit}
+            class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-indigo-500 focus:ring-indigo-500 disabled:bg-gray-100 disabled:text-gray-500 dark:border-gray-700 dark:bg-neutral-900 dark:text-gray-100 dark:disabled:bg-neutral-800 dark:disabled:text-gray-400"
           >
             <option value="" disabled>Pilih gudang</option>
             {#each warehouses as warehouse (warehouse.id)}
@@ -250,7 +289,7 @@
       <button
         type="submit"
         class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
-        >Catat</button
+        >{isEdit ? 'Simpan' : 'Catat'}</button
       >
     </div>
   </form>

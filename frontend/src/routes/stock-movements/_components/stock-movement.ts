@@ -17,6 +17,7 @@ export type MovementForm = {
   notes: string;
   occurred_at: string;
   allocated_at: string;
+  placement: string;
 };
 
 export function emptyMovementForm(): MovementForm {
@@ -29,7 +30,8 @@ export function emptyMovementForm(): MovementForm {
     quantity: 1,
     notes: '',
     occurred_at: '',
-    allocated_at: ''
+    allocated_at: '',
+    placement: ''
   };
 }
 
@@ -79,7 +81,8 @@ export function buildMovementPayload(
     return {
       ...base,
       destination_warehouse_id: Number(form.destination_warehouse_id),
-      occurred_at: form.occurred_at || undefined
+      occurred_at: form.occurred_at || undefined,
+      placement: form.placement || undefined
     };
   }
   if (action === 'outbound') {
@@ -94,7 +97,8 @@ export function buildMovementPayload(
       ...base,
       source_warehouse_id: Number(form.source_warehouse_id),
       destination_warehouse_id: Number(form.destination_warehouse_id),
-      occurred_at: form.occurred_at || undefined
+      occurred_at: form.occurred_at || undefined,
+      placement: form.placement || undefined
     };
   }
   return {
@@ -102,5 +106,19 @@ export function buildMovementPayload(
     project_id: Number(form.project_id),
     warehouse_id: Number(form.warehouse_id),
     allocated_at: form.allocated_at || undefined
+  };
+}
+
+export type MovementEditForm = {
+  quantity: number;
+  notes: string;
+  occurred_at: string;
+};
+
+export function emptyMovementEditForm(): MovementEditForm {
+  return {
+    quantity: 1,
+    notes: '',
+    occurred_at: ''
   };
 }

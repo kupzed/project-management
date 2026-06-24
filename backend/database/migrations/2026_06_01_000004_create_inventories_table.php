@@ -13,6 +13,7 @@ return new class extends Migration
             $table->foreignId('item_id')->constrained('items')->restrictOnDelete();
             $table->foreignId('warehouse_id')->constrained('warehouses')->restrictOnDelete();
             $table->unsignedInteger('quantity')->default(0);
+            $table->string('placement', 100)->nullable();
             $table->timestamps();
 
             $table->unique(['item_id', 'warehouse_id'], 'inventories_item_warehouse_unique');

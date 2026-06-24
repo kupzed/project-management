@@ -29,9 +29,11 @@ class ItemResource extends JsonResource
                             'name' => $inventory->warehouse->name,
                         ] : null,
                         'quantity' => $inventory->quantity,
+                        'placement' => $inventory->placement,
                     ];
                 });
             }),
+            'attachments' => $this->attachments,
             'created_at' => $this->created_at?->format('Y-m-d H:i:s'),
             'updated_at' => $this->updated_at?->format('Y-m-d H:i:s'),
         ];

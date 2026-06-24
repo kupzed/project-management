@@ -273,6 +273,26 @@ Master data barang inventori.
 
 ---
 
+## Tabel `item_attachments`
+
+File lampiran item/material.
+
+| Column        | Type         | Nullable | Default | Deskripsi                  |
+| ------------- | ------------ | -------- | ------- | -------------------------- |
+| `id`          | bigint (PK)  | No       | auto    | Primary key                |
+| `item_id`     | bigint (FK)  | No       | —       | Relasi ke `items.id`       |
+| `name`        | varchar(255) | No       | —       | Nama file                  |
+| `description` | text         | Yes      | NULL    | Deskripsi file             |
+| `file_path`   | varchar(255) | No       | —       | Path file di storage       |
+| `mime`        | varchar(191) | Yes      | NULL    | MIME type                  |
+| `size`        | bigint       | Yes      | NULL    | Ukuran file (bytes)        |
+| `created_at`  | timestamp    | Yes      | NULL    | Waktu dibuat               |
+| `updated_at`  | timestamp    | Yes      | NULL    | Waktu terakhir diubah      |
+
+**Foreign Key:** `item_id` → `items.id` (ON DELETE CASCADE)
+
+---
+
 ## Tabel `inventories`
 
 Stok barang per gudang (snapshot current quantity).
@@ -283,6 +303,7 @@ Stok barang per gudang (snapshot current quantity).
 | `item_id`      | bigint (FK)  | No       | —       | Relasi ke `items.id`       |
 | `warehouse_id` | bigint (FK)  | No       | —       | Relasi ke `warehouses.id`  |
 | `quantity`     | unsigned int | No       | `0`     | Jumlah stok saat ini       |
+| `placement`    | varchar(100) | Yes      | NULL    | Posisi rak penyimpanan     |
 | `created_at`   | timestamp    | Yes      | NULL    | Waktu dibuat               |
 | `updated_at`   | timestamp    | Yes      | NULL    | Waktu terakhir diubah      |
 
@@ -296,7 +317,7 @@ Stok barang per gudang (snapshot current quantity).
 
 ## Tabel `stock_movements`
 
-Catatan mutasi stok (immutable — tidak bisa diubah atau dihapus).
+Catatan mutasi stok (mutable — mendukung edit dan delete dengan penyesuaian stok otomatis).
 
 | Column                    | Type         | Nullable | Default     | Deskripsi                     |
 | ------------------------- | ------------ | -------- | ----------- | ----------------------------- |
@@ -401,8 +422,9 @@ warehouses ────────┬────── inventories
                    └────── project_materials
 
 items ─────────────┬────── inventories
-                   ├────── stock_movements
-                   └────── project_materials
+                    ├────── stock_movements
+                    ├────── project_materials
+                    └────── item_attachments
 
 stock_movements ───────── project_materials
 ```

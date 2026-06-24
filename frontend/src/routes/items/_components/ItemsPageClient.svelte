@@ -8,20 +8,28 @@
     fetchCategories,
     fetchItems as fetchItemRecords,
     updateItem,
-    type ItemFormPayload
+    type ItemForm as ApiItemForm,
+    type ItemEditForm as ApiItemEditForm
   } from '$lib/services/inventoryService';
   import { userPermissions } from '$lib/stores/permissions';
   import { showError, showSuccess } from '$lib/utils/toast';
   import { extractApiErrors } from '$lib/utils/errors';
   import { type Category, type Item } from '$lib/inventory';
+  import type { ExistingAttachment } from '$lib/types';
+  import FileAttachment from '$lib/components/FileAttachment.svelte';
   import ItemTable from './ItemTable.svelte';
 
-  type ItemForm = {
+  type ItemFormState = {
     sku: string;
     category_id: string;
     name: string;
     unit: string;
     minimum_stock: number;
+    attachments: File[];
+    attachment_names: string[];
+    attachment_descriptions: string[];
+    existing_attachments: ExistingAttachment[];
+    removed_existing_ids: number[];
   };
 
   let items = $state<Item[]>([]);
@@ -38,12 +46,17 @@
 
   let showModal = $state(false);
   let editingItem = $state<Item | null>(null);
-  let form = $state<ItemForm>({
+  let form = $state<ItemFormState>({
     sku: '',
     category_id: '',
     name: '',
     unit: 'pcs',
-    minimum_stock: 0
+    minimum_stock: 0,
+    attachments: [],
+    attachment_names: [],
+    attachment_descriptions: [],
+    existing_attachments: [],
+    removed_existing_ids: []
   });
 
   let canCreate = $derived(($userPermissions ?? []).includes('item-create'));
@@ -102,7 +115,12 @@
       category_id: categories[0]?.id ? String(categories[0].id) : '',
       name: '',
       unit: 'pcs',
-      minimum_stock: 0
+      minimum_stock: 0,
+      attachments: [],
+      attachment_names: [],
+      attachment_descriptions: [],
+      existing_attachments: [],
+      removed_existing_ids: []
     };
   }
 
@@ -121,29 +139,57 @@
       category_id: String(item.category_id),
       name: item.name,
       unit: item.unit,
-      minimum_stock: item.minimum_stock
+      minimum_stock: item.minimum_stock,
+      attachments: [],
+      attachment_names: [],
+      attachment_descriptions: [],
+      existing_attachments: item.attachments ? item.attachments.map(att => ({
+        id: att.id!,
+        name: att.name,
+        description: att.description,
+        size: att.size,
+        sizeLabel: att.sizeLabel,
+        path: att.path,
+        url: att.url
+      })) : [],
+      removed_existing_ids: []
     };
     showModal = true;
   }
 
-  function payloadFromForm(): ItemFormPayload {
-    return {
-      sku: form.sku,
-      category_id: Number(form.category_id),
-      name: form.name,
-      unit: form.unit,
-      minimum_stock: Number(form.minimum_stock)
-    };
+  function removeExistingAttachment(id: number): void {
+    form.removed_existing_ids = [...(form.removed_existing_ids ?? []), id];
+    form.existing_attachments = (form.existing_attachments ?? []).filter((item) => item.id !== id);
   }
 
   async function submitItem() {
     try {
-      const payload = payloadFromForm();
-
       if (editingItem) {
+        const payload: ApiItemEditForm = {
+          sku: form.sku,
+          category_id: Number(form.category_id),
+          name: form.name,
+          unit: form.unit,
+          minimum_stock: Number(form.minimum_stock),
+          attachments: form.attachments,
+          attachment_names: form.attachment_names,
+          attachment_descriptions: form.attachment_descriptions,
+          existing_attachments: form.existing_attachments,
+          removed_existing_ids: form.removed_existing_ids
+        };
         await updateItem(editingItem.id, payload);
         showSuccess('Item berhasil diperbarui.');
       } else {
+        const payload: ApiItemForm = {
+          sku: form.sku,
+          category_id: Number(form.category_id),
+          name: form.name,
+          unit: form.unit,
+          minimum_stock: Number(form.minimum_stock),
+          attachments: form.attachments,
+          attachment_names: form.attachment_names,
+          attachment_descriptions: form.attachment_descriptions
+        };
         await createItem(payload);
         showSuccess('Item berhasil ditambahkan.');
       }
@@ -361,6 +407,57 @@
         />
       </div>
     </div>
+
+    <div>
+      <FileAttachment
+        id="item-attachments"
+        label="Lampiran"
+        bind:files={form.attachments}
+        bind:fileNames={form.attachment_names}
+        bind:fileDescriptions={form.attachment_descriptions}
+        maxFiles={10}
+      />
+    </div>
+
+    {#if form.existing_attachments && form.existing_attachments.length > 0}
+      <div class="mt-3 space-y-3">
+        <p class="text-sm font-medium text-gray-900 dark:text-white">Lampiran Lama</p>
+        {#each form.existing_attachments as attachment (attachment.id)}
+          <div class="space-y-2 rounded border border-gray-200 p-3 text-sm dark:border-gray-700">
+            <div class="flex items-center justify-between">
+              <a
+                class="truncate font-medium text-indigo-600 hover:underline dark:text-indigo-400"
+                href={attachment.url}
+                target="_blank"
+                rel="noreferrer"
+              >
+                {attachment.name}
+              </a>
+              <button
+                type="button"
+                class="text-xs font-semibold text-red-600 hover:text-red-700 dark:text-red-400"
+                onclick={() => removeExistingAttachment(attachment.id)}
+              >
+                Hapus
+              </button>
+            </div>
+            <input
+              type="text"
+              bind:value={attachment.name}
+              required
+              placeholder="Nama lampiran"
+              class="w-full rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-neutral-900 dark:text-gray-100"
+            />
+            <input
+              type="text"
+              bind:value={attachment.description}
+              placeholder="Deskripsi lampiran (opsional)"
+              class="w-full rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-neutral-900 dark:text-gray-100"
+            />
+          </div>
+        {/each}
+      </div>
+    {/if}
 
     <div class="flex justify-end gap-2 pt-2">
       <button

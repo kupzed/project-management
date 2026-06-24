@@ -19,9 +19,10 @@
 | 13 | `2026_06_01_000001_create_categories_table.php` | Membuat tabel `categories` dengan unique constraint | Active |
 | 14 | `2026_06_01_000002_create_warehouses_table.php` | Membuat tabel `warehouses` | Active |
 | 15 | `2026_06_01_000003_create_items_table.php` | Membuat tabel `items` dengan SKU unique | Active |
-| 16 | `2026_06_01_000004_create_inventories_table.php` | Membuat tabel `inventories` dengan unique item+warehouse | Active |
+| 16 | `2026_06_01_000004_create_inventories_table.php` | Membuat tabel `inventories` dengan unique item+warehouse (ditambah kolom placement) | Active |
 | 17 | `2026_06_01_000005_create_stock_movements_table.php` | Membuat tabel `stock_movements` dengan multiple index | Active |
 | 18 | `2026_06_01_000006_create_project_materials_table.php` | Membuat tabel `project_materials` | Active |
+| 19 | `2026_06_24_000001_create_item_attachments_table.php` | Membuat tabel `item_attachments` | Active |
 
 ## Daftar Seeder
 

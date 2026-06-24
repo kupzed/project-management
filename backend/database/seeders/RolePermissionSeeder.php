@@ -28,7 +28,7 @@ class RolePermissionSeeder extends Seeder
             'category' => ['view', 'create', 'update', 'delete'],
             'warehouse' => ['view', 'create', 'update', 'delete'],
             'item' => ['view', 'create', 'update', 'delete'],
-            'stock-movement' => ['view', 'create'],
+            'stock-movement' => ['view', 'create', 'update', 'delete'],
         ];
 
         $permissions = [];

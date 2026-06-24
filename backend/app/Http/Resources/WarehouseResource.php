@@ -23,6 +23,7 @@ class WarehouseResource extends JsonResource
                         'item_id' => $inventory->item_id,
                         'warehouse_id' => $inventory->warehouse_id,
                         'quantity' => $inventory->quantity,
+                        'placement' => $inventory->placement,
                         'item' => $inventory->relationLoaded('item') && $inventory->item ? [
                             'id' => $inventory->item->id,
                             'sku' => $inventory->item->sku,

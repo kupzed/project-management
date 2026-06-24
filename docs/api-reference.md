@@ -158,8 +158,10 @@ Authorization: Bearer {access_token}
 | POST   | `/stock-movements/outbound`           | Yes  | Catat barang keluar              |
 | POST   | `/stock-movements/transfer`           | Yes  | Transfer antar gudang            |
 | POST   | `/stock-movements/allocate-project`   | Yes  | Alokasi barang ke proyek         |
+| PUT    | `/stock-movements/{id}`               | Yes  | Update mutasi stok               |
+| DELETE | `/stock-movements/{id}`               | Yes  | Hapus mutasi stok                |
 
-> **Catatan:** Stock movement bersifat **immutable** — tidak ada endpoint update atau delete.
+> **Catatan:** Edit/delete stock movement diperbolehkan untuk mengubah `quantity` (penyesuaian stok otomatis), `notes`, dan `occurred_at`.
 
 ## Activity Logs
 
