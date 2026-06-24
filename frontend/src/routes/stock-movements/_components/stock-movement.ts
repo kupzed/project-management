@@ -46,7 +46,13 @@ export function actionLabel(action: MovementAction): string {
 }
 
 export function movementTypeLabel(type: StockMovementType): string {
-  return STOCK_MOVEMENT_TYPE_OPTIONS.find((option) => option.value === type)?.label ?? type;
+  const labels: Record<StockMovementType, string> = {
+    inbound: 'Masuk',
+    outbound: 'Keluar',
+    transfer: 'Transfer',
+    project_allocation: 'Alokasi'
+  };
+  return labels[type] ?? type;
 }
 
 export function movementBadgeClasses(type: StockMovementType): string {

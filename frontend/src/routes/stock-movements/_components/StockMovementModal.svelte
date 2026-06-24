@@ -33,18 +33,23 @@
           for="movement-item"
           class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Item</label
         >
-        <select
-          id="movement-item"
-          bind:value={form.item_id}
-          required
-          disabled={isEdit}
-          class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-indigo-500 focus:ring-indigo-500 disabled:bg-gray-100 disabled:text-gray-500 dark:border-gray-700 dark:bg-neutral-900 dark:text-gray-100 dark:disabled:bg-neutral-800 dark:disabled:text-gray-400"
-        >
-          <option value="" disabled>Pilih item</option>
-          {#each items as item (item.id)}
-            <option value={item.id}>{item.name} &middot; {item.sku}</option>
-          {/each}
-        </select>
+        {#if isEdit}
+          <div class="w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-700 dark:border-gray-700 dark:bg-neutral-800 dark:text-gray-300 font-medium">
+            {items.find(i => i.id === Number(form.item_id))?.name ?? '-'} &middot; <span class="font-mono text-xs text-gray-500">{items.find(i => i.id === Number(form.item_id))?.sku ?? ''}</span>
+          </div>
+        {:else}
+          <select
+            id="movement-item"
+            bind:value={form.item_id}
+            required
+            class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-neutral-900 dark:text-gray-100"
+          >
+            <option value="" disabled>Pilih item</option>
+            {#each items as item (item.id)}
+              <option value={item.id}>{item.name} &middot; {item.sku}</option>
+            {/each}
+          </select>
+        {/if}
       </div>
       <div>
         <label
@@ -70,33 +75,40 @@
             class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
             >Gudang Tujuan</label
           >
-          <select
-            id="movement-destination"
-            bind:value={form.destination_warehouse_id}
-            required
-            disabled={isEdit}
-            class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-indigo-500 focus:ring-indigo-500 disabled:bg-gray-100 disabled:text-gray-500 dark:border-gray-700 dark:bg-neutral-900 dark:text-gray-100 dark:disabled:bg-neutral-800 dark:disabled:text-gray-400"
-          >
-            <option value="" disabled>Pilih gudang</option>
-            {#each warehouses as warehouse (warehouse.id)}
-              <option value={warehouse.id}>{warehouse.name}</option>
-            {/each}
-          </select>
+          {#if isEdit}
+            <div class="w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-700 dark:border-gray-700 dark:bg-neutral-800 dark:text-gray-300 font-medium">
+              {warehouses.find(w => w.id === Number(form.destination_warehouse_id))?.name ?? '-'}
+            </div>
+          {:else}
+            <select
+              id="movement-destination"
+              bind:value={form.destination_warehouse_id}
+              required
+              class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-neutral-900 dark:text-gray-100"
+            >
+              <option value="" disabled>Pilih gudang</option>
+              {#each warehouses as warehouse (warehouse.id)}
+                <option value={warehouse.id}>{warehouse.name}</option>
+              {/each}
+            </select>
+          {/if}
         </div>
-        <div>
-          <label
-            for="movement-placement"
-            class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Rak (Placement)</label
-          >
-          <input
-            id="movement-placement"
-            type="text"
-            bind:value={form.placement}
-            placeholder="Contoh: Rak A-1"
-            disabled={isEdit}
-            class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-indigo-500 focus:ring-indigo-500 disabled:bg-gray-100 disabled:text-gray-500 dark:border-gray-700 dark:bg-neutral-900 dark:text-gray-100 dark:disabled:bg-neutral-800 dark:disabled:text-gray-400"
-          />
-        </div>
+        {#if !isEdit}
+          <div>
+            <label
+              for="movement-placement"
+              class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
+              >Rak (Placement)</label
+            >
+            <input
+              id="movement-placement"
+              type="text"
+              bind:value={form.placement}
+              placeholder="Contoh: Rak A-1"
+              class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-neutral-900 dark:text-gray-100"
+            />
+          </div>
+        {/if}
       </div>
       <div>
         <label
@@ -118,18 +130,23 @@
             class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
             >Gudang Asal</label
           >
-          <select
-            id="movement-source"
-            bind:value={form.source_warehouse_id}
-            required
-            disabled={isEdit}
-            class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-indigo-500 focus:ring-indigo-500 disabled:bg-gray-100 disabled:text-gray-500 dark:border-gray-700 dark:bg-neutral-900 dark:text-gray-100 dark:disabled:bg-neutral-800 dark:disabled:text-gray-400"
-          >
-            <option value="" disabled>Pilih gudang</option>
-            {#each warehouses as warehouse (warehouse.id)}
-              <option value={warehouse.id}>{warehouse.name}</option>
-            {/each}
-          </select>
+          {#if isEdit}
+            <div class="w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-700 dark:border-gray-700 dark:bg-neutral-800 dark:text-gray-300 font-medium">
+              {warehouses.find(w => w.id === Number(form.source_warehouse_id))?.name ?? '-'}
+            </div>
+          {:else}
+            <select
+              id="movement-source"
+              bind:value={form.source_warehouse_id}
+              required
+              class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-neutral-900 dark:text-gray-100"
+            >
+              <option value="" disabled>Pilih gudang</option>
+              {#each warehouses as warehouse (warehouse.id)}
+                <option value={warehouse.id}>{warehouse.name}</option>
+              {/each}
+            </select>
+          {/if}
         </div>
         <div>
           <label
@@ -152,18 +169,23 @@
             class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
             >Gudang Asal</label
           >
-          <select
-            id="movement-source"
-            bind:value={form.source_warehouse_id}
-            required
-            disabled={isEdit}
-            class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-indigo-500 focus:ring-indigo-500 disabled:bg-gray-100 disabled:text-gray-500 dark:border-gray-700 dark:bg-neutral-900 dark:text-gray-100 dark:disabled:bg-neutral-800 dark:disabled:text-gray-400"
-          >
-            <option value="" disabled>Pilih gudang</option>
-            {#each warehouses as warehouse (warehouse.id)}
-              <option value={warehouse.id}>{warehouse.name}</option>
-            {/each}
-          </select>
+          {#if isEdit}
+            <div class="w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-700 dark:border-gray-700 dark:bg-neutral-800 dark:text-gray-300 font-medium">
+              {warehouses.find(w => w.id === Number(form.source_warehouse_id))?.name ?? '-'}
+            </div>
+          {:else}
+            <select
+              id="movement-source"
+              bind:value={form.source_warehouse_id}
+              required
+              class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-neutral-900 dark:text-gray-100"
+            >
+              <option value="" disabled>Pilih gudang</option>
+              {#each warehouses as warehouse (warehouse.id)}
+                <option value={warehouse.id}>{warehouse.name}</option>
+              {/each}
+            </select>
+          {/if}
         </div>
         <div>
           <label
@@ -171,35 +193,42 @@
             class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
             >Gudang Tujuan</label
           >
-          <select
-            id="movement-destination"
-            bind:value={form.destination_warehouse_id}
-            required
-            disabled={isEdit}
-            class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-indigo-500 focus:ring-indigo-500 disabled:bg-gray-100 disabled:text-gray-500 dark:border-gray-700 dark:bg-neutral-900 dark:text-gray-100 dark:disabled:bg-neutral-800 dark:disabled:text-gray-400"
-          >
-            <option value="" disabled>Pilih gudang</option>
-            {#each warehouses as warehouse (warehouse.id)}
-              <option value={warehouse.id}>{warehouse.name}</option>
-            {/each}
-          </select>
+          {#if isEdit}
+            <div class="w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-700 dark:border-gray-700 dark:bg-neutral-800 dark:text-gray-300 font-medium">
+              {warehouses.find(w => w.id === Number(form.destination_warehouse_id))?.name ?? '-'}
+            </div>
+          {:else}
+            <select
+              id="movement-destination"
+              bind:value={form.destination_warehouse_id}
+              required
+              class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-neutral-900 dark:text-gray-100"
+            >
+              <option value="" disabled>Pilih gudang</option>
+              {#each warehouses as warehouse (warehouse.id)}
+                <option value={warehouse.id}>{warehouse.name}</option>
+              {/each}
+            </select>
+          {/if}
         </div>
       </div>
       <div class="grid gap-4 sm:grid-cols-2">
-        <div>
-          <label
-            for="movement-placement"
-            class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Rak Tujuan (Placement)</label
-          >
-          <input
-            id="movement-placement"
-            type="text"
-            bind:value={form.placement}
-            placeholder="Contoh: Rak A-1"
-            disabled={isEdit}
-            class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-indigo-500 focus:ring-indigo-500 disabled:bg-gray-100 disabled:text-gray-500 dark:border-gray-700 dark:bg-neutral-900 dark:text-gray-100 dark:disabled:bg-neutral-800 dark:disabled:text-gray-400"
-          />
-        </div>
+        {#if !isEdit}
+          <div>
+            <label
+              for="movement-placement"
+              class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
+              >Rak Tujuan (Placement)</label
+            >
+            <input
+              id="movement-placement"
+              type="text"
+              bind:value={form.placement}
+              placeholder="Contoh: Rak A-1"
+              class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-neutral-900 dark:text-gray-100"
+            />
+          </div>
+        {/if}
         <div>
           <label
             for="movement-date"
@@ -220,36 +249,46 @@
             for="movement-project"
             class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Project</label
           >
-          <select
-            id="movement-project"
-            bind:value={form.project_id}
-            required
-            disabled={isEdit}
-            class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-indigo-500 focus:ring-indigo-500 disabled:bg-gray-100 disabled:text-gray-500 dark:border-gray-700 dark:bg-neutral-900 dark:text-gray-100 dark:disabled:bg-neutral-800 dark:disabled:text-gray-400"
-          >
-            <option value="" disabled>Pilih project</option>
-            {#each projects as project (project.id)}
-              <option value={project.id}>{project.name}</option>
-            {/each}
-          </select>
+          {#if isEdit}
+            <div class="w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-700 dark:border-gray-700 dark:bg-neutral-800 dark:text-gray-300 font-medium">
+              {projects.find(p => p.id === Number(form.project_id))?.name ?? '-'}
+            </div>
+          {:else}
+            <select
+              id="movement-project"
+              bind:value={form.project_id}
+              required
+              class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-neutral-900 dark:text-gray-100"
+            >
+              <option value="" disabled>Pilih project</option>
+              {#each projects as project (project.id)}
+                <option value={project.id}>{project.name}</option>
+              {/each}
+            </select>
+          {/if}
         </div>
         <div>
           <label
             for="movement-warehouse"
             class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Gudang</label
           >
-          <select
-            id="movement-warehouse"
-            bind:value={form.warehouse_id}
-            required
-            disabled={isEdit}
-            class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-indigo-500 focus:ring-indigo-500 disabled:bg-gray-100 disabled:text-gray-500 dark:border-gray-700 dark:bg-neutral-900 dark:text-gray-100 dark:disabled:bg-neutral-800 dark:disabled:text-gray-400"
-          >
-            <option value="" disabled>Pilih gudang</option>
-            {#each warehouses as warehouse (warehouse.id)}
-              <option value={warehouse.id}>{warehouse.name}</option>
-            {/each}
-          </select>
+          {#if isEdit}
+            <div class="w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-700 dark:border-gray-700 dark:bg-neutral-800 dark:text-gray-300 font-medium">
+              {warehouses.find(w => w.id === Number(form.warehouse_id))?.name ?? '-'}
+            </div>
+          {:else}
+            <select
+              id="movement-warehouse"
+              bind:value={form.warehouse_id}
+              required
+              class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-neutral-900 dark:text-gray-100"
+            >
+              <option value="" disabled>Pilih gudang</option>
+              {#each warehouses as warehouse (warehouse.id)}
+                <option value={warehouse.id}>{warehouse.name}</option>
+              {/each}
+            </select>
+          {/if}
         </div>
       </div>
       <div>

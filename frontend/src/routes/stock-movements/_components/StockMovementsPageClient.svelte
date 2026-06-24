@@ -154,7 +154,10 @@
     if (!canUpdate) return;
     isEditMode = true;
     editingMovementId = movement.id;
-    activeAction = movement.type === 'project_allocation' ? 'allocate-project' : (movement.type as MovementAction);
+    activeAction =
+      movement.type === 'project_allocation'
+        ? 'allocate-project'
+        : (movement.type as MovementAction);
 
     const formattedOccurred = formatForDateTimeLocal(movement.occurred_at);
 
@@ -179,7 +182,8 @@
         const payload = {
           quantity: Number(form.quantity),
           notes: form.notes || null,
-          occurred_at: (activeAction === 'allocate-project' ? form.allocated_at : form.occurred_at) || null
+          occurred_at:
+            (activeAction === 'allocate-project' ? form.allocated_at : form.occurred_at) || null
         };
         await updateStockMovement(editingMovementId, payload);
         showSuccess('Mutasi stok berhasil diperbarui.');
@@ -417,7 +421,7 @@
                   {movement.project?.name ?? '-'}
                 </td>
                 <td class="px-4 py-4 text-right">
-                  <div class="inline-flex justify-end w-full">
+                  <div class="inline-flex w-full justify-end">
                     <RowActionButtons
                       label={`Mutasi ${movement.id}`}
                       canEdit={canUpdate}
@@ -468,53 +472,74 @@
     {#if selectedMovement}
       <div class="space-y-4">
         <div>
-          <span class="text-xs font-semibold text-gray-500 uppercase dark:text-gray-400 font-mono">WAKTU</span>
-          <p class="text-sm font-medium text-gray-900 dark:text-white mt-0.5">
+          <span class="font-mono text-xs font-semibold text-gray-500 uppercase dark:text-gray-400"
+            >WAKTU</span
+          >
+          <p class="mt-0.5 text-sm font-medium text-gray-900 dark:text-white">
             {formatDateTime(selectedMovement.occurred_at)}
           </p>
         </div>
         <div>
-          <span class="text-xs font-semibold text-gray-500 uppercase dark:text-gray-400 font-mono">TIPE</span>
+          <span class="font-mono text-xs font-semibold text-gray-500 uppercase dark:text-gray-400"
+            >TIPE</span
+          >
           <div class="mt-1">
-            <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-bold {movementBadgeClasses(selectedMovement.type)}">
+            <span
+              class="inline-flex rounded-full px-2.5 py-1 text-xs font-bold {movementBadgeClasses(
+                selectedMovement.type
+              )}"
+            >
               {movementTypeLabel(selectedMovement.type)}
             </span>
           </div>
         </div>
         <div>
-          <span class="text-xs font-semibold text-gray-500 uppercase dark:text-gray-400 font-mono">ITEM</span>
-          <p class="text-sm font-semibold text-gray-900 dark:text-white mt-0.5">
+          <span class="font-mono text-xs font-semibold text-gray-500 uppercase dark:text-gray-400"
+            >ITEM</span
+          >
+          <p class="mt-0.5 text-sm font-semibold text-gray-900 dark:text-white">
             {selectedMovement.item?.name ?? '-'}
           </p>
-          <p class="text-xs text-gray-500 dark:text-gray-400 font-mono mt-0.5">
-            SKU: {selectedMovement.item?.sku ?? '-'} &middot; Unit: {selectedMovement.item?.unit ?? '-'}
+          <p class="mt-0.5 font-mono text-xs text-gray-500 dark:text-gray-400">
+            SKU: {selectedMovement.item?.sku ?? '-'} &middot; Unit: {selectedMovement.item?.unit ??
+              '-'}
           </p>
         </div>
         {#if selectedMovement.type === 'inbound'}
           <div>
-            <span class="text-xs font-semibold text-gray-500 uppercase dark:text-gray-400 font-mono">GUDANG TUJUAN</span>
-            <p class="text-sm font-medium text-gray-900 dark:text-white mt-0.5">
+            <span class="font-mono text-xs font-semibold text-gray-500 uppercase dark:text-gray-400"
+              >GUDANG TUJUAN</span
+            >
+            <p class="mt-0.5 text-sm font-medium text-gray-900 dark:text-white">
               {selectedMovement.destination_warehouse?.name ?? '-'}
             </p>
           </div>
         {:else if selectedMovement.type === 'outbound' || selectedMovement.type === 'project_allocation'}
           <div>
-            <span class="text-xs font-semibold text-gray-500 uppercase dark:text-gray-400 font-mono">GUDANG ASAL</span>
-            <p class="text-sm font-medium text-gray-900 dark:text-white mt-0.5">
+            <span class="font-mono text-xs font-semibold text-gray-500 uppercase dark:text-gray-400"
+              >GUDANG ASAL</span
+            >
+            <p class="mt-0.5 text-sm font-medium text-gray-900 dark:text-white">
               {selectedMovement.source_warehouse?.name ?? '-'}
             </p>
           </div>
         {:else if selectedMovement.type === 'transfer'}
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <span class="text-xs font-semibold text-gray-500 uppercase dark:text-gray-400 font-mono">GUDANG ASAL</span>
-              <p class="text-sm font-medium text-gray-900 dark:text-white mt-0.5">
+              <span
+                class="font-mono text-xs font-semibold text-gray-500 uppercase dark:text-gray-400"
+                >GUDANG ASAL</span
+              >
+              <p class="mt-0.5 text-sm font-medium text-gray-900 dark:text-white">
                 {selectedMovement.source_warehouse?.name ?? '-'}
               </p>
             </div>
             <div>
-              <span class="text-xs font-semibold text-gray-500 uppercase dark:text-gray-400 font-mono">GUDANG TUJUAN</span>
-              <p class="text-sm font-medium text-gray-900 dark:text-white mt-0.5">
+              <span
+                class="font-mono text-xs font-semibold text-gray-500 uppercase dark:text-gray-400"
+                >GUDANG TUJUAN</span
+              >
+              <p class="mt-0.5 text-sm font-medium text-gray-900 dark:text-white">
                 {selectedMovement.destination_warehouse?.name ?? '-'}
               </p>
             </div>
@@ -522,21 +547,29 @@
         {/if}
         {#if selectedMovement.type === 'project_allocation'}
           <div>
-            <span class="text-xs font-semibold text-gray-500 uppercase dark:text-gray-400 font-mono">PROJECT</span>
-            <p class="text-sm font-medium text-gray-900 dark:text-white mt-0.5">
+            <span class="font-mono text-xs font-semibold text-gray-500 uppercase dark:text-gray-400"
+              >PROJECT</span
+            >
+            <p class="mt-0.5 text-sm font-medium text-gray-900 dark:text-white">
               {selectedMovement.project?.name ?? '-'}
             </p>
           </div>
         {/if}
         <div>
-          <span class="text-xs font-semibold text-gray-500 uppercase dark:text-gray-400 font-mono">QUANTITY</span>
-          <p class="text-sm font-bold text-gray-900 dark:text-white mt-0.5">
+          <span class="font-mono text-xs font-semibold text-gray-500 uppercase dark:text-gray-400"
+            >QUANTITY</span
+          >
+          <p class="mt-0.5 text-sm font-bold text-gray-900 dark:text-white">
             {formatNumber(selectedMovement.quantity)}
           </p>
         </div>
         <div>
-          <span class="text-xs font-semibold text-gray-500 uppercase dark:text-gray-400 font-mono">CATATAN</span>
-          <p class="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap mt-0.5 border border-gray-150 rounded bg-gray-50 dark:bg-neutral-900 dark:border-neutral-800 p-2">
+          <span class="font-mono text-xs font-semibold text-gray-500 uppercase dark:text-gray-400"
+            >CATATAN</span
+          >
+          <p
+            class="border-gray-150 mt-0.5 rounded border bg-gray-50 p-2 text-sm whitespace-pre-wrap text-gray-700 dark:border-neutral-800 dark:bg-neutral-900 dark:text-gray-300"
+          >
             {selectedMovement.notes || '-'}
           </p>
         </div>
