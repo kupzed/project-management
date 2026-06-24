@@ -77,6 +77,7 @@ export type StockMovement = {
   project?: ProjectOption | null;
   quantity: number;
   notes?: string | null;
+  placement?: string | null;
   occurred_at?: string | null;
   created_at?: string | null;
   updated_at?: string | null;

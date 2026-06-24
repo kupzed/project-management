@@ -25,7 +25,11 @@
   } = $props();
 </script>
 
-<Modal bind:show title={isEdit ? 'Edit Mutasi Stok' : `Catat ${actionLabel(action)}`} maxWidth="max-w-2xl">
+<Modal
+  bind:show
+  title={isEdit ? 'Edit Mutasi Stok' : `Catat ${actionLabel(action)}`}
+  maxWidth="max-w-2xl"
+>
   <form class="space-y-4" onsubmit={onSubmit}>
     <div class="grid gap-4 sm:grid-cols-2">
       <div>
@@ -34,8 +38,13 @@
           class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Item</label
         >
         {#if isEdit}
-          <div class="w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-700 dark:border-gray-700 dark:bg-neutral-800 dark:text-gray-300 font-medium">
-            {items.find(i => i.id === Number(form.item_id))?.name ?? '-'} &middot; <span class="font-mono text-xs text-gray-500">{items.find(i => i.id === Number(form.item_id))?.sku ?? ''}</span>
+          <div
+            class="w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm font-medium text-gray-700 dark:border-gray-700 dark:bg-neutral-800 dark:text-gray-300"
+          >
+            {items.find((i) => i.id === Number(form.item_id))?.name ?? '-'} &middot;
+            <span class="font-mono text-xs text-gray-500"
+              >{items.find((i) => i.id === Number(form.item_id))?.sku ?? ''}</span
+            >
           </div>
         {:else}
           <select
@@ -76,8 +85,10 @@
             >Gudang Tujuan</label
           >
           {#if isEdit}
-            <div class="w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-700 dark:border-gray-700 dark:bg-neutral-800 dark:text-gray-300 font-medium">
-              {warehouses.find(w => w.id === Number(form.destination_warehouse_id))?.name ?? '-'}
+            <div
+              class="w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm font-medium text-gray-700 dark:border-gray-700 dark:bg-neutral-800 dark:text-gray-300"
+            >
+              {warehouses.find((w) => w.id === Number(form.destination_warehouse_id))?.name ?? '-'}
             </div>
           {:else}
             <select
@@ -93,22 +104,20 @@
             </select>
           {/if}
         </div>
-        {#if !isEdit}
-          <div>
-            <label
-              for="movement-placement"
-              class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
-              >Rak (Placement)</label
-            >
-            <input
-              id="movement-placement"
-              type="text"
-              bind:value={form.placement}
-              placeholder="Contoh: Rak A-1"
-              class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-neutral-900 dark:text-gray-100"
-            />
-          </div>
-        {/if}
+        <div>
+          <label
+            for="movement-placement"
+            class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
+            >Rak (Placement)</label
+          >
+          <input
+            id="movement-placement"
+            type="text"
+            bind:value={form.placement}
+            placeholder="Contoh: Rak A-1"
+            class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-neutral-900 dark:text-gray-100"
+          />
+        </div>
       </div>
       <div>
         <label
@@ -131,8 +140,10 @@
             >Gudang Asal</label
           >
           {#if isEdit}
-            <div class="w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-700 dark:border-gray-700 dark:bg-neutral-800 dark:text-gray-300 font-medium">
-              {warehouses.find(w => w.id === Number(form.source_warehouse_id))?.name ?? '-'}
+            <div
+              class="w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm font-medium text-gray-700 dark:border-gray-700 dark:bg-neutral-800 dark:text-gray-300"
+            >
+              {warehouses.find((w) => w.id === Number(form.source_warehouse_id))?.name ?? '-'}
             </div>
           {:else}
             <select
@@ -170,8 +181,10 @@
             >Gudang Asal</label
           >
           {#if isEdit}
-            <div class="w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-700 dark:border-gray-700 dark:bg-neutral-800 dark:text-gray-300 font-medium">
-              {warehouses.find(w => w.id === Number(form.source_warehouse_id))?.name ?? '-'}
+            <div
+              class="w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm font-medium text-gray-700 dark:border-gray-700 dark:bg-neutral-800 dark:text-gray-300"
+            >
+              {warehouses.find((w) => w.id === Number(form.source_warehouse_id))?.name ?? '-'}
             </div>
           {:else}
             <select
@@ -194,8 +207,10 @@
             >Gudang Tujuan</label
           >
           {#if isEdit}
-            <div class="w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-700 dark:border-gray-700 dark:bg-neutral-800 dark:text-gray-300 font-medium">
-              {warehouses.find(w => w.id === Number(form.destination_warehouse_id))?.name ?? '-'}
+            <div
+              class="w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm font-medium text-gray-700 dark:border-gray-700 dark:bg-neutral-800 dark:text-gray-300"
+            >
+              {warehouses.find((w) => w.id === Number(form.destination_warehouse_id))?.name ?? '-'}
             </div>
           {:else}
             <select
@@ -213,22 +228,20 @@
         </div>
       </div>
       <div class="grid gap-4 sm:grid-cols-2">
-        {#if !isEdit}
-          <div>
-            <label
-              for="movement-placement"
-              class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
-              >Rak Tujuan (Placement)</label
-            >
-            <input
-              id="movement-placement"
-              type="text"
-              bind:value={form.placement}
-              placeholder="Contoh: Rak A-1"
-              class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-neutral-900 dark:text-gray-100"
-            />
-          </div>
-        {/if}
+        <div>
+          <label
+            for="movement-placement"
+            class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
+            >Rak Tujuan (Placement)</label
+          >
+          <input
+            id="movement-placement"
+            type="text"
+            bind:value={form.placement}
+            placeholder="Contoh: Rak A-1"
+            class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-neutral-900 dark:text-gray-100"
+          />
+        </div>
         <div>
           <label
             for="movement-date"
@@ -250,8 +263,10 @@
             class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Project</label
           >
           {#if isEdit}
-            <div class="w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-700 dark:border-gray-700 dark:bg-neutral-800 dark:text-gray-300 font-medium">
-              {projects.find(p => p.id === Number(form.project_id))?.name ?? '-'}
+            <div
+              class="w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm font-medium text-gray-700 dark:border-gray-700 dark:bg-neutral-800 dark:text-gray-300"
+            >
+              {projects.find((p) => p.id === Number(form.project_id))?.name ?? '-'}
             </div>
           {:else}
             <select
@@ -273,8 +288,10 @@
             class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Gudang</label
           >
           {#if isEdit}
-            <div class="w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-700 dark:border-gray-700 dark:bg-neutral-800 dark:text-gray-300 font-medium">
-              {warehouses.find(w => w.id === Number(form.warehouse_id))?.name ?? '-'}
+            <div
+              class="w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm font-medium text-gray-700 dark:border-gray-700 dark:bg-neutral-800 dark:text-gray-300"
+            >
+              {warehouses.find((w) => w.id === Number(form.warehouse_id))?.name ?? '-'}
             </div>
           {:else}
             <select

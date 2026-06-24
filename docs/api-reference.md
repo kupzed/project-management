@@ -161,7 +161,7 @@ Authorization: Bearer {access_token}
 | PUT    | `/stock-movements/{id}`               | Yes  | Update mutasi stok               |
 | DELETE | `/stock-movements/{id}`               | Yes  | Hapus mutasi stok                |
 
-> **Catatan:** Edit/delete stock movement diperbolehkan untuk mengubah `quantity` (penyesuaian stok otomatis), `notes`, dan `occurred_at`.
+> **Catatan:** Edit/delete stock movement diperbolehkan untuk mengubah `quantity` (penyesuaian stok otomatis), `notes`, `occurred_at`, dan `placement` (untuk tipe inbound & transfer).
 
 ## Activity Logs
 

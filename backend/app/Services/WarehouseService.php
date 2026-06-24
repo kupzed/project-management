@@ -110,6 +110,7 @@ class WarehouseService
                 'quantity' => $data['quantity'],
                 'notes' => $data['notes'] ?? null,
                 'occurred_at' => $data['occurred_at'] ?? now(),
+                'placement' => $data['placement'] ?? null,
             ])->load(['item.category', 'destinationWarehouse']);
         });
     }
@@ -169,6 +170,7 @@ class WarehouseService
                 'quantity' => $data['quantity'],
                 'notes' => $data['notes'] ?? null,
                 'occurred_at' => $data['occurred_at'] ?? now(),
+                'placement' => $data['placement'] ?? null,
             ])->load(['item.category', 'sourceWarehouse', 'destinationWarehouse']);
         });
     }
@@ -226,7 +228,19 @@ class WarehouseService
                 'quantity' => $newQuantity,
                 'notes' => array_key_exists('notes', $data) ? $data['notes'] : $movement->notes,
                 'occurred_at' => $data['occurred_at'] ?? $movement->occurred_at,
+                'placement' => array_key_exists('placement', $data) ? $data['placement'] : $movement->placement,
             ]);
+
+            // Sync placement to destination inventory for inbound/transfer
+            if (in_array($movement->type, ['inbound', 'transfer'], true) && array_key_exists('placement', $data)) {
+                $inventory = $this->getLockedInventory(
+                    (int) $movement->item_id,
+                    (int) $movement->destination_warehouse_id
+                );
+                $inventory->update([
+                    'placement' => $data['placement'],
+                ]);
+            }
 
             // Sinkronkan juga ProjectMaterial jika tipe project_allocation
             if ($movement->type === 'project_allocation' && $movement->projectMaterial) {

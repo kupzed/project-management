@@ -171,7 +171,7 @@
       notes: movement.notes ?? '',
       occurred_at: formattedOccurred,
       allocated_at: formattedOccurred,
-      placement: ''
+      placement: movement.placement ?? ''
     };
     showModal = true;
   }
@@ -183,7 +183,11 @@
           quantity: Number(form.quantity),
           notes: form.notes || null,
           occurred_at:
-            (activeAction === 'allocate-project' ? form.allocated_at : form.occurred_at) || null
+            (activeAction === 'allocate-project' ? form.allocated_at : form.occurred_at) || null,
+          placement:
+            activeAction === 'inbound' || activeAction === 'transfer'
+              ? form.placement || null
+              : null
         };
         await updateStockMovement(editingMovementId, payload);
         showSuccess('Mutasi stok berhasil diperbarui.');
@@ -506,13 +510,25 @@
           </p>
         </div>
         {#if selectedMovement.type === 'inbound'}
-          <div>
-            <span class="font-mono text-xs font-semibold text-gray-500 uppercase dark:text-gray-400"
-              >GUDANG TUJUAN</span
-            >
-            <p class="mt-0.5 text-sm font-medium text-gray-900 dark:text-white">
-              {selectedMovement.destination_warehouse?.name ?? '-'}
-            </p>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <span
+                class="font-mono text-xs font-semibold text-gray-500 uppercase dark:text-gray-400"
+                >GUDANG TUJUAN</span
+              >
+              <p class="mt-0.5 text-sm font-medium text-gray-900 dark:text-white">
+                {selectedMovement.destination_warehouse?.name ?? '-'}
+              </p>
+            </div>
+            <div>
+              <span
+                class="font-mono text-xs font-semibold text-gray-500 uppercase dark:text-gray-400"
+                >RAK (PLACEMENT)</span
+              >
+              <p class="mt-0.5 text-sm font-medium text-gray-900 dark:text-white">
+                {selectedMovement.placement ?? '-'}
+              </p>
+            </div>
           </div>
         {:else if selectedMovement.type === 'outbound' || selectedMovement.type === 'project_allocation'}
           <div>
@@ -543,6 +559,14 @@
                 {selectedMovement.destination_warehouse?.name ?? '-'}
               </p>
             </div>
+          </div>
+          <div class="mt-4">
+            <span class="font-mono text-xs font-semibold text-gray-500 uppercase dark:text-gray-400"
+              >RAK TUJUAN (PLACEMENT)</span
+            >
+            <p class="mt-0.5 text-sm font-medium text-gray-900 dark:text-white">
+              {selectedMovement.placement ?? '-'}
+            </p>
           </div>
         {/if}
         {#if selectedMovement.type === 'project_allocation'}

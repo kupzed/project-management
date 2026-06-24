@@ -22,6 +22,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
     'quantity',
     'notes',
     'occurred_at',
+    'placement',
 ])]
 class StockMovement extends Model
 {

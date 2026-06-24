@@ -92,14 +92,16 @@
                 {formatNumber(warehouse.inventories_count ?? 0)}
               </td>
               <td class="px-4 py-4 text-right">
-                <RowActionButtons
-                  label={warehouse.name}
-                  canEdit={canUpdate}
-                  {canDelete}
-                  onDetail={() => onDetail(warehouse)}
-                  onEdit={() => onEdit(warehouse)}
-                  onDelete={() => onDelete(warehouse)}
-                />
+                <div class="inline-flex w-full justify-end">
+                  <RowActionButtons
+                    label={warehouse.name}
+                    canEdit={canUpdate}
+                    {canDelete}
+                    onDetail={() => onDetail(warehouse)}
+                    onEdit={() => onEdit(warehouse)}
+                    onDelete={() => onDelete(warehouse)}
+                  />
+                </div>
               </td>
             </tr>
           {/each}

@@ -2,7 +2,7 @@
 
 ## Deskripsi
 
-Modul inventori mencakup pengelolaan gudang, master data item, dan mutasi stok. Sistem ini menggunakan pola **ledger-based inventory** di mana setiap pergerakan stok dicatat sebagai record immutable di `stock_movements`, dan stok aktual di-maintain di tabel `inventories`.
+Modul inventori mencakup pengelolaan gudang, master data item, dan mutasi stok. Sistem ini menggunakan pola **ledger-based inventory** di mana setiap pergerakan stok dicatat di `stock_movements`, dan stok aktual di-maintain di tabel `inventories`.
 
 ## Sub-Modul
 
@@ -26,8 +26,8 @@ Modul inventori mencakup pengelolaan gudang, master data item, dan mutasi stok. 
 
 ### 4. Mutasi Stok (Stock Movement)
 - Route: `/stock-movements`
-- API: `GET /api/stock-movements`, `POST /api/stock-movements/{type}`
-- Deskripsi: Pencatatan pergerakan stok
+- API: `GET /api/stock-movements`, `POST /api/stock-movements/{type}`, `PUT /api/stock-movements/{id}`, `DELETE /api/stock-movements/{id}`
+- Deskripsi: Pencatatan pergerakan stok (mendukung CRUD)
 
 ## Komponen Utama
 
@@ -51,7 +51,7 @@ Modul inventori mencakup pengelolaan gudang, master data item, dan mutasi stok. 
 - `warehouses` — Gudang
 - `items` — Master barang
 - `inventories` — Stok aktual per item per gudang
-- `stock_movements` — Riwayat mutasi (immutable)
+- `stock_movements` — Riwayat mutasi (mendukung edit/delete dengan penyesuaian stok otomatis)
 - `project_materials` — Material yang dialokasikan ke proyek
 
 ## Tipe Mutasi Stok
@@ -65,7 +65,7 @@ Modul inventori mencakup pengelolaan gudang, master data item, dan mutasi stok. 
 
 ## Business Rules
 
-1. **Immutability** — `StockMovement` tidak bisa diubah atau dihapus. Model melempar `LogicException` jika ada attempt update/delete.
+1. **Mutability** — `StockMovement` mendukung edit (quantity, notes, occurred_at, placement) dan delete dengan penyesuaian/reversal stok otomatis di gudang.
 2. **Atomic transaction** — Semua operasi mutasi menggunakan `DB::transaction()` dengan pessimistic locking (`lockForUpdate()`).
 3. **Stok harus cukup** — Operasi `outbound`, `transfer`, dan `project_allocation` akan gagal jika stok tidak mencukupi (`Insufficient stock`).
 4. **Auto-create inventory** — Jika belum ada record `inventories` untuk kombinasi item + warehouse, otomatis dibuat dengan quantity 0.

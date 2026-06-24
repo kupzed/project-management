@@ -328,6 +328,7 @@ Catatan mutasi stok (mutable — mendukung edit dan delete dengan penyesuaian st
 | `destination_warehouse_id`| bigint (FK)  | Yes      | NULL        | Gudang tujuan                 |
 | `project_id`              | bigint (FK)  | Yes      | NULL        | Proyek terkait (alokasi)      |
 | `quantity`                | unsigned int | No       | —           | Jumlah barang                 |
+| `placement`               | varchar(100) | Yes      | NULL        | Posisi rak penyimpanan        |
 | `notes`                   | text         | Yes      | NULL        | Catatan                       |
 | `occurred_at`             | timestamp    | No       | `CURRENT`   | Waktu mutasi terjadi          |
 | `created_at`              | timestamp    | Yes      | NULL        | Waktu dibuat                  |
@@ -347,7 +348,7 @@ Catatan mutasi stok (mutable — mendukung edit dan delete dengan penyesuaian st
 - `destination_warehouse_id` → `warehouses.id` (RESTRICT)
 - `project_id` → `projects.id` (RESTRICT)
 
-**Business Rule:** Model ini bersifat **immutable** — update dan delete akan melempar `LogicException`.
+**Business Rule:** Model ini bersifat **mutable** — mendukung edit dan delete dengan penyesuaian stok otomatis.
 
 ---
 

@@ -19,6 +19,7 @@ class StockMovementUpdateRequest extends FormRequest
             'quantity' => ['required', 'integer', 'min:1'],
             'notes' => ['nullable', 'string'],
             'occurred_at' => ['nullable', 'date'],
+            'placement' => ['nullable', 'string', 'max:100'],
         ];
     }
 }

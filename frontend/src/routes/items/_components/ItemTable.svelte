@@ -90,24 +90,6 @@
                 <div class="mt-1 font-mono text-xs text-gray-500 dark:text-gray-400">
                   {item.sku}
                 </div>
-                {#if item.attachments && item.attachments.length > 0}
-                  <div class="mt-2 flex flex-wrap gap-1.5">
-                    {#each item.attachments as att}
-                      <a
-                        href={att.url}
-                        target="_blank"
-                        rel="noreferrer"
-                        class="inline-flex items-center gap-1 rounded bg-gray-100 px-1.5 py-0.5 text-[10px] font-medium text-gray-700 hover:bg-gray-200 dark:bg-neutral-800 dark:text-gray-300 dark:hover:bg-neutral-700"
-                        title={att.description || att.name}
-                      >
-                        <svg class="h-3 w-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
-                        </svg>
-                        <span class="max-w-[120px] truncate">{att.name}</span>
-                      </a>
-                    {/each}
-                  </div>
-                {/if}
               </td>
               <td class="px-4 py-4 text-sm text-gray-600 dark:text-gray-300">
                 {item.category?.name ?? '-'}
@@ -126,7 +108,7 @@
                 {formatNumber(item.minimum_stock)}
               </td>
               <td class="px-4 py-4 text-right">
-                <div class="inline-flex justify-end w-full">
+                <div class="inline-flex w-full justify-end">
                   <RowActionButtons
                     label={item.name}
                     canEdit={canUpdate}
