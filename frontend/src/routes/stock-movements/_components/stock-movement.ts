@@ -40,7 +40,7 @@ export function actionLabel(action: MovementAction): string {
     inbound: 'Inbound',
     outbound: 'Outbound',
     transfer: 'Transfer',
-    'allocate-project': 'Alokasi Project'
+    'allocate-project': 'Alokasi'
   };
   return labels[action];
 }

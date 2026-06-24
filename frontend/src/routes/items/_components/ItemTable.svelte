@@ -15,6 +15,7 @@
     perPageOptions,
     canUpdate,
     canDelete,
+    onDetail,
     onEdit,
     onDelete,
     onPageChange,
@@ -30,6 +31,7 @@
     perPageOptions: number[];
     canUpdate: boolean;
     canDelete: boolean;
+    onDetail: (item: Item) => void;
     onEdit: (item: Item) => void;
     onDelete: (item: Item) => void;
     onPageChange: (page: number) => void;
@@ -119,20 +121,6 @@
                 >
                   {formatNumber(totalStock(item))}
                 </span>
-                {#if item.inventories && item.inventories.length > 0}
-                  <div class="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
-                    {#each item.inventories as inv}
-                      {#if inv.quantity > 0}
-                        <div class="truncate">
-                          {inv.warehouse?.name}: <strong>{formatNumber(inv.quantity)}</strong>
-                          {#if inv.placement}
-                            <span class="ml-1 text-gray-400 dark:text-gray-500">(Rak: {inv.placement})</span>
-                          {/if}
-                        </div>
-                      {/if}
-                    {/each}
-                  </div>
-                {/if}
               </td>
               <td class="px-4 py-4 text-right text-sm font-medium text-gray-700 dark:text-gray-300">
                 {formatNumber(item.minimum_stock)}
@@ -143,6 +131,7 @@
                     label={item.name}
                     canEdit={canUpdate}
                     {canDelete}
+                    onDetail={() => onDetail(item)}
                     onEdit={() => onEdit(item)}
                     onDelete={() => onDelete(item)}
                   />

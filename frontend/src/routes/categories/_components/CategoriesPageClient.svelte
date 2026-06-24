@@ -228,6 +228,11 @@
             <th
               class="px-4 py-3 text-right text-xs font-bold tracking-wide text-gray-500 uppercase dark:text-gray-300"
             >
+              Terpakai
+            </th>
+            <th
+              class="px-4 py-3 text-right text-xs font-bold tracking-wide text-gray-500 uppercase dark:text-gray-300"
+            >
               Aksi
             </th>
           </tr>
@@ -235,17 +240,17 @@
         <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
           {#if loading}
             <tr>
-              <td colspan="3" class="px-4 py-8 text-center text-sm text-gray-500"
+              <td colspan="4" class="px-4 py-8 text-center text-sm text-gray-500"
                 >Memuat kategori...</td
               >
             </tr>
           {:else if error}
             <tr>
-              <td colspan="3" class="px-4 py-8 text-center text-sm text-red-600">{error}</td>
+              <td colspan="4" class="px-4 py-8 text-center text-sm text-red-600">{error}</td>
             </tr>
           {:else if categories.length === 0}
             <tr>
-              <td colspan="3" class="px-4 py-8 text-center text-sm text-gray-500">
+              <td colspan="4" class="px-4 py-8 text-center text-sm text-gray-500">
                 Belum ada kategori.
               </td>
             </tr>
@@ -262,8 +267,19 @@
                     {typeLabel(category.type)}
                   </span>
                 </td>
+                <td
+                  class="px-4 py-4 text-right text-sm font-medium text-gray-600 dark:text-gray-300"
+                >
+                  <span
+                    class={category.items_count && category.items_count > 0
+                      ? 'font-semibold text-indigo-600 dark:text-indigo-400'
+                      : ''}
+                  >
+                    {category.items_count ?? 0} data
+                  </span>
+                </td>
                 <td class="px-4 py-4 text-right text-sm">
-                  <div class="inline-flex justify-end w-full">
+                  <div class="inline-flex w-full justify-end">
                     <RowActionButtons
                       label={category.name}
                       canEdit={canUpdate}

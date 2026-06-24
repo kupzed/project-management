@@ -341,7 +341,7 @@
             <th
               class="px-4 py-3 text-left text-xs font-bold tracking-wide text-gray-500 uppercase dark:text-gray-300"
             >
-              Waktu
+              Item
             </th>
             <th
               class="px-4 py-3 text-left text-xs font-bold tracking-wide text-gray-500 uppercase dark:text-gray-300"
@@ -349,9 +349,9 @@
               Tipe
             </th>
             <th
-              class="px-4 py-3 text-left text-xs font-bold tracking-wide text-gray-500 uppercase dark:text-gray-300"
+              class="px-4 py-3 text-right text-xs font-bold tracking-wide text-gray-500 uppercase dark:text-gray-300"
             >
-              Item
+              Quantity
             </th>
             <th
               class="px-4 py-3 text-left text-xs font-bold tracking-wide text-gray-500 uppercase dark:text-gray-300"
@@ -366,16 +366,6 @@
             <th
               class="px-4 py-3 text-right text-xs font-bold tracking-wide text-gray-500 uppercase dark:text-gray-300"
             >
-              Quantity
-            </th>
-            <th
-              class="px-4 py-3 text-left text-xs font-bold tracking-wide text-gray-500 uppercase dark:text-gray-300"
-            >
-              Catatan
-            </th>
-            <th
-              class="px-4 py-3 text-right text-xs font-bold tracking-wide text-gray-500 uppercase dark:text-gray-300"
-            >
               Aksi
             </th>
           </tr>
@@ -383,25 +373,30 @@
         <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
           {#if loading}
             <tr>
-              <td colspan="8" class="px-4 py-8 text-center text-sm text-gray-500">
+              <td colspan="6" class="px-4 py-8 text-center text-sm text-gray-500">
                 Memuat mutasi stok...
               </td>
             </tr>
           {:else if error}
             <tr>
-              <td colspan="8" class="px-4 py-8 text-center text-sm text-red-600">{error}</td>
+              <td colspan="6" class="px-4 py-8 text-center text-sm text-red-600">{error}</td>
             </tr>
           {:else if movements.length === 0}
             <tr>
-              <td colspan="8" class="px-4 py-8 text-center text-sm text-gray-500">
+              <td colspan="6" class="px-4 py-8 text-center text-sm text-gray-500">
                 Belum ada mutasi stok.
               </td>
             </tr>
           {:else}
             {#each movements as movement (movement.id)}
               <tr class="hover:bg-gray-50 dark:hover:bg-neutral-950">
-                <td class="px-4 py-4 text-sm whitespace-nowrap text-gray-600 dark:text-gray-300">
-                  {formatDateTime(movement.occurred_at)}
+                <td class="px-4 py-4">
+                  <div class="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                    {movement.item?.name ?? '-'}
+                  </div>
+                  <div class="mt-1 font-mono text-xs text-gray-500">
+                    {movement.item?.sku ?? '-'}
+                  </div>
                 </td>
                 <td class="px-4 py-4">
                   <span
@@ -412,25 +407,14 @@
                     {movementTypeLabel(movement.type)}
                   </span>
                 </td>
-                <td class="px-4 py-4">
-                  <div class="text-sm font-semibold text-gray-900 dark:text-gray-100">
-                    {movement.item?.name ?? '-'}
-                  </div>
-                  <div class="mt-1 font-mono text-xs text-gray-500">
-                    {movement.item?.sku ?? '-'}
-                  </div>
+                <td class="px-4 py-4 text-right text-sm font-bold text-gray-900 dark:text-gray-100">
+                  {formatNumber(movement.quantity)}
                 </td>
                 <td class="px-4 py-4 text-sm text-gray-600 dark:text-gray-300">
                   {warehouseFlow(movement)}
                 </td>
                 <td class="px-4 py-4 text-sm text-gray-600 dark:text-gray-300">
                   {movement.project?.name ?? '-'}
-                </td>
-                <td class="px-4 py-4 text-right text-sm font-bold text-gray-900 dark:text-gray-100">
-                  {formatNumber(movement.quantity)}
-                </td>
-                <td class="px-4 py-4 text-sm text-gray-600 dark:text-gray-300">
-                  {movement.notes || '-'}
                 </td>
                 <td class="px-4 py-4 text-right">
                   <div class="inline-flex justify-end w-full">
