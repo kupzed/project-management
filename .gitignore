@@ -1,0 +1,9 @@
+# OS files
+.DS_Store
+Thumbs.db
+
+# Docker environment (berisi secrets — JANGAN commit!)
+.env.docker
+
+# Docker data (jika ada local override)
+docker-compose.override.yml

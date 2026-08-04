@@ -1,0 +1,40 @@
+# Dependencies (di-install ulang di dalam Docker)
+/vendor
+/node_modules
+
+# Environment files (di-set via docker-compose, bukan di-copy)
+.env
+.env.backup
+.env.production
+
+# Git & IDE
+.git
+.gitignore
+.gitattributes
+.idea
+.vscode
+.fleet
+.nova
+.zed
+
+# Testing & Development
+/tests
+phpunit.xml
+.phpunit.result.cache
+.phpunit.cache
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Storage logs (akan dibuat fresh di container)
+/storage/logs/*
+!/storage/logs/.gitignore
+
+# Build artifacts
+/public/build
+/public/hot
+/public/storage
+
+# Documentation
+README.md

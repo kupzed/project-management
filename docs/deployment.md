@@ -123,3 +123,142 @@ Saat ini `config/cors.php` menggunakan `allowed_origins => ['*']`. Untuk product
 - [ ] API response tidak menampilkan debug info
 - [ ] CORS tidak memblokir request frontend
 - [ ] SSL certificate valid
+
+---
+
+## Docker Deployment
+
+### Arsitektur
+
+```
+                          ┌────────────────────────────────────────────┐
+   Internet               │  VPS Ubuntu 24.04                          │
+   (port 80)              │                                            │
+  ──────────────────────► │  ┌──────────┐                              │
+                          │  │  Nginx   │──── /api/* ───► PHP-FPM:9000 │
+                          │  │  :80     │──── /storage/* ► Volume      │
+                          │  │          │──── /* ───────► Node.js:3000 │
+                          │  └──────────┘                              │
+                          │       │            ┌──────────┐            │
+                          │       └───────────►│  MySQL   │            │
+                          │                    │  :3306   │            │
+                          │                    └──────────┘            │
+                          └────────────────────────────────────────────┘
+```
+
+### File Docker
+
+| File                        | Deskripsi                                 |
+| --------------------------- | ----------------------------------------- |
+| `docker-compose.yml`        | Orchestrator semua container              |
+| `backend/Dockerfile`        | Image PHP 8.4-FPM untuk Laravel           |
+| `frontend/Dockerfile`       | Multi-stage build Node.js untuk SvelteKit |
+| `docker/nginx/default.conf` | Konfigurasi Nginx reverse proxy           |
+| `docker/mysql/my.cnf`       | Optimasi MySQL untuk 4GB RAM              |
+| `.env.docker.example`       | Template environment variable             |
+
+### Prasyarat
+
+- VPS dengan Ubuntu 22.04+ dan minimal 2GB RAM
+- Docker Engine dan Docker Compose terinstal
+- Git terinstal
+- Port 80 terbuka di firewall
+
+### Install Docker di VPS
+
+```bash
+# Update sistem
+sudo apt update && sudo apt upgrade -y
+
+# Install Docker via official script
+curl -fsSL https://get.docker.com | sudo sh
+
+# Tambahkan user ke group docker (agar bisa jalankan tanpa sudo)
+sudo usermod -aG docker $USER
+
+# Logout & login ulang agar group aktif
+exit
+# SSH kembali
+```
+
+### Deploy Step-by-Step
+
+```bash
+# 1. Clone repository
+mkdir -p ~/apps/kupzed && cd ~/apps/kupzed
+git clone https://github.com/kupzed/project-management.git
+cd project-management
+
+# 2. Setup environment
+cp .env.docker.example .env.docker
+nano .env.docker    # Edit password & API keys
+
+# 3. Build & jalankan semua container
+docker compose up -d --build
+
+# 4. Generate APP_KEY (jalankan sekali saja)
+docker compose exec php php artisan key:generate --force
+
+# 5. Jalankan migration
+docker compose exec php php artisan migrate --force
+
+# 6. Seed data (opsional)
+docker compose exec php php artisan db:seed --force
+
+# 7. Create storage symlink
+docker compose exec php php artisan storage:link
+
+# 8. Cache config untuk performa
+docker compose exec php php artisan config:cache
+docker compose exec php php artisan route:cache
+docker compose exec php php artisan view:cache
+
+# 9. Verifikasi
+docker compose ps
+curl http://localhost
+```
+
+### Perintah Maintenance
+
+| Perintah                                      | Fungsi                      |
+| --------------------------------------------- | --------------------------- |
+| `docker compose up -d`                        | Start semua container       |
+| `docker compose down`                         | Stop semua container        |
+| `docker compose logs -f`                      | Lihat semua log (live)      |
+| `docker compose logs php`                     | Lihat log backend saja      |
+| `docker compose logs --tail=50 nginx`         | Lihat 50 log terakhir Nginx |
+| `docker compose restart php`                  | Restart backend saja        |
+| `docker compose up -d --build`                | Rebuild & restart semua     |
+| `docker compose exec php php artisan migrate` | Jalankan migration baru     |
+| `docker compose exec php php artisan tinker`  | Buka Laravel REPL           |
+| `docker compose exec mysql mysql -u root -p`  | Akses MySQL CLI             |
+
+### Update Deployment
+
+```bash
+cd ~/apps/kupzed/project-management
+
+# Tarik perubahan terbaru
+git pull origin main
+
+# Rebuild & restart
+docker compose up -d --build
+
+# Jalankan migration jika ada
+docker compose exec php php artisan migrate --force
+
+# Clear & rebuild cache
+docker compose exec php php artisan config:cache
+docker compose exec php php artisan route:cache
+docker compose exec php php artisan view:cache
+```
+
+### Backup Database
+
+```bash
+# Backup
+docker compose exec mysql mysqldump -u root -p"$MYSQL_ROOT_PASSWORD" indogreen > backup_$(date +%Y%m%d).sql
+
+# Restore
+docker compose exec -T mysql mysql -u root -p"$MYSQL_ROOT_PASSWORD" indogreen < backup_20260804.sql
+```

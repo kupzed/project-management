@@ -1,5 +1,13 @@
 # Changelog
 
+## [2026-08-04] — feat(deployment): add Docker containerization for VPS deployment
+
+- Menambahkan konfigurasi Docker Compose dengan 4 container: Nginx (reverse proxy), PHP 8.4-FPM (Laravel backend), Node.js (SvelteKit frontend), dan MySQL 8.0.
+- Mengubah SvelteKit adapter dari `adapter-auto` ke `adapter-node` untuk mendukung deployment Docker/Node.js.
+- File baru: `docker-compose.yml`, `backend/Dockerfile`, `frontend/Dockerfile`, `docker/nginx/default.conf`, `docker/mysql/my.cnf`, `.env.docker.example`, `.gitignore` (root), `backend/.dockerignore`, `frontend/.dockerignore`.
+- File diubah: `frontend/svelte.config.js` (adapter-node), `frontend/package.json` (add adapter-node dep), `docs/deployment.md` (Docker section).
+- Dampak: Frontend perlu `@sveltejs/adapter-node` sebagai devDependency (sudah ditambahkan). Build tetap kompatibel dengan development lokal.
+
 ## [2026-06-24] — feat(inventory): add item attachments, placement, and stock movement CRUD
 
 - Menambahkan fitur lampiran (attachments) untuk master data items/material (file upload, rename, delete).

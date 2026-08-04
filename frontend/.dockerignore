@@ -1,0 +1,40 @@
+# Dependencies (di-install ulang di dalam Docker)
+node_modules
+
+# Build output (di-build ulang di dalam Docker)
+/build
+/.svelte-kit
+.output
+
+# Environment files (di-set via docker-compose build args)
+.env
+.env.*
+!.env.example
+!.env.test
+
+# Git & IDE
+.git
+.gitignore
+.idea
+.vscode
+
+# Platform-specific
+.vercel
+.netlify
+.wrangler
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Development & Testing
+*.test.ts
+*.spec.ts
+vitest-setup-client.ts
+
+# Vite timestamps
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*
+
+# Documentation
+README.md

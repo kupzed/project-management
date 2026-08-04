@@ -1,0 +1,156 @@
+# =============================================
+# Docker Compose — Indogreen Project Management
+# =============================================
+#
+# Penjelasan:
+# Docker Compose adalah tool untuk menjalankan BANYAK container sekaligus.
+# File ini mendefinisikan 4 container (services) yang bekerja bersama:
+#
+#   1. nginx     — Reverse proxy (pintu masuk dari internet)
+#   2. php       — Laravel backend (PHP-FPM)
+#   3. frontend  — SvelteKit (Node.js server)
+#   4. mysql     — Database
+#
+# CARA PAKAI:
+#   docker compose up -d --build     # Build & jalankan semua
+#   docker compose down              # Stop semua
+#   docker compose logs -f           # Lihat semua log
+#   docker compose ps                # Cek status container
+#
+
+services:
+  # =============================================
+  # 1. Nginx — Reverse Proxy
+  # =============================================
+  # Satu-satunya container yang terbuka ke internet (port 80).
+  # Menerima semua request lalu meneruskan ke service yang tepat.
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: indogreen-nginx
+    restart: unless-stopped
+    ports:
+      # port_host:port_container
+      # Akses http://150.109.11.132:80 → masuk ke Nginx container
+      - "80:80"
+    volumes:
+      # Mount konfigurasi Nginx (read-only)
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      # Share volume storage agar Nginx bisa serve file upload
+      - backend_storage:/var/www/backend/storage/app/public:ro
+    depends_on:
+      # Nginx baru start setelah php dan frontend siap
+      php:
+        condition: service_started
+      frontend:
+        condition: service_started
+    networks:
+      - app_network
+
+  # =============================================
+  # 2. PHP-FPM — Laravel Backend
+  # =============================================
+  # Menjalankan Laravel API. Tidak terbuka ke publik,
+  # hanya bisa diakses oleh Nginx via internal network.
+  php:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: indogreen-php
+    restart: unless-stopped
+    env_file:
+      # Semua environment variable di-load dari file ini
+      - .env.docker
+    volumes:
+      # Persistent storage untuk file upload
+      # Data di volume ini tidak hilang saat container restart/rebuild
+      - backend_storage:/var/www/backend/storage/app/public
+      # Persistent storage untuk log Laravel
+      - backend_logs:/var/www/backend/storage/logs
+      # Persistent storage untuk activity logs
+      - backend_activity_logs:/var/www/backend/storage/app/activity-logs
+    depends_on:
+      mysql:
+        # Tunggu sampai MySQL benar-benar siap menerima koneksi
+        condition: service_healthy
+    networks:
+      - app_network
+
+  # =============================================
+  # 3. Frontend — SvelteKit (Node.js)
+  # =============================================
+  # Menjalankan SvelteKit SSR server. Tidak terbuka ke publik,
+  # hanya bisa diakses oleh Nginx via internal network.
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        # Build args — nilai ini di-"bake" ke dalam app saat build
+        # Browser akan menggunakan URL ini untuk request ke API
+        PUBLIC_API_BASE_URL: ${PUBLIC_API_BASE_URL:-http://150.109.11.132/api}
+        PUBLIC_STORAGE_BASE_URL: ${PUBLIC_STORAGE_BASE_URL:-http://150.109.11.132/storage}
+    container_name: indogreen-frontend
+    restart: unless-stopped
+    networks:
+      - app_network
+
+  # =============================================
+  # 4. MySQL — Database
+  # =============================================
+  # Database utama. Tidak terbuka ke publik,
+  # hanya bisa diakses oleh PHP container via internal network.
+  mysql:
+    image: mysql:8.0
+    container_name: indogreen-mysql
+    restart: unless-stopped
+    env_file:
+      - .env.docker
+    volumes:
+      # Persistent storage untuk data MySQL
+      # INI YANG PALING PENTING — tanpa volume, data hilang saat container restart!
+      - mysql_data:/var/lib/mysql
+      # Konfigurasi MySQL custom (read-only)
+      - ./docker/mysql/my.cnf:/etc/mysql/conf.d/custom.cnf:ro
+    # Health check — Docker akan cek apakah MySQL sudah siap
+    # Service lain yang depends_on MySQL akan menunggu sampai healthy
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - app_network
+
+# =============================================
+# Volumes — Persistent Storage
+# =============================================
+# Volume adalah penyimpanan yang persistent (tetap ada walau container dihapus).
+# Tanpa volume, semua data di dalam container HILANG saat container di-rebuild.
+volumes:
+  # Data MySQL (tables, indexes, dll.)
+  mysql_data:
+    name: indogreen-mysql-data
+
+  # File upload Laravel (foto, dokumen, dll.)
+  backend_storage:
+    name: indogreen-backend-storage
+
+  # Log Laravel
+  backend_logs:
+    name: indogreen-backend-logs
+
+  # Activity logs
+  backend_activity_logs:
+    name: indogreen-backend-activity-logs
+
+# =============================================
+# Networks — Internal Communication
+# =============================================
+# Network bridge memungkinkan container berkomunikasi satu sama lain
+# menggunakan nama service (misal: "mysql", "php", "frontend").
+# Container di luar network ini TIDAK bisa mengakses service internal.
+networks:
+  app_network:
+    name: indogreen-network
+    driver: bridge
