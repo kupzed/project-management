@@ -61,6 +61,9 @@ services:
       # Semua environment variable di-load dari file ini
       - .env.docker
     volumes:
+      # Mount .env.docker sebagai .env di dalam container
+      # Laravel butuh file .env untuk artisan key:generate, jwt:secret, dll.
+      - ./.env.docker:/var/www/backend/.env
       # Persistent storage untuk file upload
       # Data di volume ini tidak hilang saat container restart/rebuild
       - backend_storage:/var/www/backend/storage/app/public

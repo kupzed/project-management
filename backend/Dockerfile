@@ -100,8 +100,10 @@ RUN mkdir -p \
         storage \
         bootstrap/cache
 
-# Jalankan sebagai user non-root (best practice keamanan)
-USER www-data
+# Catatan: Tidak menggunakan USER www-data di sini karena:
+# - PHP-FPM worker sudah otomatis jalan sebagai www-data (di www.conf)
+# - Artisan commands (via docker exec) perlu akses root untuk tulis ke .env
+# - Container sudah terisolasi oleh Docker, jadi aman
 
 # PHP-FPM default listen di port 9000
 EXPOSE 9000
