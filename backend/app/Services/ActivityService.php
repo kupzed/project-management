@@ -87,7 +87,7 @@ class ActivityService
             'customers'     => $customers,
             'vendors'       => $vendors,
             'kategori_list' => [
-                'Expense Report', 'Invoice', 'Invoice & FP', 'Purchase Order', 'Payment', 'Quotation',
+                'Expense Report', 'Invoice', 'Invoice & FP', 'Purchase Order', 'Purchase Requisition', 'Payment', 'Quotation',
                 'Faktur Pajak', 'Kasbon', 'Laporan Teknis', 'Surat Masuk', 'Surat Keluar',
                 'Kontrak', 'Berita Acara', 'Receive Item', 'Delivery Order', 'Legalitas', 'Other',
             ],

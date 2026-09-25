@@ -130,7 +130,7 @@ Pencatatan aktivitas keuangan/dokumen per proyek.
 
 **Enum `jenis`:** `Internal`, `Customer`, `Vendor`
 
-**Enum `kategori`:** `Expense Report`, `Invoice`, `Invoice & FP`, `Purchase Order`, `Payment`, `Quotation`, `Faktur Pajak`, `Kasbon`, `Laporan Teknis`, `Surat Masuk`, `Surat Keluar`, `Kontrak`, `Berita Acara`, `Receive Item`, `Delivery Order`, `Legalitas`, `Other`
+**Enum `kategori`:** `Expense Report`, `Invoice`, `Invoice & FP`, `Purchase Order`, `Purchase Requisition`, `Payment`, `Quotation`, `Faktur Pajak`, `Kasbon`, `Laporan Teknis`, `Surat Masuk`, `Surat Keluar`, `Kontrak`, `Berita Acara`, `Receive Item`, `Delivery Order`, `Legalitas`, `Other`
 
 **Foreign Key:**
 - `project_id` → `projects.id` (ON DELETE CASCADE)

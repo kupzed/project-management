@@ -1,5 +1,17 @@
 # Changelog
 
+## [2026-09-25] — feat(activities): add Purchase Requisition category
+
+- Menambahkan opsi kategori 'Purchase Requisition' pada aktivitas proyek (DB enum, validasi request backend, AI document extraction, factory, serta tipe dan opsi frontend).
+- Disediakan query DDL ALTER TABLE langsung untuk database production tanpa menjalankan migration.
+- File yang diubah:
+  - Backend: `database/migrations/2025_06_13_075840_create_activities_table.php`, `app/Http/Requests/ActivityRequest.php`, `app/Services/ActivityService.php`, `app/Services/AIDocumentExtractionService.php`, `database/factories/ActivityFactory.php`
+  - Frontend: `src/lib/types/activity.ts`, `src/lib/constants/activity.ts`
+  - Docs: `docs/database-schema.md`, `docs/database-migrations.md`, `docs/features/aktivitas.md`, `docs/changelog.md`
+- Dampak yang perlu diketahui:
+  - User dapat memilih 'Purchase Requisition' saat membuat/mengedit aktivitas atau memfilter aktivitas berdasarkan kategori tersebut.
+  - Perlu menjalankan query `ALTER TABLE activities MODIFY COLUMN ...` pada database produksi.
+
 ## [2026-06-24] — feat(inventory): add item attachments, placement, and stock movement CRUD
 
 - Menambahkan fitur lampiran (attachments) untuk master data items/material (file upload, rename, delete).
