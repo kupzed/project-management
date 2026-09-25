@@ -155,7 +155,7 @@ ATURAN PENTING:
     "name": "(string) Judul dokumen yang logis dan singkat. Contoh: 'Proforma Invoice PT Bangkit Indo Energi #2025/VI/BIE-PI/0354'.",
     "jenis": "(string) WAJIB persis salah satu dari: 'Internal', 'Customer', 'Vendor'. Lihat PANDUAN PENENTUAN JENIS di bawah.",
     "mitra_id": "(number|null) ID vendor dari DAFTAR VENDOR yang diberikan di PROJECT CONTEXT. HANYA diisi jika jenis='Vendor'. Cocokkan nama vendor/supplier di dokumen dengan nama vendor di daftar. Jika tidak cocok atau jenis bukan 'Vendor', isi null.",
-    "kategori": "(string) WAJIB persis salah satu dari: 'Expense Report', 'Invoice', 'Invoice & FP', 'Purchase Order', 'Payment', 'Quotation', 'Faktur Pajak', 'Kasbon', 'Laporan Teknis', 'Surat Masuk', 'Surat Keluar', 'Kontrak', 'Berita Acara', 'Receive Item', 'Delivery Order', 'Legalitas', 'Other'. (Pilih 'Invoice' jika ini adalah tagihan).",
+    "kategori": "(string) WAJIB persis salah satu dari: 'Expense Report', 'Invoice', 'Invoice & FP', 'Purchase Order', 'Purchase Requisition', 'Payment', 'Quotation', 'Faktur Pajak', 'Kasbon', 'Laporan Teknis', 'Surat Masuk', 'Surat Keluar', 'Kontrak', 'Berita Acara', 'Receive Item', 'Delivery Order', 'Legalitas', 'Other'. (Pilih 'Invoice' jika ini adalah tagihan).",
     "from": "(string) Pihak pengirim/pembuat dokumen. Lihat ATURAN FROM & TO di bawah.",
     "to": "(string) Pihak penerima dokumen. Lihat ATURAN FROM & TO di bawah.",
     "short_desc": "(string) Ringkasan satu kalimat mengenai isi dokumen. MAKSIMAL 80 karakter.",
@@ -207,7 +207,7 @@ PROMPT;
     private function sanitize(array $data): array
     {
         $allowedKategori = [
-            'Expense Report', 'Invoice', 'Invoice & FP', 'Purchase Order', 'Payment',
+            'Expense Report', 'Invoice', 'Invoice & FP', 'Purchase Order', 'Purchase Requisition', 'Payment',
             'Quotation', 'Faktur Pajak', 'Kasbon', 'Laporan Teknis', 'Surat Masuk',
             'Surat Keluar', 'Kontrak', 'Berita Acara', 'Receive Item', 'Delivery Order',
             'Legalitas', 'Other',

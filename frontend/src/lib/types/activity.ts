@@ -10,6 +10,7 @@ export type ActivityKategori =
   | 'Invoice'
   | 'Invoice & FP'
   | 'Purchase Order'
+  | 'Purchase Requisition'
   | 'Payment'
   | 'Quotation'
   | 'Faktur Pajak'

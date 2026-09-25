@@ -48,6 +48,7 @@ export const ACTIVITY_CATEGORY_OPTIONS = [
   'Invoice',
   'Invoice & FP',
   'Purchase Order',
+  'Purchase Requisition',
   'Payment',
   'Quotation',
   'Faktur Pajak',
